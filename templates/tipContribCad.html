@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Tipo de Contribuição</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .form-section { background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
+    .required::after { content:" *"; color:#dc3545; }
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Cabeçalho (igual aos outros programas) -->
+  <header class="bg-success text-white py-3 shadow-sm">
+    <div class="container d-flex align-items-center">
+      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:80px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <main class="flex-grow-1">
+    <div class="container my-4">
+      <div class="form-section">
+        <h3 class="text-success text-center mb-4">Cadastro Tipo de Contribuição</h3>
+
+        {% if message %}
+          <div class="alert alert-info text-center">{{ message }}</div>
+        {% endif %}
+
+        <form action="/cadTipContrib" method="POST" class="row g-3">
+
+          <!-- Código Contribuição -->
+          <div class="col-md-4">
+            <label for="idTipContrib" class="form-label fw-bold required">Código Contribuição</label>
+            <input type="text" id="idTipContrib" name="idTipContrib"
+                  class="form-control" maxlength="5" pattern="[0-9]{1,5}" inputmode="numeric"
+                  placeholder="até 5 dígitos" required>
+            <div class="form-text">Somente números (ex: 12345).</div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="col-md-8">
+            <label for="nomContrib" class="form-label fw-bold required">Descrição</label>
+            <input type="text" id="nomContrib" name="nomContrib"
+                  class="form-control" maxlength="50" required placeholder="até 50 caracteres">
+          </div>
+
+          <!-- Categoria -->
+          <div class="col-md-6">
+            <label for="idCatgContrib" class="form-label fw-bold required">Categoria</label>
+            <select id="idCatgContrib" name="idCatgContrib" class="form-select" required>
+              <option value="">-- Selecione --</option>
+              {% for c in categorias %}
+                <option value="{{ c[0] }}">{{ c[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Seleção de Política Pública (só quando Categoria = 1) -->
+          <div class="col-md-6 d-none" id="grpPolPubSel">
+            <label for="idPolPub" class="form-label fw-bold">Política Pública</label>
+            <select id="idPolPub" name="idPolPub" class="form-select">
+              <option value="">-- Selecione --</option>
+              {% for p in politicas %}
+                <!-- p: (idPolPub, nomPolPub, valor, perct) -->
+                <option value="{{ p[0] }}"
+                        data-nome="{{ p[1] }}"
+                        data-valor="{{ p[2] }}"
+                        data-perct="{{ p[3] }}">
+                  {{ p[1] }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Saídas da Política -->
+          <div class="col-md-6 d-none" id="grpNomPolPub">
+            <label class="form-label fw-bold">Nome da Política Pública</label>
+            <input type="text" id="nomPolPubOut" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-3 d-none" id="grpValPolPub">
+            <label for="valPolPub" class="form-label fw-bold">Valor da Política Pública</label>
+            <input type="number" step="0.01" min="0" id="valPolPub" name="valPolPub" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-3 d-none" id="grpPerct">
+            <label class="form-label fw-bold">Percentual.</label>
+            <div class="input-group">
+              <input type="text" id="perctView" class="form-control" readonly>
+              <span class="input-group-text">%</span>
+            </div>
+            <input type="hidden" id="perct" name="perct">
+          </div>
+
+          <div class="col-md-3 d-none" id="grpPercVal">
+            <label for="percVal" class="form-label fw-bold">Valor Cobrado</label>
+            <input type="number" step="0.01" min="0" id="percVal" name="percVal" class="form-control" readonly>
+          </div>
+
+          <!-- Igualdade Proporcional (sempre visível) -->
+          <div class="col-md-6" id="grpUnEqv">
+            <label for="idTipUnEqv" class="form-label fw-bold">Igualdade Proporcional</label>
+            <select id="idTipUnEqv" name="idTipUnEqv" class="form-select">
+              <option value="">-- Selecione --</option>
+              {% for u in unidades %}
+                <option value="{{ u[0] }}">{{ u[1] }}</option>
+              {% endfor %}
+            </select>
+            {% if not unidades or unidades|length == 0 %}
+              <div class="form-text text-danger">Sem unidades de igualdade proporcional cadastradas.</div>
+            {% endif %}
+          </div>
+
+          <!-- Merecimento -->
+          <div class="col-md-12">
+            <label for="merecto" class="form-label fw-bold">Merecimento</label>
+            <input type="text" id="merecto" name="merecto" class="form-control" maxlength="150" placeholder="até 150 caracteres">
+          </div>
+
+          <div class="col-12 text-center mt-2">
+            <button type="submit" class="btn btn-success">Cadastrar</button>
+            <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- (Opcional) Rodapé para manter padrão visual -->
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
+    <p class="mb-0">
+      Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA
+    </p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Seu JS existente (se houver) pode continuar abaixo -->
+  <script>
+    // ---- Mostrar/ocultar blocos de Política conforme Categoria (1 = Política Pública) ----
+    const selCategoria  = document.getElementById('idCatgContrib');
+    const selPolitica   = document.getElementById('idPolPub');
+
+    const grpPolPubSel  = document.getElementById('grpPolPubSel');
+    const grpNomPolPub  = document.getElementById('grpNomPolPub');
+    const grpValPolPub  = document.getElementById('grpValPolPub');
+    const grpPerct      = document.getElementById('grpPerct');
+    const grpPercVal    = document.getElementById('grpPercVal');
+
+    const nomPolPubOut  = document.getElementById('nomPolPubOut');
+    const valPolPub     = document.getElementById('valPolPub');
+    const perctView     = document.getElementById('perctView');
+    const perctHidden   = document.getElementById('perct');
+    const percVal       = document.getElementById('percVal');
+
+    function n(v){ v=(v??'').toString().trim(); return v?Number(v):0; }
+
+    function atualizarVisibilidadePorCategoria() {
+      const isPolitica = selCategoria && selCategoria.value === '1';
+      if (isPolitica) {
+        grpPolPubSel.classList.remove('d-none');
+        grpNomPolPub.classList.remove('d-none');
+        grpValPolPub.classList.remove('d-none');
+        grpPerct.classList.remove('d-none');
+        grpPercVal.classList.remove('d-none');
+        atualizarSaidasPolitica();
+      } else {
+        grpPolPubSel.classList.add('d-none');
+        grpNomPolPub.classList.add('d-none');
+        grpValPolPub.classList.add('d-none');
+        grpPerct.classList.add('d-none');
+        grpPercVal.classList.add('d-none');
+        selPolitica.value = '';
+        nomPolPubOut.value = '';
+        valPolPub.value    = '';
+        perctView.value    = '';
+        perctHidden.value  = '';
+        percVal.value      = '';
+      }
+    }
+
+    function atualizarSaidasPolitica() {
+      const opt = selPolitica.options[selPolitica.selectedIndex];
+      if (!opt || !opt.value) {
+        nomPolPubOut.value = '';
+        valPolPub.value = '';
+        perctView.value = '';
+        perctHidden.value = '';
+        percVal.value = '';
+        return;
+      }
+      const nome  = opt.getAttribute('data-nome') ?? '';
+      const valor = n(opt.getAttribute('data-valor'));
+      const perct = n(opt.getAttribute('data-perct')); // ex.: 0.12
+
+      nomPolPubOut.value = nome;
+      valPolPub.value    = isFinite(valor) ? valor.toFixed(2) : '';
+      perctView.value    = isFinite(perct) ? (perct*100).toFixed(2) : '';
+      perctHidden.value  = isFinite(perct) ? perct.toString() : '';
+
+      const cobrado = valor * perct;           // valor cobrado = valor * perct
+      percVal.value = isFinite(cobrado) ? cobrado.toFixed(2) : '';
+    }
+
+    selCategoria?.addEventListener('change', atualizarVisibilidadePorCategoria);
+    selPolitica?.addEventListener('change', atualizarSaidasPolitica);
+
+    // aplica na carga inicial (útil em caso de re-render com valores)
+    atualizarVisibilidadePorCategoria();
+  </script>
+
+</body>
+</html>
