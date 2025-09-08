@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Alteração de Assentado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<header class="bg-primary text-white py-3 shadow-sm mb-4">
+  <div class="container d-flex align-items-center">
+    <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:70px;">
+    <h1 class="h4 mb-0">Excluir Assentado</h1>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form action="/assentado/alterar_assent" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="matricula" class="form-label">Matrícula</label>
+          <input type="text" id="matricula" name="matricula" class="form-control"
+                 value="{{ assentado[0] }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome</label>
+          <input type="text" id="nome" name="nome" class="form-control" value="{{ assentado[1] }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="foto" class="form-label">Foto</label>
+          <input type="file" id="foto" name="foto" class="form-control" accept="image/jpeg">
+          <div class="form-text">Se não enviar, a foto atual será mantida.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="idfamilia" class="form-label">Família</label>
+          <select id="idfamilia" name="idfamilia" class="form-select" required>
+            {% for familia in familias %}
+              <option value="{{ familia[0] }}" {% if familia[0] == assentado[2] %}selected{% endif %}>
+                {{ familia[0] }} - {{ familia[1] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="idTipAssent" class="form-label">Tipo de Assentado</label>
+          <select id="idTipAssent" name="idTipAssent" class="form-select" required>
+            {% for tipo in tipAssents %}
+              <option value="{{ tipo[0] }}" {% if tipo[0] == assentado[3] %}selected{% endif %}>
+                {{ tipo[0] }} - {{ tipo[1] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="idSitAssent" class="form-label">Situação Assentado</label>
+          <select id="idSitAssent" name="idSitAssent" class="form-select" required>
+            {% for sit in sitAssents %}
+              <option value="{{ sit[0] }}" {% if sit[0] == assentado[4] %}selected{% endif %}>
+                {{ sit[0] }} - {{ sit[1] }} - {{ sit[2] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="genero" class="form-label">Gênero</label>
+          <select id="genero" name="genero" class="form-select" required>
+            <option value="M" {% if assentado[5] == "M" %}selected{% endif %}>Masculino</option>
+            <option value="F" {% if assentado[5] == "F" %}selected{% endif %}>Feminino</option>
+            <option value="X" {% if assentado[5] == "X" %}selected{% endif %}>Outro</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Excluir Assentados</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA</title>
+
+    <script>
+        function mascaraData(input) {
+            var valor = input.value;
+            if (isNaN(valor[valor.length - 1])) {
+                input.value = valor.substring(0, valor.length - 1);
+                return;
+            }
+            if (valor.length === 2 || valor.length === 5) {
+                input.value += '/';
+            }
+        }
+    </script>
+
+</head>
+<body>
+{% if 'mensagem' in session %}
+<div class="alert alert-success">
+{{ session['mensagem'] }}
+</div>
+{% endif %}
+
+<div class="borda">
+    <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong style="color: red;"> TOTAL ENTREGA DE MERENDA POR DIA</strong>
+    </div>
+
+    <!-- Removido o vídeo e o canvas -->
+
+<br><br><br>
+
+<div class="borda">
+      <form action="/sigConsQTDdia" method="post" id="consDia">
+      <BR>
+       <label for="datEntrg"><strong>Data da Entrega:</strong></label>
+        <input type="text" id="datEntrg" name="datEntrg" placeholder="dd/mm/aaaa"
+               maxlength="10" oninput="mascaraData(this)" required>
+         <input type="submit" value="OK">
+          <br><br>
+
+        <input type="hidden" id="turno" name="turno" value="X" >
+
+         <br>
+         <h3>____________________________  RESULTADO DA CONSULTA ___________________________</h3>
+        <label for="semana">Semana:</label>
+        <input type="text" id="semana" name="semana" value="{{ semana }}" readonly size="3" maxlength="3">
+        <label for="datEntrg">Dia da Entrega:</label>
+        <input type="text" id="datEntrg2" name="datEntrg2" value="{{ datEntrg }}" readonly size="10" maxlength="10">
+
+        <label for="alimento">Alimento:</label>
+        <input type="text" id="alimento" name="alimento" value="{{ nomAlim }}" readonly>
+
+
+         <h3>__________________________________________________________________________</h3>
+        <label for="qtdEntregue">Qtd Entregue:</label>
+        <input type="text" id="qtdEntregue" name="qtdEntregue" value="{{ qtdEntregue }}" readonly size="3" maxlength="3">
+
+        <label for="qtdTurM">Qtd Por Manhã:</label>
+        <input type="text" id="qtdTurM" name="qtdTurM" value="{{ qtdTurM }}" readonly size="3">
+
+        <label for="qtdTurT">Qtd Por Tarde:</label>
+        <input type="text" id="qtdTurT" name="qtdTurT" value="{{ qtdTurT }}" readonly size="3">
+
+        <label for="qtdTurN">Qtd Por Noite:</label>
+        <input type="text" id="qtdTurN" name="qtdTurN" value="{{ qtdTurN }}" readonly size="3">
+     <h3>__________________________________________________________________________</h3>
+       <label for="valEntregue">Valor Entregue:</label>
+        <input type="text" id="valEntregue" name="valEntregue" value="{{ valEntregue }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurM">Valor Manhã:</label>
+        <input type="text" id="valTurM" name="valTurM" value="{{ valTurM }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurT">Valor Tarde:</label>
+        <input type="text" id="valTurT" name="valTurT" value="{{ valTurT }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurN">Valor Noite:</label>
+        <input type="text" id="valTurN" name="valTurN" value="{{ valTurN }}" readonly size="7"
+               class="moeda-brasileira">
+
+
+        <br><br>
+    </form>
+  </div>
+</div>
+
+<script>
+    // Função para formatar o valor para moeda brasileira
+    function formatarMoeda(valor) {
+        return 'R$ ' + parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    }
+
+    // Obter todos os inputs com a classe moeda-brasileira
+    var inputsMoeda = document.querySelectorAll('.moeda-brasileira');
+
+    // Iterar sobre os inputs e formatar seus valores para moeda brasileira
+    inputsMoeda.forEach(function(input) {
+        // Obter o valor atual do input
+        var valor = input.value;
+
+        // Formatar o valor para moeda brasileira
+        var valorFormatado = formatarMoeda(valor);
+
+        // Definir o valor formatado de volta no input
+        input.value = valorFormatado;
+    });
+</script>
+
+</body>
+</html>

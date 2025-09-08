@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartão Discente QR</title>
+    <style>
+        hr {
+            border: none;
+            border-top: 1px solid #000;
+            margin: 1em 0;
+        }
+        .qr-code {
+            width: 2cm;
+            height: 2cm;
+            margin-left: 1em;
+        }
+        body {
+            font-size: 12px; /* Define o tamanho da fonte para 12px */
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        {% for aluno in alunos %}
+        <li>
+            <p>I F P A - CARTÃO DE MERENDA - {{ mes_atual }} - TURNO: {{ aluno.turno }}
+                <img class="qr-code" src="{{ aluno.qrcode }}" alt="QR Code"></p>
+            Curso: {{ codCurso }} - {{ nomCur }}
+            <br>Matr: {{ aluno.matricula }} &nbsp; {{ aluno.nome }}
+            <br>_______________________________________________________</br>
+            <br>&nbsp;&nbsp;2024 &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; SEG &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            TER &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QUA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            QUI&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SEX
+            <br>_______________________________________________________</br>
+            <p>Semana 1</p>
+            <p>Semana 2</p>
+            <p>Semana 3</p>
+            <p>Semana 4</p>
+            <p>Semana 5</p>
+                _______________________________________________________
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

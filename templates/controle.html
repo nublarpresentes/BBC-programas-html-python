@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Controle de  Alimento</title>
+</head>
+<body>
+
+{% if 'mensagem' in session %}
+       <div id="alerta-sucesso" class="alerta-sucesso">
+           <img src="/static/img/visto.png" width="30px" height="30px">
+           {{ session['mensagem'] }}
+       </div>
+    {% endif %}
+ <h2>Cadastro de Controle de Alimento</h2>
+
+    <form action="/cadcontrole" method="post">
+
+        <label for="usuario"><strong>Usuário:</strong> </label>
+        <select id="usuario" name="usuario">
+            {% for usuario in usuarios %}
+                <option value="{{ usuario[0] }}">{{ usuario[4] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="status"><strong>Status Controle:</strong> </label>
+        <select id="status" name="status">
+            <option value="1">Aberto</option>
+            <option value="2">Fechado</option>
+        </select>
+
+        <label for="dtEntCtrl"><strong>Data Entrada:</strong> </label>
+        <input type="date" id="dtEntCtrl" name="dtEntCtrl" value="{{ data_atual.strftime('%Y-%m-%d') }}" required>
+
+
+        <h3>_______________________________________________________________________________</h3><br>
+        <label for="ano">ANO:</label>
+        <input type="text" id="ano" name="ano" value="{{ data_atual.year }}" readonly>
+
+
+<label for="mes">MÊS:</label>
+        <select id="mes" name="mes">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+
+        <label for="semana">SEMANA:</label>
+        <select id="semana" name="semana">
+            <option value="01" selected>1</option>
+            <option value="02">2</option>
+            <option value="03">3</option>
+            <option value="04">4</option>
+            <option value="05">5</option>
+        </select>
+
+        <label for="dia">Selecione o dia:</label>
+        <select id="dia" name="dia" required>
+            <!-- Opções do dia serão adicionadas dinamicamente aqui -->
+        </select>
+
+      <script>
+        document.getElementById('semana').addEventListener('change', function() {
+            var semana = parseInt(this.value);
+            var dias = document.getElementById('dia');
+            dias.innerHTML = ''; // Limpa as opções anteriores
+
+            var inicioDia = (semana - 1) * 7 + 1;
+            var fimDia = semana * 7;
+            fimDia = (fimDia > 31) ? 31 : fimDia; // Garante que o máximo seja 31
+
+            for (var i = inicioDia; i <= fimDia; i++) {
+                var option = document.createElement('option');
+                option.text = i;
+                option.value = i;
+                dias.add(option);
+            }
+        });
+      </script>
+
+ <h3>_______________________________________________________________________________</h3><br>
+
+        <label for="codAlim">ALIMENTO:</label>
+        <select id="codAlim" name="codAlim" required>
+            {% for alimento in alimentos %}
+                <option value="{{ alimento[0] }}">{{ alimento[1] }} - {{ alimento[3] }}</option>
+            {% endfor %}
+        </select>
+
+
+        <label for="qtdTotal">Quant. Total:</label>
+        <input type="number" id="qtdTotal" name="qtdTotal" min="0" max="9999" required maxlength="999">
+
+        <label for="codFornec">Fornecedor:</label>
+        <select id="codFornec" name="codFornec">
+            {% for fornecedor in fornecedores %}
+                <option value="{{ fornecedor[0] }}">{{ fornecedor[1] }}</option>
+            {% endfor %}
+        </select>
+  <br>
+ <h3>_______________________________________________________________________________</h3><br>
+
+        <input type="submit" value="Cadastrar Controle">
+    </form>
+</body>
+</html>

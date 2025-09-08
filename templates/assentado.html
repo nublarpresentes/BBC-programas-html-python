@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro  de Assentados</title>
+</head>
+<body>
+    <h1>Cadastros de Assentados</h1>
+    <form action="/assentado/adicionar_assent" method="post" enctype="multipart/form-data">
+        <label for="matricula">Matrícula:</label>
+        <input type="number" id="matricula" name="matricula" required><br><br>
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+        <label for="foto">Foto:</label>
+        <input type="file" id="foto" name="foto" accept="image/jpeg" required><br><br>
+      #  label for="idCurso">ID Turma:< / label>
+      # input type="text" id="idCurso" name="idCurso" maxlength="8" required>< br>< br >
+
+        <label for="idfamilia">Família:</label>
+        <select id="idfamilia" name="idfamilia" required>
+            {% for familia in familias %}
+             <option value="{{ familia[0] }}">{{ familia[0] }} - {{ familia[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+         <label for="idTipAssent">Tipo de Assentado:</label>
+        <select id="idTipAssent" name="idTipAssent" required>
+            {% for idTipAssent in idTipAssents %}
+             <option value="{{ idTipAssent[0] }}">{{ idTipAssent[0] }} - {{ idTipAssent[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+         <label for="idSitAssent">Situação Assentado:</label>
+        <select id="idSitAssent" name="idSitAssent" required>
+            {% for sitAssent in sitAssents %}
+             <option value="{{ sitAssent[0] }}">{{ sitAssent[0] }} - {{ sitAssent[1] - {{ sitAssent[2] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+
+        <label for="genero">Gênero:</label>
+        <select id="genero" name="genero" required>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="X">Outro</option>
+        </select><br><br>
+        <button type="submit">Adicionar Assentado</button>
+    </form>
+    <br>
+    <h2>Lista de Assentados</h2>
+    <ul>
+        {% for assentado in assentados %}
+        <li>{{ assentado[1] }} - {{ assentado[2] }}  - Gênero: {{ genero[assentado[4]] }} - Situação: {{ situacao[assentado[3]] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

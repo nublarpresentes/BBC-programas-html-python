@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA</title>
+</head>
+<body>
+    <h2>Aluno(a):</h2>
+    <form action="/cadastra_merenda" method="post">
+
+  <div class="custom-select">
+               <span class="selected-option">Selecione um aluno</span>
+               <div class="options">
+                   {% for aluno in alunos %}
+                      <div class="option" data-value="{{ aluno[0] }}">
+                          <img src="{{ aluno[2] }}" alt="Foto">
+                          <span>{{ aluno[1] }}</span>
+                      </div>
+                   {% endfor %}
+               </div>
+               <select id="matricula" name="matricula" style="display: none;">
+                  {% for aluno in alunos %}
+                     <option value="{{ aluno[0] }}">{{ aluno[1] }}</option>
+                  {% endfor %}
+               </select>
+        </div>
+
+
+
+        <input type="submit" value="OK">
+    </form>
+
+</body>
+</html>

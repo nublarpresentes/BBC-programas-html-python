@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABRIR CATRACA</title>
+</head>
+<body>
+
+{% if 'mensagem' in session %}
+       <div id="alerta-sucesso" class="alerta-sucesso">
+           <!-- img src="/static/img/visto.png" width="30px" height="30px" -->
+           {{ session['mensagem'] }}
+       </div>
+    {% endif %}
+<h3 style="color: red;"><img src="/static/img/catraca.PNG" alt="sigma" width="60px" height="60px">
+    ABRIR CATRACA
+  </h3>
+
+
+    <form action="/cadCatraca" method="post">
+
+    <label for="data_atual"><strong>Data:</strong></label>
+    <input type="text" id="data_atual" name="data_atual" value="{{ data_atual }}" readonly size="10">
+     &nbsp; &nbsp; &nbsp;
+    <label for="hora_atual"><strong>Hora:</strong></label>
+    <input type="text" id="hora_atual" name="hora_atual" value="{{ hora_atual }}" readonly size="5">
+     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        <label><strong>Turno:</strong> {{ turno }} - {{ turnodes }}</label>
+  <br> <br>
+        <label for="matRespCad"><strong>Responsável Abertura Catraca:</strong> </label>
+        <select id="matRespCad" name="matRespCad">
+            {% for usuario in usuarios %}
+                <option value="{{ usuario[0] }}">{{ usuario[4] }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="hidden" name="situ" value="A">
+
+        <br> <br>
+        <input type="submit" value="ABRIR CATRACA">
+    </form>
+</body>
+</html>

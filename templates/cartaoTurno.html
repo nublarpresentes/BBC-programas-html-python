@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emitir Cartao Merenda</title>
+</head>
+<body>
+    <h1 style="color: red;">Emitir Cartões Por Turno</h1>
+    <form action="/emitirCartaoTurno" method="post">
+        <br>
+        <label for="turno">Turno:</label>
+        <select id="turno" name="turno" required>
+            <option value="M">Manhã</option>
+            <option value="T">Tarde</option>
+            <option value="N">Noite</option>
+        </select>
+        <br><br>
+        <button type="submit">EMITIR CARTÕES POR TURNO</button>
+    </form>
+</body>
+</html>

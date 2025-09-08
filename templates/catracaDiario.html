@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATRACA - ENTRADA E SAÍDA</title>
+</head>
+<body>
+{% if 'mensagem' in session %}
+<div class="alert alert-success">
+{{ session['mensagem'] }}
+</div>
+{% endif %}
+
+<div class="borda">
+    <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong>CATRACA - ENTRADA E SAÍDA<</strong>
+    </div>
+
+    <!-- Removido o vídeo e o canvas -->
+
+    <input type="hidden" id="codCtrl" name="codCtrl" value="{{ catraDiario['codCtrl'] }}" readonly size="08">
+    <form>
+        <label for="dtatual">Data: </label>
+        <input type="text" id="dtatual" name="dtatual" value="{{ data_atual.strftime('%d/%m/%Y') }}"
+               size="10" maxlength="10" readonly>
+        <label for="qtdTotEnt">Qtd Total Entrada:</label>
+        <input type="text" id="qtdTotEnt" name="qtdTotEnt" value="{{ qtdTotEnt }}" readonly size="3" maxlength="3">
+        
+        <label for="qtdTotSai">Qtd Total Saída:</label>
+        <input type="text" id="qtdTotSai" name="qtdTotSai" value="{{ qtdTotSai }}" readonly size="3" maxlength="3">
+       
+        <br><br>
+        <label for="qtdDif"><strong>Diferença (Entrada - Saida ) => </strong></label>
+        <input type="text" id="qtdDif" name="qtdDif" value="{{ qtdDif }}" readonly size="3">
+    </form>
+</div>
+
+<br><br><br>
+
+<div class="borda">
+     <form action="/merenda" method="post" id="merendaForm">
+        <!-- Adicione um botão para iniciar a leitura do QR Code -->
+        <button type="button" onclick="lerQRCode()">Ler QR Code</button>
+
+        <!-- Adicione um campo de texto para a matrícula -->
+        <label for="matricula"><strong>Matricula:</strong></label>
+
+         <input type="text" id="matricula" name="matricula" pattern="\d{11,12}"
+       required="required" size="12" maxlength="12">
+
+        <label><strong>Turno:</strong> {{ turno }} - {{ turnodes }}</label>
+
+        <input type="submit" value=" OK">
+    </form>
+</div>
+
+{% if aluno %}
+<div class="borda">
+    <p>Matrícula: {{ matricula}} Nome: {{ aluno[0] }} </p>
+    <img src="{{ aluno[1] }}" alt="Foto">
+    <form action="/cadmerenda" method="post">
+        <!-- Campos ocultos permanecem os mesmos -->
+        <br>
+        <input type="hidden" name="catraDiario" value="{{ catraDiario }}">
+        <input type="hidden" name="codCatra" value="{{ codCatra[4] }}">
+        <input type="hidden" name="matricula" value="{{ matricula }}">
+        <input type="hidden" name="nome" value="{{ aluno[0] }}">
+        <input type="hidden" name="turno" value="{{ turno }}">
+        <input type="hidden" name="qtdTotEnt" value="{{ qtdTotEnt }}">
+        <input type="hidden" name="qtdTotSai" value="{{ qtdTotSai }}">
+        <input type="hidden" name="QtdTurM" value="{{ catraDiario[12] }}">
+        <input type="hidden" name="QtdTurT" value="{{ catraDiario[13] }}">
+        <input type="hidden" name="QtdTurN" value="{{ catraDiario[14] }}">
+
+        <div align="center">
+            <input type="submit" value="REGISTRAR ENTRADA">
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<script>
+    function lerQRCode() {
+        // Simulação: substitua este valor pelo valor real do QR Code lido
+        var valorQRCode = "123456";
+
+        // Atualize o valor do campo de matrícula com o valor do QR Code
+        document.getElementById("matricula").value = valorQRCode;
+    }
+</script>
+
+</body>
+</html>
+

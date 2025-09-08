@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MENSAGEM</title>
+    <style>
+        /* Estilo para centralizar o conteúdo */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo para o container da mensagem */
+        .message-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            margin-top: 1em; /* Adicionando margem superior de 5em */
+        }
+    </style>
+</head>
+<body>
+    <div class="message-container">
+        {% if 'mensagem' in session %}
+            <div class="alert alert-success">
+                {{ session['mensagem'] }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

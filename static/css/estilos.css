@@ -1,0 +1,107 @@
+/* Estilos globais */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Verdana', 'Arial', 'Helvetica', sans-serif;
+    background-color: #f0f0f0;
+}
+
+/* Cabeçalho */
+#cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centraliza o conteúdo */
+    background: linear-gradient(90deg, #90ee90, #32cd32); /* Degradê verde-claro */
+    padding: 20px;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#cabecalho .logo {
+    height: 90px;
+    margin-right: 20px; /* Para dar um espaçamento se precisar da logo ao lado */
+}
+
+#cabecalho h1 {
+    margin: 0;
+    font-size: 24px;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center; /* Garante que o texto no h1 seja centralizado */
+}
+
+
+/* Layout principal */
+#pag {
+    display: flex; /* Flexbox para manter menu e conteúdo lado a lado */
+    width: 1024px;
+    margin: 20px auto;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Menu */
+#menu {
+    width: 200px;
+    background-color: #90ee90; /* Cor de fundo verde claro */
+    padding: 15px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#menu h3 {
+    font-size: 16px; /* Tamanho da fonte */
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+#menu ul li {
+    margin-bottom: 8px; /* Menor espaçamento entre itens */
+}
+
+#menu ul li a {
+    display: block;
+    padding: 8px; /* Menor padding */
+    background-color: #90ee90; /* Mantém o fundo verde claro */
+    color: black; /* Letras pretas */
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: left;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    font-size: 14px; /* Tamanho da fonte */
+}
+
+#menu ul li a:hover {
+    background-color: #70c570; /* Cor de fundo mais escura ao passar o mouse */
+}
+
+
+/* Conteúdo */
+#conteudo {
+    flex-grow: 1; /* O conteúdo cresce para preencher o espaço ao lado do menu */
+    margin-left: 20px;
+}
+
+#conteudo iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+}
+
+/* Rodapé */
+#rodape {
+    width: 100%; /* Largura completa da página */
+    background-color: #90ee90;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+    bottom: 0;
+    margin-top: 20px;
+}

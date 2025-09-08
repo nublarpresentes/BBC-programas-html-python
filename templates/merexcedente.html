@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA EXCEDENTE</title>
+</head>
+<body>
+{% if 'mensagem' in session %}
+       <div class="alert alert-success">
+            {{ session['mensagem'] }}
+       </div>
+{% endif %}
+
+<div class="borda">
+
+   <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong style="color: red;">ENTREGA DE MERENDA EXCEDENTE</strong>
+    </div>
+
+    <form action="/cadMerendaExced" method="post">
+        <br>
+        <label for="dtatual">Data: </label>
+        <input type="text" id="dtatual" name="dtatual" value="{{ data_atual.strftime('%d/%m/%Y') }}"
+               size="10" maxlength="10" readonly>
+       <input type="text" id="turno" name="turno" value="{{ turno }} - {{ turnodes }}"
+               size="10" maxlength="10" readonly>
+        <label for="qtdTotal">Qtd Total:</label>
+        <input type="text" id="qtdTotal" name="qtdTotal" value="{{ qtdTotal }}" readonly size="3" maxlength="3">
+        <label for="qtdEntregue">Qtd Entregue:</label>
+        <input type="text" id="qtdEntregue" name="qtdEntregue" value="{{ qtdEntregue }}" readonly size="3" maxlength="3">
+        <label for="qtdDisp"><strong>Qtd Disponível:</strong></label>
+        <input type="text" id="qtdDisp" name="qtdDisp" value="{{ qtdDisp }}" readonly size="3" maxlength="3">
+        <br> <br>
+
+        <input type="hidden" name="contrDiario" value="{{ contrDiario }}">
+        <input type="hidden" name="codCtrl" value="{{ contrDiario[4] }}">
+        <input type="hidden" name="ano" value="{{ ano }}">
+        <input type="hidden" name="mes" value="{{ mes }}">
+        <input type="hidden" name="semana" value="{{ contrDiario[15] }}">
+        <input type="hidden" name="dia" value="{{ contrDiario[8] }}">
+
+         <h3> ________________ Excedentes Já Entregues Por Turno  _________________</h3>
+
+
+
+        <div class="borda">
+            <label for="qtdTurM">Manhã :</label>
+            <input type="number" id="qtdTurM" name="qtdTurM" value="{{ qtdTurM }}" size="3" maxlength="3" readonly>
+
+            <label for="qtdTurT">Tarde :</label>
+            <input type="number" id="qtdTurT" name="qtdTurT" value="{{ qtdTurT }}" size="3" maxlength="3" readonly>
+
+            <label for="qtdTurN">Noite :</label>
+            <input type="number" id="qtdTurN" name="qtdTurN" value="{{ qtdTurN }}" size="3" maxlength="3" readonly>
+
+      </div>
+        <br><br><br>
+        <h3> ___________________  INFORME QTD EXCEDENTES ( abaixo ) __________________</h3>
+        <br>
+        <div class="borda">
+
+                <label for="qtdTurMInp">Manhã :</label>
+                <input type="number" id="qtdTurMInp" name="qtdTurMInp" value="0" pattern="[0-9]*"
+                                        maxlength="3" {% if turno != 'M' %} disabled {% endif %}>
+
+                <label for="qtdTurTInp">Tarde :</label>
+               <input type="number" id="qtdTurTInp" name="qtdTurTInp"  value="0" pattern="[0-9]*"
+                                        maxlength="3" {% if turno != 'T' %} disabled {% endif %}>
+
+                <label for="qtdTurNInp">Noite :</label>
+                <input type="number" id="qtdTurNInp" name="qtdTurNInp"  value="0" pattern="[0-9]*"
+                                        maxlength="3" {% if turno != 'N' %} disabled {% endif %}>
+
+        </div>
+        <br><br>
+        <div align="center">
+            <input type="submit" value="MERENDA EXCEDENTE">
+        </div>
+    </form>
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Alterar Senha - SBBC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Cabeçalho -->
+  <header class="bg-success text-white py-3 shadow-sm">
+    <div class="container d-flex align-items-center">
+      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:80px;">
+      <h1 class="h4 mb-0">SBBC - Alteração de Senha</h1>
+    </div>
+  </header>
+
+  <!-- Mensagem de erro (caso exista) -->
+  <div class="container mt-3">
+    {% if message %}
+      <div class="alert alert-danger text-center" role="alert">
+        {{ message }}
+      </div>
+    {% endif %}
+  </div>
+
+
+  <!-- Conteúdo principal -->
+  <main class="flex-grow-1 d-flex justify-content-center align-items-center">
+    <div class="card shadow-sm p-4" style="max-width: 500px; width: 100%;">
+      <h4 class="text-center mb-4">Alterar Senha</h4>
+      <form id="formSenha" action="/altSenha" method="post" autocomplete="off" novalidate>
+        <div class="mb-3">
+          <label for="usuario" class="form-label">Usuário</label>
+          <input type="text" class="form-control" id="usuario" name="usuario" maxlength="12" required>
+        </div>
+
+       <div class="mb-3">
+          <label for="senha" class="form-label">Senha Atual</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="senha" name="senha" minlength="8" maxlength="12" autocomplete="current-password" required>
+            <button class="btn btn-outline-secondary toggle-password" type="button"
+                    data-target="#senha" aria-label="Mostrar senha atual">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="nova_senha" class="form-label">Nova Senha</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="nova_senha" name="nova_senha" minlength="8" maxlength="12" autocomplete="new-password" required>
+            <button class="btn btn-outline-secondary toggle-password" type="button"
+                    data-target="#nova_senha" aria-label="Mostrar nova senha">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="confirmar_senha" class="form-label">Confirmar Nova Senha</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" minlength="8" maxlength="12" autocomplete="new-password" required>
+            <button class="btn btn-outline-secondary toggle-password" type="button"
+                    data-target="#confirmar_senha" aria-label="Mostrar confirmação de senha">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success">Alterar</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
+    <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+   <!-- Script único para todos os botões de olho -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // alterna visibilidade da senha para todos os botões com .toggle-password
+      document.querySelectorAll('.toggle-password').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const selector = btn.getAttribute('data-target');
+          const input = document.querySelector(selector);
+          if (!input) return;
+
+          const isPassword = input.getAttribute('type') === 'password';
+          input.setAttribute('type', isPassword ? 'text' : 'password');
+
+          const icon = btn.querySelector('i');
+          if (icon) {
+            icon.classList.toggle('fa-eye', !isPassword);
+            icon.classList.toggle('fa-eye-slash', isPassword);
+          }
+
+          btn.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+        });
+      });
+
+      // validação simples: nova_senha === confirmar_senha
+      document.getElementById("formSenha").addEventListener("submit", function (event) {
+        const nova = document.getElementById("nova_senha").value;
+        const confirmar = document.getElementById("confirmar_senha").value;
+        if (nova !== confirmar) {
+          event.preventDefault();
+          alert("As senhas novas não coincidem!");
+        }
+      });
+    });
+  </script>
+
+ <script>
+  window.addEventListener('load', () => {
+    const form = document.querySelector("form");
+    form.reset(); // limpa todos os inputs ao carregar a página
+  });
+ </script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Situação de Assentado</title>
+</head>
+<body>
+    <h1>Situação dos Assentados</h1>
+
+    <h2>Adicionar Nova Situação</h2>
+    <form action="/sitass/adicionar" method="post">
+        <label>ID:</label>
+        <input type="number" name="idSitAss" required><br><br>
+        <label>Nome:</label>
+        <input type="text" name="nome" required><br><br>
+        <button type="submit">Adicionar</button>
+    </form>
+
+    <h2>Lista de Situações</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Ações</th>
+        </tr>
+        {% for idSitAss, nome in registros %}
+        <tr>
+            <td>{{ idSitAss }}</td>
+            <td>{{ nome }}</td>
+            <td>
+                <form action="/sitass/editar/{{ idSitAss }}" method="post" style="display:inline;">
+                    <input type="text" name="nome" placeholder="Novo nome" required>
+                    <button type="submit">Editar</button>
+                </form>
+                <a href="/sitass/deletar/{{ idSitAss }}">Deletar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

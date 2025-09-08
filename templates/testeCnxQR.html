@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA</title>
+</head>
+<body>
+{% if 'mensagem' in session %}
+<div class="alert alert-success">
+{{ session['mensagem'] }}
+</div>
+{% endif %}
+
+<div class="borda">
+    <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong>ENTREGA DE MERENDA</strong>
+    </div>
+
+<br>
+
+<div class="borda">
+     <form action="/receber_matricula" method="post" id="merendaForm">
+       <label for="matricula"><strong>Matricula:</strong></label>
+        <input type="text" id="matricula" name="matricula" pattern="\d{1,12}"
+               required="required" size="12" maxlength="12">
+
+        <input type="submit" value=" OK">
+    </form>
+</div>
+
+
+</body>
+</html>
+

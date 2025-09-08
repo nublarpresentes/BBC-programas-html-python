@@ -1,0 +1,195 @@
+
+
+ body {
+                background-color: white;
+                
+                margin:0 ;
+                padding:0;
+                text-align:center;
+            }
+            #pag {
+                width:1024px;
+                margin-top: 10px; 
+                margin:0 auto;
+                background-color: whitesmoke;
+            }
+           
+          #logo
+            {  width:200px;
+              background-color: white;
+                height:180px;
+                float:left; 
+               
+            }
+            #formlogin
+            {  width:210px;
+              background-color: whitesmoke;
+                height:180px;
+                float:left; 
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }
+            
+           #formevento
+            {  width:210px;
+              background-color: #00adee;
+                height:180px;
+                float:center; 
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }  
+            
+           #ladoesq
+            {  width: 300px;
+               background-color: white;
+               height: 500px;
+               margin-left: 100px;
+               font-size: 10px;
+               font-family: verdana, arial, helvetica, san-serif;
+            }
+
+             #ladodir
+            {  width: 300px;
+               background-color: white;
+               height: 500px;
+               margin-left: 10px;
+               font-size: 10px;
+               font-family: verdana, arial, helvetica, san-serif;
+            }
+            #conteudo
+            {  width: 824px;
+               background-color: white;
+               height: 500px;
+               margin-left: 220px;
+               font-size: 10px;
+               font-family: verdana, arial, helvetica, san-serif;
+            }
+            
+                 #contindex
+            {  width:1024px;
+              background-color: white;
+                height:400px;
+                float:left; 
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }
+
+             #alerta-sucesso
+            {   font-color:green;
+                font-size:12px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }
+
+            #relacao
+            {  width:800px;
+              background-color: white;
+              margin-left: 100px;
+                height:500px;
+                float:left; 
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }
+            #banner {
+                width:824px;
+                height:180px;
+                float:left; 
+                background-color:#FFFFFF;
+            }
+            
+         #titulo {
+                width:540px;
+                height:180px;
+                float:left; 
+                background-color:#FFFFFF;
+            }
+            
+          #login {
+                width:280px;
+                height:180px;
+                float:left; 
+                background-color:#00adee;
+            }    
+            
+           #evento {
+                width:280px;
+                height:180px;
+                float:left; 
+                background-color:#00adee;
+            }   
+        #menu
+            {  width:200px;
+                height:500px;
+                float:left; 
+                background-color:whitesmoke;
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+            }
+            
+            #menu a {
+
+                display: block;
+                padding: 1px 0 1px 25px;
+                border: 1px solid;
+                color:#000000;
+                width: 180px;
+                background-color: #yellow;
+                color: #000000;
+                text-decoration: none;
+                width: 153px;
+            }
+
+            #menu a:hover {
+
+                border: 1px solid;
+                color:#000000;
+                width: 155px;
+                background-color: white;
+                color: #000000;
+                text-decoration: none;
+            }
+        #menu a:visited {
+
+                border: 1px solid;
+                color:#yellow;
+                width: 155px;
+                background-color: yellow;
+                text-decoration: none;
+            }  
+            
+            #menu a:active {
+
+                display: block;
+                padding: 1px 0 1px 25px;
+                border: 1px solid;
+                color: #034000;
+                width: 180px;
+                background-color: #003455;
+                color: YELLON;
+                text-decoration: none;
+
+            }
+
+            #menu ul{
+
+                list-style-type: none;
+                margin:5px;
+                padding:8px;
+                font-size:10px;
+                font-family: verdana,arial, helvetica, san-serif;
+
+            }
+
+            #menu ul li a{
+
+                height: 20px;
+                align-content: left;
+               
+            }
+                   
+          #rodape
+            {  width:1024px;
+                height:10px;
+                float:left; 
+                background-color:#00adee;
+            }       
+                

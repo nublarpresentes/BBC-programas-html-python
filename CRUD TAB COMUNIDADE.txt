@@ -1,0 +1,170 @@
+PROJETO PYTHON =>  faça o crud pra web - html com flask e python , para a tabela tbSitAss 
+postgre 
+abaixo com base nos codigos abaixo: -
+- ROTINA de conexao dentro do codigo python
+- codigos html 
+- codigo python com rotinas (
+
+
+--------------------------------------------------
+TABELA DE tbSitAss
+------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public."tbSitAss"
+(
+    "idSitAss" integer NOT NULL,
+    nome character varying(30) COLLATE pg_catalog."default",
+    CONSTRAINT pksitass PRIMARY KEY ("idSitAss")
+)
+
+
+
+
+-----------------------------------------------------------------------
+CODIGO BASE DE ALUNO  
+-----------------------------------------------------------------------
+from flask import Flask, render_template, request, redirect, url_for
+import os
+app = Flask(__name__)
+#----------------------------------------
+#from flask_import import app
+#from conexaoBD import conectar_bd
+
+
+try:
+    import psycopg2
+    conn = psycopg2.connect(user="postgres",
+                                  password="admin",
+                                  host="localhost",
+                                  database="BBC")
+    cur = conn.cursor()
+    cur.execute("SELECT matricula, nome FROM tbassentado LIMIT 10")
+    # Obter os resultados
+    rows = cur.fetchall()
+    # Imprimir os resultados
+    for row in rows:
+        print(f"Matrícula: {row[0]}, Nome: {row[1]}")
+
+
+except (Exception, psycopg2.Error) as error:
+    print("Falha na insercao na tabela tbassentado {}".format(error))
+
+finally:
+    # fecha conexao do banco de dados.
+    if conn:
+        cur.close()
+        conn.close()
+        print("PostgreSQL conexao fechada")
+
+# Rota principal
+@app.route('/assentado')
+def assentado():
+    # Obtendo todos os ASSENTADOS do banco de dados
+    cur.execute("SELECT * FROM tbassentado")
+    ASSENTADOS = cur.fetchall()
+    return render_template('assentado.html', ASSENTADOS=ASSENTADOS)
+
+# Rota para adicionar um novo assentado
+@app.route('/assentado/adicionar_aluno', methods=['POST'])
+def adicionar_aluno():
+    matricula = request.form['matricula']
+    nome = request.form['nome']
+    foto = request.form['foto']
+    idCurso = request.form['idCurso']
+    idSitAlu = request.form['idSitAlu']
+    genero = request.form['genero']
+    cur.execute("INSERT INTO tbassentado (matricula, nome, foto, idCurso, idSitAlu) VALUES (%s, %s, %s, %s, %s, %s)", (matricula, nome, foto, idCurso, idSitAlu, genero))
+    conn.commit()
+    return redirect(url_for('/templates/assentado'))
+
+# Rota para deletar um assentado
+@app.route('/assentado/deletar_aluno/<int:matricula>')
+def deletar_aluno(matricula):
+    cur.execute("DELETE FROM tbassentado WHERE matricula = %s", (matricula,))
+    conn.commit()
+    return redirect(url_for('/templastes/assentado'))
+
+# Rota para consulta todos ASSENTADOS
+@app.route('/assentado/Cons_todos_alunos/<int:matricula>')
+def Cons_todos_alunos():
+    cur.execute("SELECT * FROM tbassentado")
+    return cur.fetchall()
+
+@app.route('/assentado/atualizar_aluno/<int:matricula>')
+def atualizar_aluno(matricula, nome):
+    cur.execute("UPDATE tbassentado SET nome = %s WHERE matricula = %s", (nome, matricula))
+    conn.commit()
+
+@app.route('/assentado/deletar_aluno/<int:matricula>')
+def deletar_aluno(matricula):
+    cur.execute("DELETE FROM tbassentado WHERE matricula = %s", (matricula,))
+    conn.commit()
+
+# Diretório onde as imagens dos ASSENTADOS estão armazenadas
+PASTA_IMAGENS_ALUNOS = "/imagens"
+
+@app.route('/foto/<matricula>')
+def obter_foto_assentado(matricula):
+    # Caminho completo para a imagem do assentado
+    caminho_imagem = os.path.join(PASTA_IMAGENS_ASSENTADOS, f"{matricula}.jpg")
+
+    # Verifica se o arquivo de imagem existe
+    if os.path.isfile(caminho_imagem):
+        return send_file(caminho_imagem, mimetype='image/jpeg')
+    else:
+        # Se a imagem não existir, retorna uma imagem de placeholder ou outra resposta adequada
+        return "Imagem não encontrada", 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# Fechando cursor e conexão
+cur.close()
+conn.close()
+
+
+
+---------------------------------------------------------------------
+
+CODIGO HTML BASE PARA CADASTRO DE TIPO DE SITUACAO DE ASSENTADO 
+--------------------------------------------------------------------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manutenção de Asentados</title>
+</head>
+<body>
+    <h1>Cadastros de Assentados</h1>
+    <form action="/aluno/adicionar_tipSitAss" method="post" enctype="multipart/form-data">
+         <label for="idSitAlu">Situação:</label>
+        <select id="idSitAlu" name="idSitAlu" required>
+            <option value="1">Ativo</option>
+            <option value="2">Inativo</option>
+            <option value="3">Outro</option>
+        </select><br><br>
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+        <button type="submit">Adicionar Tipo Situação</button>
+    </form>
+    <br>
+    <h2>Lista de Alunos</h2>
+    <ul>
+        {% for tipSitAss in tipSitAsss %}
+        <li>{{ tipSitAss[1] }} - {{ tipSitAss[2] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

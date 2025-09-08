@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar WhatsApp</title>
+</head>
+<body>
+    <h1>Enviar WhatsApp</h1>
+    <form action="/enviarWhatsapp" method="post">
+        <label for="discente">Discente:</label>
+        <select id="nome" name="nome">
+            <!-- Opções de matrículas obtidas do banco de dados -->
+            {% for nome, matricula, noWhatsapp in alunos %}
+                <option value="{{ nome }}">{{ nome }} - Whatsapp: {{ noWhatsapp }}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+        <label for="mensagem">Mensagem:</label><br>
+        <input type="text" id="mensagem" name="mensagem" size="100" maxlength="100" required>
+         <input type="hidden" id="noWhatsapp" name="noWhatsapp" value="{{ noWhatsapp }}">
+        <br><br>
+        <button type="submit">ENVIAR WHATSAPP</button>
+    </form>
+
+</body>
+</html>

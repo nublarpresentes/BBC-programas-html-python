@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA</title>
+
+    <script>
+        function mascaraData(input) {
+            var valor = input.value;
+            if (isNaN(valor[valor.length - 1])) {
+                input.value = valor.substring(0, valor.length - 1);
+                return;
+            }
+            if (valor.length === 2 || valor.length === 5) {
+                input.value += '/';
+            }
+        }
+    </script>
+
+</head>
+<body>
+{% if 'mensagem' in session %}
+<div class="alert alert-success">
+{{ session['mensagem'] }}
+</div>
+{% endif %}
+
+<div class="borda">
+    <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong style="color: red;"> TOTAL ENTREGA DE MERENDA POR SEMANA</strong>
+    </div>
+
+<div class="borda">
+      <form action="/sigConsQTDsem" method="post" id="consSem">
+         <BR>
+        <h3>_______________________________________________________________________________</h3><br>
+        <label for="ano">ANO:</label>
+        <input type="text" id="ano" name="ano" value="{{ data_atual.year }}" readonly>
+
+        <label for="mes">MÊS:</label>
+        <select id="mes" name="mes">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+
+        <label for="semana">SEMANA:</label>
+        <select id="semana" name="semana">
+            <option value="01" selected>1</option>
+            <option value="02">2</option>
+            <option value="03">3</option>
+            <option value="04">4</option>
+            <option value="05">5</option>
+
+        &nbsp;&nbsp;<input type="submit" value="OK">
+          <br>
+
+        <input type="hidden" id="turno" name="turno" value="X" >
+
+         <h3>_______________________  RESULTADO DA CONSULTA ______________________</h3>
+        <label for="ano2">Ano:</label>
+        <input type="text" id="ano2" name="ano2" value="{{ ano }}" readonly size="3" maxlength="3">
+
+         <label for="mes2">Mês:</label>
+        <input type="text" id="mes2" name="mes2" value="{{ mes }}" readonly size="3" maxlength="3">
+
+        <label for="semana2">Semana:</label>
+        <input type="text" id="semana2" name="semana2" value="{{ semana }}" readonly size="3" maxlength="3">
+
+        <br><br>
+        <label for="alimento">ALIMENTOS NA SEMANA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+            &nbsp;&nbsp;&nbsp;Valor &nbsp;&nbsp;&nbsp;
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dia da Semana</label>
+         {% for par in alimentos %}
+            <br>
+             <input type="text" id="alimento{{ loop.index }}" name="alimento{{ loop.index }}"
+                    value="{{ par[0] }}" readonly>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <input type="text" id="valor{{ loop.index }}" name="valor{{ loop.index }}"
+                    value="{{ par[1] }}" readonly size="7" maxlength="7" class="moeda-brasileira">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" id="diaSem{{ loop.index }}" name="diaSem{{ loop.index }}"
+                    value="{{ par[2] }}" readonly align="center" size="9" maxlength="9">
+        {% endfor %}
+
+
+
+           <h3>__________________________________________________________________________</h3>
+        <label for="qtdEntregue">Qtd Entregue:</label>
+        <input type="text" id="qtdEntregue" name="qtdEntregue" value="{{ qtdEntregueTot }}" readonly size="3" maxlength="3">
+
+        <label for="qtdTurM">Qtd Por Manhã:</label>
+        <input type="text" id="qtdTurM" name="qtdTurM" value="{{ qtdTurMtot }}" readonly size="3">
+
+        <label for="qtdTurT">Qtd Por Tarde:</label>
+        <input type="text" id="qtdTurT" name="qtdTurT" value="{{ qtdTurTtot }}" readonly size="3">
+
+        <label for="qtdTurN">Qtd Por Noite:</label>
+        <input type="text" id="qtdTurN" name="qtdTurN" value="{{ qtdTurNtot }}" readonly size="3">
+      <h3>_______________________________________________________________________</h3>
+       <label for="valEntregue">Valor Entregue:</label>
+        <input type="text" id="valEntregue" name="valEntregue" value="{{ valEntregue }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurM">Valor Manhã:</label>
+        <input type="text" id="valTurM" name="valTurM" value="{{ valTurM }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurT">Valor Tarde:</label>
+        <input type="text" id="valTurT" name="valTurT" value="{{ valTurT }}" readonly size="7"
+               class="moeda-brasileira">
+
+        <label for="valTurN">Valor Noite:</label>
+        <input type="text" id="valTurN" name="valTurN" value="{{ valTurN }}" readonly size="7"
+               class="moeda-brasileira">
+
+
+        <br>
+    </form>
+  </div>
+</div>
+
+<script>
+    // Função para formatar o valor para moeda brasileira
+    function formatarMoeda(valor) {
+        return 'R$ ' + parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    }
+
+    // Obter todos os inputs com a classe moeda-brasileira
+    var inputsMoeda = document.querySelectorAll('.moeda-brasileira');
+
+    // Iterar sobre os inputs e formatar seus valores para moeda brasileira
+    inputsMoeda.forEach(function(input) {
+        // Obter o valor atual do input
+        var valor = input.value;
+
+        // Formatar o valor para moeda brasileira
+        var valorFormatado = formatarMoeda(valor);
+
+        // Definir o valor formatado de volta no input
+        input.value = valorFormatado;
+    });
+</script>
+
+</body>
+</html>

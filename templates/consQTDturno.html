@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTREGA DA MERENDA</title>
+</head>
+<body>
+{% if 'mensagem' in session %}
+<div class="alert alert-success">
+{{ session['mensagem'] }}
+</div>
+{% endif %}
+
+<div class="borda">
+    <div id="titulo">
+        <img src="/static/img/merenda2.PNG" alt="sigma">
+        <strong style="color: red;">ENTREGA DE MERENDA</strong>
+    </div>
+
+    <!-- Removido o vídeo e o canvas -->
+
+<br><br><br>
+
+<div class="borda">
+       <BR>
+      <h1>Quantidade Entrega Por Turno</h1>
+     <form action="/cons_QTDturnoSaida" method="post" id="merendaForm">
+        <!-- Adicione um botão para iniciar a leitura do QR Code -->
+        <label for="dtatual">Hoje: </label>
+        <input type="text" id="dtatual" name="dtatual" value="{{ data_atual.strftime('%d/%m/%Y') }}"
+               size="10" maxlength="10" readonly>
+
+        <label for="dtatual">Informe o Dia: (dd/mm/aaaa):</label>
+        <input type="text" id="dia" name="dia" placeholder="dd/mm/aaaa"
+               pattern="\d{2}/\d{2}/\d{4}" required>
+
+        <label for="turno">Turno:</label>
+        <select id="turno" name="turno" required>
+            <option value="M">Manhã</option>
+            <option value="T">Tarde</option>
+            <option value="N">Noite</option>
+        </select>
+        <input type="submit" value=" OK">
+    </form>
+ <div>>
+
+    <form action="/menu" method="post" id="consQTD3">
+        <label for="qtdTotal">Qtd Total:</label>
+        <input type="text" id="qtdTotal" name="qtdTotal" value="{{ qtdTotal }}" readonly size="3" maxlength="3">
+
+        <label for="qtdTurM">Qtd Por Manhã:</label>
+        <input type="text" id="qtdTurM" name="qtdTurM" value="{{ qtdTurM }}" readonly size="3">
+
+        <label for="qtdTurT">Qtd Por Tarde:</label>
+        <input type="text" id="qtdTurM" name="qtdTurM" value="{{ qtdTurT }}" readonly size="3">
+
+        <label for="qtdTurN">Qtd Por Noite:</label>
+        <input type="text" id="qtdTurN" name="qtdTurN" value="{{ qtdTurN }}" readonly size="3">
+
+        <br><br>
+
+        <input type="submit" value="VOLTAR AO MENU">
+
+    </form>
+</div>
+
+
+</body>
+</html>
