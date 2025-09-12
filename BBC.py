@@ -10,7 +10,15 @@ from controleBBC import dados_controle, cadastrar_controle, busca_controle, atua
      gerar_pdf_Cartao, dados_cartao, cartaoQR, dados_cartao_turno, cartao_turno, \
      dados_cartao_curso, cartao_curso
 
+#--------------------- contribuicoes e retribuicoes ------------------------------------
+
 from tipContrib import cadastrar_tipcontrib , alterar_tipcontrib
+from tipRetrib import cadastrar_tipretrib , alterar_tipretrib
+
+from contrib import cadastrar_contrib , alterar_contrib
+from retrib import cadastrar_retrib , alterar_retrib
+
+#------------------------------------------------------------------------------------------
 
 from assentado import  consulta_nome_assentado, obter_foto_assentado, incluir_assentado, \
 atualizar_assentado, excluir_assentado, consulta_todos_assentados
@@ -216,10 +224,10 @@ def altStaAssent():
 
 def _carrega_selects():
     conn = conectar_bd()
-    categorias, politicas, unidades = [], [], []
+    categorias, politicas, unidades, assentados = [], [], [], []
     if conn:
         cur = conn.cursor()
-        cur.execute('SELECT "idCatgContrib","nomCatgContrib" FROM "tbcatgcontri" ORDER BY "nomCatgContrib"')
+        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc", "catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
         categorias = cur.fetchall()
 
         cur.execute('SELECT "idPolPub","nomPolPub","valor","perct" FROM "tbpolitpub" ORDER BY "nomPolPub"')
@@ -227,16 +235,22 @@ def _carrega_selects():
 
         cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
         unidades = cur.fetchall()
+
+        cur.execute(
+            'SELECT "matricula","nome", "idFamilia" FROM "tbassentado" ORDER BY "nome"')
+        assentados = cur.fetchall()
+
         conn.close()
-    return categorias, politicas, unidades
+
+    return categorias, politicas, unidades, assentados
 
 #------- cadastro tipo de contribuicao ----------------------
 # Rota para cad tipo de contribuicao
 @app.route("/tipContribCad")
 def tipContribCad():
-    categorias, politicas, unidades = _carrega_selects()
+    categorias, politicas, unidades, assentados = _carrega_selects()
     return render_template(
-        "tipContribCad.html", message="✅ Tipo de Contribuição Cadastrado com Sucesso!",
+        "tipContribCad.html", message="✅ Tipo de Contribuição Cadastrada com Sucesso!",
         categorias=categorias,
         politicas=politicas,
         unidades=unidades
@@ -250,25 +264,180 @@ def cadTipContrib():
 
 #------- alterar tipo de contribuicao ----------------------
 # Rota para cad tipo de contribuicao
+# @app.route('/tipContribAlt')
+# def tipContribAlt():
+#    return render_template('tipContribAlt.html')
+
+#@app.route('/altTipContrib', methods=['POST'])
+#def altTipContrib():
+    # Redirecionar para a rota
+ #   return alterar_tip_contrib()
+# ------- ALTERAR tipo de contribuicao ----------------------
 @app.route('/tipContribAlt')
 def tipContribAlt():
-    return render_template('tipContribAlt.html')
+    from conexao_bd import conectar_bd
+    conn = conectar_bd()
+    categorias = politicas = unidades = []
+    itens = []
+    registro = None
+
+    if conn:
+        cur = conn.cursor()
+
+        # lista em ordem decrescente (se tiver created_at use; senão, por id)
+        cur.execute('''
+             SELECT "idTipFinanc","nomFinanc","idCatgFinanc","idPolPub",
+                    "valPolPub","percVal","idTipUnEqv","merecto"
+             FROM "tbtipfinanc"
+             ORDER BY "idTipFinanc" DESC
+         ''')
+        itens = cur.fetchall()
+
+        # carrega selects
+        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc","catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
+        categorias = cur.fetchall()
+
+        cur.execute('SELECT "idPolPub","nomPolPub","valor","perct" FROM "tbpolitpub" ORDER BY "nomPolPub"')
+        politicas = cur.fetchall()
+
+        cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
+        unidades = cur.fetchall()
+
+        # se o usuário clicou em Alterar na lista
+        sel_id = request.args.get('id')
+        if sel_id:
+            cur.execute('''
+                 SELECT "idTipFinanc","nomFinanc","idCatgFinanc","idPolPub",
+                        "valPolPub","percVal","idTipUnEqv","merecto"
+                 FROM "tbtipfinanc"
+                 WHERE "idTipFinanc" = %s
+             ''', (sel_id,))
+            registro = cur.fetchone()
+
+        conn.close()
+
+    return render_template(
+        'tipContribAlt.html',
+        itens=itens,
+        categorias=categorias,
+        politicas=politicas,
+        unidades=unidades,
+        registro=registro
+    )
+
 
 @app.route('/altTipContrib', methods=['POST'])
 def altTipContrib():
-    # Redirecionar para a rota
-    return alterar_tip_contrib()
+    from tipContrib import alterar_tipcontrib
+    return alterar_tipcontrib()
 
-#------- excluir tipo de contribuicao ----------------------
-# Rota para exc tipo de contribuicao
+
+# ------- EXCLUIR tipo de contribuicao ----------------------
 @app.route('/tipContribExc')
 def tipContribExc():
-    return render_template('tipContribExc.html')
+    from conexao_bd import conectar_bd
+    sel_id = request.args.get('id')
+    registro = None
+    if sel_id:
+        conn = conectar_bd()
+        if conn:
+            cur = conn.cursor()
+            cur.execute('''
+                 SELECT "idTipFinanc","nomFinanc","idCatgFinanc","idPolPub",
+                        "valPolPub","percVal","idTipUnEqv","merecto"
+                 FROM "tbtipfinanc"
+                 WHERE "idTipFinanc" = %s
+             ''', (sel_id,))
+            registro = cur.fetchone()
+            conn.close()
+    return render_template('tipContribExc.html', registro=registro)
+
+# ------- excluir tipo de contribuicao ----------------------
 
 @app.route('/excTipContrib', methods=['POST'])
 def excTipContrib():
     # Redirecionar para a rota
     return excluir_tipo_contrib()
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+#------- excluir tipo de contribuicao ----------------------
+
+# Rota para cad tipo de retribuicao
+@app.route("/tipRetribCad")
+def tipRetribCad():
+    categorias, politicas, unidades, assentados = _carrega_selects()
+    return render_template(
+        "tipRetribCad.html", message="✅ Tipo de Retribuição Cadastrada com Sucesso!",
+        categorias=categorias,
+        politicas=politicas,
+        unidades=unidades
+    )
+
+
+@app.route('/cadTipRetrib', methods=['POST'])
+def cadTipRetrib():
+    # Redirecionar para a rota
+    return cadastrar_tipretrib()
+
+#------- alterar tipo de retrib ----------------------
+# Rota para cad tipo de retr
+@app.route('/tipRetribAlt')
+def tipRetribAlt():
+    return render_template('tipRetribAlt.html')
+
+@app.route('/altTipRetrib', methods=['POST'])
+def altTipRetrib():
+    # Redirecionar para a rota
+    return alterar_tip_retrib()
+
+#------- excluir tipo de financas ----------------------
+# Rota para exc tipo de financas
+@app.route('/tipRetribExc')
+def tipRetribExc():
+    return render_template('tipRetribExc.html')
+
+@app.route('/excTipRetrib', methods=['POST'])
+def excTipRetrib():
+    # Redirecionar para a rota
+    return excluir_tipo_retrib()
+
+
+# Rota para a cadastro de contribuicao
+@app.route('/contribCad')
+def contribCad():
+    categorias, politicas, unidades, assentados = _carrega_selects()
+    return render_template(
+        "financCad.html", message="✅  Contribuição Cadastrada com Sucesso!",
+        categorias=categorias,
+        assentados=assentados
+    )
+
+    return render_template('contribCad.html')
+
+@app.route('/cadContrib', methods=['POST'])
+def cadContrib():
+    # Redirecionar para a rota
+    return cadastrar_contrib()
+
+# Rota para a cadastro retribuicao
+@app.route('/retribCad')
+def retribCad():
+    categorias, politicas, unidades, assentados = _carrega_selects()
+    return render_template(
+        "retribCad.html", message="✅  Retribuição Cadastrada com Sucesso!",
+        categorias=categorias,
+        assentados=assentados
+    )
+
+
+    return render_template('retribCad.html')
+
+@app.route('/cadRetrib', methods=['POST'])
+def cadRetrib():
+    # Redirecionar para a rota
+    return cadastrar_retrib()
+
 
 #------- cadastro tipo de painel contribuicao ----------------------
 # Rota para menu BBC
@@ -279,34 +448,35 @@ def menuBBC():
 
 #------- cadastro tipo de painel contribuicao ----------------------
 # Rota para cad tipo de contribuicao
-@app.route('/panlContribCad')
-def panlContribCad():
-    return render_template('panlContribCad.html')
+@app.route('/panlF'
+           'inanCad ')
+def panlFinanCad ():
+    return render_template('panlFinanCad .html')
 
-@app.route('/cadPanlContrib', methods=['POST'])
-def cadPanlContrib():
+@app.route('/cadPanlFinanc ', methods=['POST'])
+def cadPanlFinanc ():
     # Redirecionar para a rota
     return cadastrar_painel_contrib()
 
 #------- alterar painel de contribuicao ----------------------
 # Rota para cad painl de contribuicao
-@app.route('/panlContribAlt')
-def panlContribAlt():
-    return render_template('panlContribAlt.html')
+@app.route('/panlFinancAlt ')
+def panlFinancAlt ():
+    return render_template('panlFinancAlt .html')
 
-@app.route('/altPanlContrib', methods=['POST'])
-def altPanlContrib():
+@app.route('/altPanlFinanc ', methods=['POST'])
+def altPanlFinanc ():
     # Redirecionar para a rota
-    return alterar_painel_contrib()
+    return alterar_painel_financ()
 
-#------- excluir painel de contribuicao ----------------------
-# Rota para exc painel de contribuicao
-@app.route('/´panlContribExc')
-def panlContribExc():
-    return render_template('panlContribExc.html')
+#------- excluir painel de financas ----------------------
+# Rota para exc painel de financas
+@app.route('/´panlFinancExc ')
+def panlFinancExc ():
+    return render_template('panlFinancExc .html')
 
-@app.route('/excPanlContrib', methods=['POST'])
-def excPanlContrib():
+@app.route('/excPanlFinanc ', methods=['POST'])
+def excPanlFinanc ():
     # Redirecionar para a rota
     return excluir_painel_contrib()
 
@@ -315,10 +485,10 @@ def mensagem():
     return render_template('mensagem.html')
 
 
-@app.route('/cadPainelContrib', methods=['GET', 'POST'])
-def cadPainelContrib():
+@app.route('/cadPainelFinanc ', methods=['GET', 'POST'])
+def cadPainelFinanc ():
     session['mensagem'] = "  "
-    print("BBCQC..PY ==l 111 ===> /cadPainelContrib ")
+    print("BBCQC..PY ==l 111 ===> /cadPainelFinanc  ")
     turno = " "
     if request.method == 'GET':
          matricula = request.args.get('matricula', '999')
@@ -336,7 +506,7 @@ def cadPainelContrib():
 
 @app.route('/cadStaAssent', methods=['GET', 'POST'])
 def cad_sta_assentado():
-    print("BBCQC..PY ==# -------------/////// hoooje CAD cadPainelContrib #######################")
+    print("BBCQC..PY ==# -------------/////// hoooje CAD cadPainelFinanc  #######################")
     if request.method == 'POST':
         matricula = request.form.get('matricula')
         idStaAsent = request.form.get('idStaAsent')
@@ -389,8 +559,8 @@ def obter_dados_painel_contrib():
 
 
         except Exception as e:
-            session['mensagem'] = " Erro ao obter dados de controle de cadPainelContrib !"
-            print("BBCQC..PY ==Erro ao obter dados de controle de cadPainelContrib:", e)
+            session['mensagem'] = " Erro ao obter dados de controle de cadPainelFinanc  !"
+            print("BBCQC..PY ==Erro ao obter dados de controle de cadPainelFinanc :", e)
             return []
     else:
         return []

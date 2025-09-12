@@ -9,9 +9,12 @@ def conectar_bd():
             host="localhost",
             port=5432
         )
-        print("Conexão com o banco de dados estabelecida com sucesso!")
         return conn
     except psycopg2.Error as e:
-        print("** Erro ao conectar ao banco de dados:", e.pgerror)
+        print("** Erro ao conectar ao banco de dados:", str(e))
+#        print("** Erro ao conectar ao banco de dados:", e.pgerror)
         print("Detalhe:", e)
         return None
+
+# if __name__ == '__main__':  /// está aqui pra ver se esta rodando service ( postgresql-x64-16)
+#     conectar_bd()

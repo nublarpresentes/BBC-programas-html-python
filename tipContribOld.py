@@ -77,6 +77,6 @@ def alterar_tipcontrib():
                 return redirect(url_for("menuBBC"))
             except psycopg2.Error as e:
                 conn.rollback()
-                return render_template("tipContribCad.html", message=f"❌ Erro ao alterar: {e}")
+                return render_template("tipContribCadOld.html", message=f"❌ Erro ao alterar: {e}")
         else:
             return "❌ Erro de conexão com BD."
