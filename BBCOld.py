@@ -21,9 +21,6 @@ from tipContrib import listar_tipcontrib, pegar_tipcontrib, excluir_tipo_contrib
 from tipRetrib import cadastrar_tipretrib , alterar_tipretrib
 
 from contrib import cadastrar_contrib , alterar_contrib
-
-from partlh import cadastrar_partlh , alterar_partlh
-
 from retrib import cadastrar_retrib , alterar_retrib
 
 #------------------------------------------------------------------------------------------
@@ -58,7 +55,7 @@ def index():
     return render_template('index.html')
 
 
-# ------------   USUARIO - LOGIN - SENHA -----------------------
+# Rota para autenticação de usuário
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -108,42 +105,7 @@ def altSenha():
     # Redirecionar para a rota
     return alterar_senha()
 
-
-# ----------------------  EVENTO --------------------------------
-
-# ----- Tipo de Evento -----
-from tipEvt import (
-    pagina_tipEvtAlt, pagina_tipEvtExc,
-    cadastrar_tipevt, alterar_tipevt, excluir_tipevt
-)
-
-@app.route('/tipEvtCad')
-def tipEvtCad():
-    return render_template('tipEvtCad.html')
-
-@app.route('/cadTipEvt', methods=['POST'])
-def cadTipEvt():
-    return cadastrar_tipevt()
-
-@app.route('/tipEvtAlt')
-def tipEvtAlt():
-    return pagina_tipEvtAlt()
-
-@app.route('/altTipEvt', methods=['POST'])
-def altTipEvt():
-    return alterar_tipevt()
-
-@app.route('/tipEvtExc')
-def tipEvtExc():
-    return pagina_tipEvtExc()
-
-@app.route('/excTipEvt', methods=['POST'])
-def excTipEvt():
-    return excluir_tipevt()
-
-
-#--------------------------- POLITICA PUBLICA ---------------------
-
+#---------------------------------------------------
 # Rota para cad  politica publica
 
 # BBC.py (trechos)
@@ -171,7 +133,7 @@ def politPubCad():
 def cadPolitPub():
     return cadastrar_politpub()
 
-# ---------- alterar  (lista + form) ----------
+# ---------- ALTERAR (lista + form) ----------
 @app.route('/politPubAlt')
 def politPubAlt():
     itens = listar_politpub()
@@ -200,8 +162,7 @@ def politPubExc():
 def excPolitPub():
     return excluir_politpub()
 
-#------------------------- UNIDADE DE EQUIVALIA -----------------------------
-
+#---------------------------------------------------
 # Rota para cadastro  unidade Equivalia
 # BBC.py (apenas as rotas relacionadas a UnEqv)
 
@@ -240,8 +201,9 @@ def unEqvExc():
 def excUnEqv():
     return excluir_uneqv()
 
-#--------------------   FAMILIA  ------------------
+#--------------------   familia ------------------
 
+# --------------------  Família  --------------------
 @app.route('/familiaCad')
 def familiaCad():
     return render_template('familiaCad.html')
@@ -274,7 +236,7 @@ def excFamilia():
     return excluir_familia()
 
 
-#---------------  ASSENTADO - ROTINAS ---------------------------------
+#------------  situacao assentado
 
 # --- Situação do Assentado
 @app.route('/sitAssentCad')
@@ -305,16 +267,6 @@ def sitAssentExc():
 def excSitAssent():
     from sitAssent import excluir_sitassent
     return excluir_sitassent()
-
-
-  #  contrDiario = request.form.get('contrDiario')
-
-    print("BBCQC..PY ==BBCQC..PY ===========> 22222 ####### CAD MEREDNA => ", contrDiario)
-
-    # Renderiza o template merendaQC.html
-    return cadastro_sta_asentado()
-
-
 
 # ------------  categoria assentado
 @app.route('/ctgAssentCad')
@@ -382,36 +334,9 @@ def assentExc():
 def excAssent():
     # Redirecionar para a rota
     return excluir_assentado()
-
-@app.route('/obter_dados_assent', methods=['GET', 'POST'])
-def obter_dados_assent():
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT matricula, nome, foto FROM tbassentado ORDER BY nome")
-            assentados = cur.fetchall()
-            assentados_corrigidos = []
-            for assentado in assentados:
-                matricula, nome, foto = assentado  # Desempacotando os dados do assentado
-                # Corrigindo o caminho da foto
-                foto_corrigida = url_for('static', filename=f'img/{foto}')
-                assentados_corrigidos.append((matricula, nome, foto_corrigida))
-            conn.close()
-            return assentados_corrigidos
-        except Exception as e:
-            session['mensagem'] = " Erro @@@ 111  oter_dados_aluno() !"
-            print("BBCQC..PY ==Erro ao obter dados dos alunos:", e)
-            return []
-    else:
-        return []
-
-
-
 #---------------------------------------------------
 # Rota para alterar  situacao assentado
 
-#-------------------  SELECTS GERAIS ------------------------
 
 def _carrega_selects():
     conn = conectar_bd()
@@ -435,9 +360,8 @@ def _carrega_selects():
 
     return categorias, politicas, unidades, assentados
 
-#------------------- CONTRIBUIÇÃO - ROTINAS  --------------------------
-
-# Rota para cadastro tipo contribuicao  --------
+#------- cadastro tipo de contribuicao ----------------------
+# Rota para cad tipo de contribuicao
 @app.route("/tipContribCad")
 def tipContribCad():
     categorias, politicas, unidades, assentados = _carrega_selects()
@@ -471,36 +395,8 @@ def tipContribExc():
 def altTipContrib():
     return alterar_tipcontrib()
 
-#-----------------------   CONTRIBUIÇÃO -----------------
-# CADASTRO
-@app.route('/contribCad')
-def contribCad():
-    from contrib import view_contribCad
-    return view_contribCad()
 
-@app.route('/cadContrib', methods=['POST'])
-def cadContrib():
-    from contrib import cadastrar_contrib
-    return cadastrar_contrib()
-
-# ALTERAÇÃO
-@app.route('/contribAlt')
-def contribAlt():
-    from contrib import view_contribAlt
-    return view_contribAlt()
-
-@app.route('/altContrib', methods=['POST'])
-def altContrib():
-    from contrib import alterar_contrib
-    return alterar_contrib()
-
-
-# Compat: se o menu ainda aponta para /conContrib, redireciona:
-@app.route('/conContrib')
-def conContrib():
-    from flask import redirect, url_for, request
-    return redirect(url_for('conGeralContrib', **request.args))
-
+# -------CONSULTAS CONTRIBUICAO -----------------------
 
 # --- Consulta Geral de Contribuições ---
 @app.route('/conGeralContrib', methods=['GET'])
@@ -513,91 +409,17 @@ def conFiltroContrib():
     from conGeralContrib import conFiltroContrib
     return conFiltroContrib()
 
-
-
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-#------------------- PARTILHA - ROTINAS  --------------------------
-
-# Rota para cadastro tipo partilha  --------
-@app.route("/tipPartlhCad")
-def tipPartlhCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "tipPartlhCad.html", message="✅ Tipo de Partilha Cadastrada com Sucesso!",
-        categorias=categorias,
-        politicas=politicas,
-        unidades=unidades
-    )
-
-
-@app.route('/cadTipPartlhb', methods=['POST'])
-def cadTipPartlhb():
-    # Redirecionar para a rota
-    return cadastrar_tippartlh()
-
-
-# ALTERAR – lista + formulário (GET) e salvar (POST separado)
-@app.route('/tipPartlhAlt')
-def tipPartlhAlt():
-    return view_tipPartlhAlt()
-
-
-# EXCLUIR – lista + cartão de confirmação (GET) e exclusão (POST separado)
-@app.route('/tipPartlhExc')
-def tipPartlhExc():
-    return view_tipPartlhExc()
-
-
-@app.route('/altTipPartlh', methods=['POST'])
-def altTipPartlh():
-    return alterar_tippartlh()
-
-
-# -------consultas partilha-------------------
-
-# --- Consulta Geral de Patilhas ------ ---
-@app.route('/conGeralPartlh', methods=['GET'])
-def conGeralPartlh():
-    from conGeralPartlh import pagina_conGeralPartlh
-    return pagina_conGeralPartlh()
-
-@app.route('/conFiltroPartlh', methods=['GET', 'POST'])
-def conFiltroPartlh():
-    from conGeralPartlh import conFiltroPartlh
-    return conFiltroPartlh()
-
-# Compat: se o menu ainda aponta para /conPartlh, redireciona:
-@app.route('/conPartlh')
-def conPartlh():
+# Compat: se o menu ainda aponta para /conContrib, redireciona:
+@app.route('/conContrib')
+def conContrib():
     from flask import redirect, url_for, request
-    return redirect(url_for('conGeralPartlh', **request.args))
-
-
-@app.route('/partlhCad')
-def partlhCad():
-    # reutilizando seu _carrega_selects(), mas PRECISA devolver politicas também
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "partlhCad.html",
-        message=" ",
-        categorias=categorias,
-        politicas=politicas,   # <--- ADICIONE
-        assentados=assentados
-    )
-
-
-@app.route('/cadPartlh', methods=['POST'])
-def cadPartlh():
-    # Redirecionar para a rota
-    return cadastrar_partlh()
+    return redirect(url_for('conGeralContrib', **request.args))
 
 
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
-#--------------- RETRIBUIÇÃO --------------------------
+#------- excluir tipo de contribuicao ----------------------
 
 # Rota para cad tipo de retribuicao
 @app.route("/tipRetribCad")
@@ -632,7 +454,7 @@ def excTipContrib():
     return excluir_tipo_contrib()
 
 
-#------- excluir tipo ----------------------
+#------- excluir tipo de financas ----------------------
 # Rota para exc tipo de financas
 @app.route('/tipRetribExc')
 def tipRetribExc():
@@ -645,6 +467,21 @@ def excTipRetrib():
 
 
 # Rota para a cadastro de contribuicao
+@app.route('/contribCad')
+def contribCad():
+    categorias, politicas, unidades, assentados = _carrega_selects()
+    return render_template(
+        "contribCad.html", message="✅  Contribuição Cadastrada com Sucesso!",
+        categorias=categorias,
+        assentados=assentados
+    )
+
+    return render_template('contribCad.html')
+
+@app.route('/cadContrib', methods=['POST'])
+def cadContrib():
+    # Redirecionar para a rota
+    return cadastrar_contrib()
 
 # Rota para a cadastro retribuicao
 @app.route('/retribCad')
@@ -665,25 +502,93 @@ def cadRetrib():
     return cadastrar_retrib()
 
 
-#-------------------- MENUS  - ROTAS ----------------------
-
+#------- cadastro e rotas  ----------------------
 # Rota para menu BBC
 @app.route('/menuBBC')
 def menuBBC():
     return render_template('menuBBC.html')
 
-@app.route('/menuCaderneta')
-def menuCaderneta():
-    return render_template('menuCaderneta.html')
-
 @app.route('/menuAssent')
 def menuAssent():
     return render_template('menuAssent.html')
 
+@app.route('/menuCaderneta')
+def menuCaderneta():
+    return render_template('menuCaderneta.html')
+
+#------- cadastro tipo de painel contribuicao ----------------------
+# Rota para cad tipo de contribuicao
+@app.route('/panlFinanCad ')
+def panlFinanCad ():
+    return render_template('panlFinanCad .html')
+
+@app.route('/cadPanlFinanc ', methods=['POST'])
+def cadPanlFinanc ():
+    # Redirecionar para a rota
+    return cadastrar_painel_contrib()
 
 @app.route('/mensagem')
 def mensagem():
     return render_template('mensagem.html')
+
+
+@app.route('/cadPainelFinanc ', methods=['GET', 'POST'])
+def cadPainelFinanc ():
+    session['mensagem'] = "  "
+    print("BBCQC..PY ==l 111 ===> /cadPainelFinanc  ")
+    turno = " "
+    if request.method == 'GET':
+         matricula = request.args.get('matricula', '999')
+    elif request.method == 'POST':
+         matricula = request.form.get('matricula')
+         turno = request.form.get('turno')
+
+    if matricula == '999':
+        matricula = '001'  # Valor padrão caso 'matricula' não seja fornecido
+
+    # Renderiza o template merendaQC.html passando o parâmetro 'termo'
+    session['mensagem'] = "  "
+    return dados_merenda(matricula)
+
+
+@app.route('/cadStaAssent', methods=['GET', 'POST'])
+def cad_sta_assentado():
+    print("BBCQC..PY ==# -------------/////// hoooje CAD cadPainelFinanc  #######################")
+    if request.method == 'POST':
+        matricula = request.form.get('matricula')
+        idStaAsent = request.form.get('idStaAsent')
+
+
+  #  contrDiario = request.form.get('contrDiario')
+
+    print("BBCQC..PY ==BBCQC..PY ===========> 22222 ####### CAD MEREDNA => ", contrDiario)
+
+    # Renderiza o template merendaQC.html
+    return cadastro_sta_asentado()
+
+@app.route('/obter_dados_assent', methods=['GET', 'POST'])
+def obter_dados_assent():
+    conn = conectar_bd()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT matricula, nome, foto FROM tbassentado ORDER BY nome")
+            assentados = cur.fetchall()
+            assentados_corrigidos = []
+            for assentado in assentados:
+                matricula, nome, foto = assentado  # Desempacotando os dados do assentado
+                # Corrigindo o caminho da foto
+                foto_corrigida = url_for('static', filename=f'img/{foto}')
+                assentados_corrigidos.append((matricula, nome, foto_corrigida))
+            conn.close()
+            return assentados_corrigidos
+        except Exception as e:
+            session['mensagem'] = " Erro @@@ 111  oter_dados_aluno() !"
+            print("BBCQC..PY ==Erro ao obter dados dos alunos:", e)
+            return []
+    else:
+        return []
+
 
 def obter_dados_painel_contrib():
     conn = conectar_bd()
@@ -814,79 +719,6 @@ def ver_assent():
     assent_selecionado_id = request.form.get('matricula')
     assent_selecionado = obter_dados_assent-matricula(aluno_selecionado_id)  # Substitua por sua função para obter dados do assentado por ID
     return render_template('merendaQC.html', assentado=assent_selecionado)
-
-
-#---------------------- GRUPO DE PARTILHA -------------------
-
-# --- Grupo de Partilha ---
-from grpPartlh import (
-    cadastrar_grpPartlh, alterar_grpPartlh, excluir_grpPartlh,
-    pagina_grpPartlhAlt, pagina_grpPartlhExc, pagina_grpPartlhCon
-)
-
-@app.route('/grpPartlhCad')
-def grpPartlhCad():
-    return render_template('grpPartlhCad.html')
-
-@app.route('/cadGrpPartlh', methods=['POST'])
-def cadGrpPartlh():
-    return cadastrar_grpPartlh()
-
-@app.route('/grpPartlhAlt')
-def grpPartlhAlt():
-    return pagina_grpPartlhAlt()
-
-@app.route('/altGrpPartlh', methods=['POST'])
-def altGrpPartlh():
-    return alterar_grpPartlh()
-
-@app.route('/grpPartlhExc')
-def grpPartlhExc():
-    return pagina_grpPartlhExc()
-
-@app.route('/excGrpPartlh', methods=['POST'])
-def excGrpPartlh():
-    return excluir_grpPartlh()
-
-@app.route('/grpPartlhCon')
-def grpPartlhCon():
-    return pagina_grpPartlhCon()
-
-
-#-----------------  ROTAS GRUPO - ASSENTADO ----------------------
-
-# --- Grupo x Assentado ---
-from grpAssent import (
-    pagina_grpAssentCad, pagina_grpAssentAlt, pagina_grpAssentExc,
-    cadastrar_grpAssent, alterar_grpAssent, excluir_grpAssent
-)
-
-@app.route('/grpAssentCad')
-def grpAssentCad():
-    return pagina_grpAssentCad()
-
-@app.route('/cadGrpAssent', methods=['POST'])
-def cadGrpAssent():
-    return cadastrar_grpAssent()
-
-@app.route('/grpAssentAlt')
-def grpAssentAlt():
-    return pagina_grpAssentAlt()
-
-@app.route('/altGrpAssent', methods=['POST'])
-def altGrpAssent():
-    return alterar_grpAssent()
-
-@app.route('/grpAssentExc')
-def grpAssentExc():
-    return pagina_grpAssentExc()
-
-@app.route('/excGrpAssent', methods=['POST'])
-def excGrpAssent():
-    return excluir_grpAssent()
-
-
-
 
 
 # Função para verificar as credenciais do usuário

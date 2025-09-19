@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Retribuição</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .form-section { background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
+    .required::after { content:" *"; color:#dc3545; }
+    .badge-big { font-size:1rem; padding:.6rem .9rem; }
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Cabeçalho padrão SBBC -->
+ <!-- Cabeçalho -->
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <!-- Linha com logo e título -->
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+
+    <!-- Linha com o menu principal -->
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC">
+        <i class="bi bi-house-door-fill"></i> Home
+      </a>
+      <a class="nav-link text-white" href="/menuAssent">
+        <i class="bi bi-people-fill"></i> Assentado
+      </a>
+      <a class="nav-link text-white" href="/menuBBC">
+        <i class="bi bi-bank"></i> Banco do Bem Comum
+      </a>
+      <a class="nav-link text-white" href="/menuCaderneta">
+        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
+      </a>
+      <a class="nav-link text-white" href="/faleConosco">
+        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
+      </a>
+    </nav>
+  </div>
+</header>
+
+
+  <main class="flex-grow-1">
+    <div class="container my-4">
+      <div class="form-section">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <h3 class="text-primary mb-3">Cadastro de Retribuição</h3>
+          <span class="badge text-bg-primary badge-big">RETRIBUIÇÃO</span>
+        </div>
+
+        {% if message %}
+          <div class="alert alert-info text-center">{{ message }}</div>
+        {% endif %}
+
+        <!-- IMPORTANTE: ação alterada p/ cadTipRetri -->
+        <form action="/cadRetri" method="POST" class="row g-3">
+          <!-- Tipo fixo (escondido) -->
+          <input type="hidden" name="tipFinancCR" value="2">
+
+          <!-- Assentado (matrícula - nome) -->
+          <div class="col-md-8">
+            <label for="matricula" class="form-label fw-bold required">Assentado (Matrícula - Nome)</label>
+            <select id="matricula" name="matricula" class="form-select" required>
+              <option value="">-- Selecione --</option>
+              {% for a in assentados %}
+                <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Categoria (Retribuição) -->
+          <div class="col-md-4">
+            <label for="idCatgFinanc" class="form-label fw-bold required">Categoria de Retribuição</label>
+            <select id="idCatgFinanc" name="idCatgFinanc" class="form-select" required>
+              <option value="">-- Selecione --</option>
+              {% for c in categorias %}
+                <option value="{{ c[0] }}" data-parcelado="{{ c[2] }}">{{ c[1] }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Se a categoria for parcelada (S), os campos de parcelas aparecerão.</div>
+          </div>
+
+          <!-- Valor -->
+          <div class="col-md-4">
+            <label for="valFinanc" class="form-label fw-bold required">Valor</label>
+            <input type="number" step="0.01" min="0" id="valFinanc" name="valFinanc" class="form-control" placeholder="0.00" required>
+          </div>
+
+          <!-- Observação -->
+          <div class="col-md-8">
+            <label for="obs" class="form-label fw-bold">Observação</label>
+            <input type="text" id="obs" name="obs" class="form-control" maxlength="150" placeholder="até 150 caracteres">
+          </div>
+
+          <!-- BLOCO de Parcelas (só quando categoria catgParcdoSN = 'S') -->
+          <div id="grpParcelas" class="row g-3 d-none">
+            <div class="col-12">
+              <hr class="my-2">
+              <h6 class="text-primary mb-2">Parcelamento</h6>
+            </div>
+            <div class="col-md-3">
+              <label for="anoFinanc" class="form-label fw-bold">Ano</label>
+              <input type="number" id="anoFinanc" name="anoFinanc" class="form-control" min="2000" max="2100" placeholder="AAAA">
+            </div>
+            <div class="col-md-3">
+              <label for="mesFinanc" class="form-label fw-bold">Mês</label>
+              <input type="number" id="mesFinanc" name="mesFinanc" class="form-control" min="1" max="12" placeholder="1-12">
+            </div>
+            <div class="col-md-3">
+              <label for="numParcela" class="form-label fw-bold">Nº Parcela</label>
+              <input type="number" id="numParcela" name="numParcela" class="form-control" min="1" placeholder="1, 2, 3...">
+            </div>
+          </div>
+
+          <div class="col-12 text-center mt-2">
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
+    <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Parcelas: mostra quando a categoria tem data-parcelado="S"
+    const selCat  = document.getElementById('idCatgFinanc');
+    const grpParc = document.getElementById('grpParcelas');
+    function atualizaParcelas() {
+      const opt = selCat?.options[selCat.selectedIndex];
+      const parc = opt ? (opt.getAttribute('data-parcelado') || 'N') : 'N';
+      grpParc.classList.toggle('d-none', parc !== 'S');
+      if (parc !== 'S') {
+        document.getElementById('anoFinanc').value = '';
+        document.getElementById('mesFinanc').value = '';
+        document.getElementById('numParcela').value = '';
+      }
+    }
+    selCat?.addEventListener('change', atualizaParcelas);
+    atualizaParcelas();
+  </script>
+</body>
+</html>

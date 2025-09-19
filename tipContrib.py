@@ -3,7 +3,7 @@ from flask import request, render_template, redirect, url_for, flash
 from conexao_bd import conectar_bd
 
 # ---------------------------------
-# Utilitários locais (somente tipContrib)
+# Utilitários locais
 # ---------------------------------
 def _carrega_selects_basicos():
     categorias = politicas = unidades = []
@@ -26,7 +26,7 @@ def listar_tipcontrib():
         cur = conn.cursor()
         cur.execute('''
             SELECT "idTipFinanc","nomFinanc","idCatgFinanc","idPolPub",
-                   "valPolPub","percVal","idTipUnEqv","merecto"
+                   "valPolPub","percVal","idTipUnEqv","merecto","valEqv"
             FROM "tbtipfinanc"
             ORDER BY "idTipFinanc" DESC
         ''')
@@ -43,7 +43,7 @@ def pegar_tipcontrib(id_):
     cur = conn.cursor()
     cur.execute('''
         SELECT "idTipFinanc","nomFinanc","idCatgFinanc","idPolPub",
-               "valPolPub","percVal","idTipUnEqv","merecto"
+               "valPolPub","percVal","idTipUnEqv","merecto","valEqv"
         FROM "tbtipfinanc" WHERE "idTipFinanc" = %s
     ''', (id_,))
     reg = cur.fetchone()
@@ -51,7 +51,7 @@ def pegar_tipcontrib(id_):
     return reg
 
 # ---------------------------------
-# VIEWS: ALTERAR (GET) e EXCLUIR (GET)
+# VIEWS
 # ---------------------------------
 def view_tipContribAlt():
     itens = listar_tipcontrib()
@@ -78,7 +78,7 @@ def view_tipContribExc():
                            registro=registro)
 
 # ---------------------------------
-# AÇÕES: CADASTRAR / ALTERAR / EXCLUIR
+# AÇÕES
 # ---------------------------------
 def cadastrar_tipcontrib():
     if request.method != 'POST':
@@ -93,11 +93,17 @@ def cadastrar_tipcontrib():
 
     valPolPub = request.form.get('valPolPub') or None
     perct     = request.form.get('perct') or None
+    valEqv    = request.form.get('valEqv') or None  # NOVO
 
     # normalização
-    valPolPub = float(valPolPub) if valPolPub not in (None,'') else None
-    perct     = float(perct)     if perct     not in (None,'') else 0.0
-    percVal   = (valPolPub or 0.0) * perct if perct else None
+    try: valPolPub = float(valPolPub) if valPolPub not in (None,'') else None
+    except: valPolPub = None
+    try: perct = float(perct) if perct not in (None,'') else 0.0
+    except: perct = 0.0
+    percVal = (valPolPub or 0.0) * perct if perct else None
+
+    try: valEqv = float(valEqv) if valEqv not in (None,'') else None
+    except: valEqv = None
 
     conn = conectar_bd()
     if not conn:
@@ -107,15 +113,18 @@ def cadastrar_tipcontrib():
         cur.execute('''
             INSERT INTO "tbtipfinanc"
             ("idTipFinanc","nomFinanc","idCatgFinanc",
-             "idPolPub","valPolPub","percVal","idTipUnEqv","merecto")
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-        ''', (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub, percVal, idTipUnEqv, merecto))
+             "idPolPub","valPolPub","percVal","idTipUnEqv","merecto","valEqv")
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        ''', (idTipFinanc, nomFinanc, idCatgFinanc,
+              idPolPub, valPolPub, percVal, idTipUnEqv, merecto, valEqv))
         conn.commit()
         conn.close()
+        flash("✅ Tipo de contribuição cadastrado com sucesso!")
         return redirect(url_for('tipContribCad'))
-    except Exception:
+    except Exception as e:
         conn.rollback()
         conn.close()
+        print("Erro ao cadastrar tipo contribuicao:", e)
         return redirect(url_for('tipContribCad'))
 
 def alterar_tipcontrib():
@@ -131,6 +140,7 @@ def alterar_tipcontrib():
     percVal      = request.form.get('percVal') or None
     idTipUnEqv   = request.form.get('idTipUnEqv') or None
     merecto      = request.form.get('merecto','')
+    valEqv       = request.form.get('valEqv') or None  # NOVO
 
     # normalização
     try: valPolPub = float(valPolPub) if valPolPub not in (None,'') else None
@@ -139,6 +149,8 @@ def alterar_tipcontrib():
     except: perct = None
     try: percVal = float(percVal) if percVal not in (None,'') else None
     except: percVal = None
+    try: valEqv = float(valEqv) if valEqv not in (None,'') else None
+    except: valEqv = None
 
     conn = conectar_bd()
     if not conn:
@@ -153,9 +165,10 @@ def alterar_tipcontrib():
                    "valPolPub"=%s,
                    "percVal"=%s,
                    "idTipUnEqv"=%s,
-                   "merecto"=%s
+                   "merecto"=%s,
+                   "valEqv"=%s
              WHERE "idTipFinanc"=%s
-        ''', (nomFinanc, idCatgFinanc, idPolPub, valPolPub, percVal, idTipUnEqv, merecto, idTipFinanc))
+        ''', (nomFinanc, idCatgFinanc, idPolPub, valPolPub, percVal, idTipUnEqv, merecto, valEqv, idTipFinanc))
         conn.commit()
         conn.close()
         flash("✅ Tipo de contribuição alterado com sucesso!")
@@ -181,12 +194,11 @@ def excluir_tipo_contrib():
         cur.execute('DELETE FROM "tbtipfinanc" WHERE "idTipFinanc"=%s', (idTipFinanc,))
         conn.commit()
         conn.close()
-        flash("✅ Tipo de contribuição excluida com sucesso!")
+        flash("✅ Tipo de contribuição excluída com sucesso!")
         return redirect(url_for('tipContribExc'))
     except psycopg2.Error as e:
         conn.rollback()
         conn.close()
-        # volta pra tela com mensagem
         itens = listar_tipcontrib()
         categorias, politicas, unidades = _carrega_selects_basicos()
         registro = pegar_tipcontrib(idTipFinanc)

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Contribuição</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .required::after{content:" *";color:#dc3545}
+    .badge-big{font-size:1rem;padding:.6rem .9rem}
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/ifpaLogo.png" class="me-3" style="height:60px;" alt="IFPA">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuCaderneta"><i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha</a>
+      <a class="nav-link text-white" href="/faleConosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="form-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <h3 class="text-success mb-3">Cadastro de Contribuição</h3>
+        <span class="badge text-bg-success badge-big">CONTRIBUIÇÃO</span>
+      </div>
+
+      {% if message %}
+        <div class="alert alert-info text-center">{{ message }}</div>
+      {% endif %}
+
+      <form action="/cadContrib" method="POST" class="row g-3">
+        <input type="hidden" name="tipFinancCP" value="1">
+
+        <!-- Assentado -->
+        <div class="col-md-8">
+          <label for="matricula" class="form-label fw-bold required">Assentado (Matrícula - Nome)</label>
+          <select id="matricula" name="matricula" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- TIPO DE CONTRIBUIÇÃO (vem de tbtipfinanc) -->
+        <div class="col-md-4">
+          <label class="form-label fw-bold required">Tipo de Contribuição</label>
+          <select id="idTipFinanc" name="idTipFinanc" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for t in tipos %}
+              <!-- Esperado: (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub, perct, idTipUnEqv, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
+             <option
+                value="{{ t[0] }}"
+                data-desc="{{ t[1] }}"
+                data-idcatg="{{ t[2] }}"
+                data-idpol="{{ t[3] or '' }}"
+                data-valpol="{{ t[4] or '' }}"
+                data-percval="{{ t[5] or '' }}"  <!-- AQUI: percVal direto -->
+                data-polperc="{{ t[6] or '' }}"
+                data-uneqv="{{ t[7] or '' }}"
+                data-valeqv="{{ t[8] or '' }}"
+                data-nomcatg="{{ t[9] or '' }}"
+                data-parc="{{ t[10] or 'N' }}"
+                data-nomuneqv="{{ t[11] or '' }}"
+              >{{ t[1] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Linha de “cartão” de informações do tipo escolhido -->
+        <div class="col-12">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Descrição</label>
+              <input type="text" id="descTipo" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Categoria</label>
+              <input type="text" id="catgTipo" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Igualdade Proporcional</label>
+              <input type="text" id="uneqvTipo" class="form-control" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Valor (sempre readonly; é definido pela regra do tipo) -->
+        <div class="col-md-3">
+          <label for="valFinanc_view" class="form-label fw-bold">Valor</label>
+          <input type="text" id="valFinanc_view" class="form-control" readonly>
+          <input type="hidden" id="valFinanc" name="valFinanc">
+        </div>
+
+        <!-- Parcelamento (aparece apenas se catgParcdoSN='S') -->
+        <div class="col-md-3 d-none" id="grpParcelas">
+          <label for="qtdParcelas" class="form-label fw-bold">Nº de Parcelas (pagar agora)</label>
+          <input type="number" id="qtdParcelas" name="qtdParcelas" class="form-control" min="1" max="12" placeholder="ex.: 3">
+          <div class="form-text">Máximo 12/ano (o sistema respeita o que já foi pago).</div>
+        </div>
+
+        <!-- Observação -->
+        <div class="col-md-6">
+          <label for="obs" class="form-label fw-bold">Observação</label>
+          <input type="text" id="obs" name="obs" class="form-control" maxlength="150" placeholder="até 150 caracteres">
+        </div>
+
+        <!-- Guardas p/ backend -->
+        <input type="hidden" id="idCatgFinanc" name="idCatgFinanc">
+        <input type="hidden" id="catgParcdoSN" name="catgParcdoSN">
+        <input type="hidden" id="idPolPub" name="idPolPub">
+
+        <div class="col-12 text-center mt-2">
+          <button type="submit" class="btn btn-success">Cadastrar</button>
+          <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const selTipo = document.getElementById('idTipFinanc');
+  const descTipo= document.getElementById('descTipo');
+  const catgTipo= document.getElementById('catgTipo');
+  const uneqvTipo= document.getElementById('uneqvTipo');
+
+  const valView = document.getElementById('valFinanc_view');
+  const valHidden = document.getElementById('valFinanc');
+
+  const grpParcelas = document.getElementById('grpParcelas');
+  const qtdParcelas = document.getElementById('qtdParcelas');
+
+  const hidIdCatg = document.getElementById('idCatgFinanc');
+  const hidParcSN = document.getElementById('catgParcdoSN');
+  const hidPolPub = document.getElementById('idPolPub');
+
+  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
+
+  function atualizarTipo(){
+    const opt = selTipo?.options[selTipo.selectedIndex];
+    if(!opt || !opt.value){
+      descTipo.value = ''; catgTipo.value = ''; uneqvTipo.value = '';
+      valView.value = ''; valHidden.value = '';
+      hidIdCatg.value = ''; hidParcSN.value='N'; hidPolPub.value='';
+      grpParcelas.classList.add('d-none'); qtdParcelas.value='';
+      return;
+    }
+
+    const desc = opt.getAttribute('data-desc') || '';
+    const nomcatg = opt.getAttribute('data-nomcatg') || '';
+    const uneqv = opt.getAttribute('data-nomuneqv') || '';
+    const idCatg = opt.getAttribute('data-idcatg') || '';
+    const parcSN = (opt.getAttribute('data-parc') || 'N');
+    const idPol  = opt.getAttribute('data-idpol') || '';
+    const valPol = n(opt.getAttribute('data-valpol'));
+    const perct  = n(opt.getAttribute('data-perct'));
+    const valEqv = n(opt.getAttribute('data-valeqv'));
+
+    // Valor pela regra:
+    // Política Pública -> valPolPub * perct; Mensalidade -> valEqv; Outras -> valEqv
+    let valor = valEqv;
+    const nomeC = nomcatg.toUpperCase();
+    const isPolitica = (idPol && (nomeC.includes('POLIT')));
+    const isMensal   = nomeC.includes('MENSAL');
+
+    if(isPolitica) valor = valPol * perct;
+    else if(isMensal) valor = valEqv;
+
+    descTipo.value = desc;
+    catgTipo.value = nomcatg;
+    uneqvTipo.value = uneqv;
+
+    valView.value = isFinite(valor)? valor.toFixed(2) : '';
+    valHidden.value = isFinite(valor)? valor.toString() : '';
+
+    hidIdCatg.value = idCatg;
+    hidParcSN.value = parcSN;
+    hidPolPub.value = idPol || '';
+
+    // Parcelas só se categoria for parcelada
+    grpParcelas.classList.toggle('d-none', parcSN !== 'S');
+    if(parcSN !== 'S'){ qtdParcelas.value=''; }
+  }
+
+  selTipo?.addEventListener('change', atualizarTipo);
+  atualizarTipo();
+</script>
+
+<!-- mantém seu <select id="idTipFinanc"> como está -->
+<script>
+  const selTipo    = document.getElementById('idTipFinanc');
+  const descTipo   = document.getElementById('descTipo');
+  const catgTipo   = document.getElementById('catgTipo');
+  const uneqvTipo  = document.getElementById('uneqvTipo');
+
+  const valView    = document.getElementById('valFinanc_view');
+  const valHidden  = document.getElementById('valFinanc');
+
+  const grpParcelas = document.getElementById('grpParcelas');
+  const qtdParcelas = document.getElementById('qtdParcelas');
+
+  const hidIdCatg  = document.getElementById('idCatgFinanc');
+  const hidParcSN  = document.getElementById('catgParcdoSN');
+  const hidPolPub  = document.getElementById('idPolPub');
+
+  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
+
+  function atualizarTipo(){
+    const opt = selTipo?.options[selTipo.selectedIndex];
+    if(!opt || !opt.value){
+      descTipo.value = ''; catgTipo.value = ''; uneqvTipo.value = '';
+      valView.value = ''; valHidden.value = '';
+      hidIdCatg.value = ''; hidParcSN.value='N'; hidPolPub.value='';
+      grpParcelas.classList.add('d-none'); qtdParcelas.value='';
+      return;
+    }
+
+    const desc    = opt.getAttribute('data-desc') || '';
+    const nomcatg = opt.getAttribute('data-nomcatg') || '';
+    const uneqv   = opt.getAttribute('data-nomuneqv') || '';
+    const idCatg  = opt.getAttribute('data-idcatg') || '';
+    const parcSN  = (opt.getAttribute('data-parc') || 'N');
+    const idPol   = opt.getAttribute('data-idpol') || '';
+    const valPol  = n(opt.getAttribute('data-valpol'));   // ex.: 1000
+    let   perct   = n(opt.getAttribute('data-perct'));    // pode vir 0.12 ou 12
+    const valEqv  = n(opt.getAttribute('data-valeqv'));
+
+    // normaliza percentual: se vier 12, converte p/ 0.12
+    if (perct > 1) perct = perct / 100;
+
+    // política pública = presença de idPolPub
+    const isPolitica = !!idPol;
+
+    // Valor: Política -> valPol * perct ; outras/mensalidade -> valEqv
+    let valor = isPolitica ? (valPol * perct) : valEqv;
+
+    descTipo.value  = desc;
+    catgTipo.value  = nomcatg;
+    uneqvTipo.value = uneqv;
+
+    if (isFinite(valor) && valor > 0){
+      valView.value   = valor.toFixed(2);
+      valHidden.value = valor.toString();
+    } else {
+      valView.value   = '';
+      valHidden.value = '';
+    }
+
+    hidIdCatg.value = idCatg;
+    hidParcSN.value = parcSN;
+    hidPolPub.value = idPol || '';
+
+    grpParcelas.classList.toggle('d-none', parcSN !== 'S');
+    if (parcSN !== 'S') qtdParcelas.value = '';
+  }
+
+  selTipo?.addEventListener('change', atualizarTipo);
+  // aplica ao carregar (caso já exista um tipo pré-selecionado)
+  atualizarTipo();
+</script>
+
+</body>
+</html>

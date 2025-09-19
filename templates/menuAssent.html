@@ -12,7 +12,7 @@
 <style>
 .list-heading { font-weight: 700; color: #dc3545; text-align: center; background: #f8f9fa; }
 
-/* Submenu no hover */
+/* Estilo submenu no hover */
 .dropdown-submenu {
   position: relative;
   cursor: pointer;
@@ -26,7 +26,7 @@
   display: block;
 }
 
-/* Setinha vermelha */
+/* Ícone setinha vermelha */
 .dropdown-submenu .arrow {
   float: right;
   color: #dc3545;
@@ -67,6 +67,7 @@
   </div>
 </header>
 
+
 <!-- Mensagem de boas-vindas -->
 <div class="container mt-3">
   <div class="alert alert-success text-center" role="alert">
@@ -79,69 +80,65 @@
   <div class="container my-4">
     <div class="row g-4">
 
-      <!-- Menu lateral com submenus -->
+      <!-- Menu lateral com setinhas -->
       <div class="col-md-3">
         <div class="list-group shadow-sm">
-
           <div class="list-group-item list-heading">MÓDULOS</div>
-          <a href="/menuBBC" class="list-group-item list-group-item-action">BANCO DO BEM COMUM</a>
-          <a href="/menuCaderneta" class="list-group-item list-group-item-action">CADERNETA DA PARTILHA</a>
-          <a href="/menuAssent" class="list-group-item list-group-item-action">ASSENTADO</a>
-          <a href="/menuEventos" class="list-group-item list-group-item-action">EVENTOS</a>
-          <!-- TABELAS DO SISTEMA -->
-         <div class="list-group-item list-heading mt-2">TABELAS DO SISTEMA</div>
+
+          <!-- cad assentando -->
+          <div class="list-group-item dropdown-submenu">
+            <span class="fw-bold">Cadastro Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+              <a href="/assentCad" class="dropdown-item">Incluir</a>
+              <a href="/assentAlt" class="dropdown-item">Alteração</a>
+              <a href="/assentExc" class="dropdown-item">Exclusao</a>
+              </div>
+          </div>
+
            <div class="list-group-item dropdown-submenu">
-             <span class="fw-bold">Entidades <i class="bi bi-caret-right-fill arrow"></i></span>
+            <span class="fw-bold">Família Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
-              <a href="/entidadeCad" class="dropdown-item">Incluir</a>
-              <a href="/entidadeAlt" class="dropdown-item">Alterar</a>
-              <a href="/entidadeExc" class="dropdown-item">Excluir </a>
+              <a href="/familiaCad" class="dropdown-item">Incluir</a>
+              <a href="/familiaAlt" class="dropdown-item">Alterar</a>
+              <a href="/familiaExc" class="dropdown-item">Excluir</a>
             </div>
           </div>
 
-            <div class="list-group-item dropdown-submenu">
-             <span class="fw-bold">Tipo de Eventos <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/tipEvtCad" class="dropdown-item">Incluir</a>
-              <a href="/tipEvtAlt" class="dropdown-item">Alterar</a>
-              <a href="/tipEvtExc" class="dropdown-item">Excluir </a>
-            </div>
-          </div>
-
-          <a href="/menuMerenda" class="list-group-item list-group-item-action">Trabalho Interno</a>
-          <a href="/menuMerenda" class="list-group-item list-group-item-action">Tipo de Evento</a>
-          <a href="/menuCatraca" class="list-group-item list-group-item-action">Tipo de Grupo de Trabalho</a>
-          <a href="/menuCatraca" class="list-group-item list-group-item-action">Grupo de Trabalho</a>
-
-          <!-- CONTA USUÁRIO -->
-          <div class="list-group-item list-heading mt-2">CONTA USUÁRIO</div>
+            <!-- categoria do assentado -->
           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Usuários <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/usuarioCad" class="dropdown-item">Cadastrar Usuário</a>
-              <a href="/usuarioAlt" class="dropdown-item">Alterar Usuário</a>
-            </div>
-          </div>
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Senha <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/senhaAlt" class="dropdown-item">Alterar Senha</a>
-              <a href="/senhaRec" class="dropdown-item">Recuperar Senha</a>
+            <span class="fw-bold">Categoria Assentado<i class="bi bi-caret-right-fill arrow"></i></span>
+             <div class="dropdown-menu">
+              <a href="/ctgAssentCad" class="dropdown-item">Incluir</a>
+              <a href="/ctgAssentAlt" class="dropdown-item">Alterar</a>
+               <a href="/ctgAssentExc" class="dropdown-item">Excluir</a>
             </div>
           </div>
 
-          <!-- LINKS ÚTEIS -->
-          <div class="list-group-item list-heading mt-2">LINKS ÚTEIS</div>
-          <a href="https://sigaa.abaetetuba.edu.br" target="_blank" class="list-group-item list-group-item-action">CUIDA PET</a>
-          <a href="https://sigaa.abaetetuba.edu.br" target="_blank" class="list-group-item list-group-item-action">SIGAA</a>
-          <a href="https://www.mec.gov.br/" target="_blank" class="list-group-item list-group-item-action">MEC</a>
+          <!-- situacao do assentado -->
+          <div class="list-group-item dropdown-submenu">
+            <span class="fw-bold">Situação do Assentado<i class="bi bi-caret-right-fill arrow"></i></span>
+             <div class="dropdown-menu">
+              <a href="/sitAssentCad" class="dropdown-item">Incluir</a>
+              <a href="/sitAssentAlt" class="dropdown-item">Alterar</a>
+               <a href="/sitAssentExc" class="dropdown-item">Excluir</a>
+            </div>
+          </div>
+
+
+
         </div>
       </div>
 
-      <!-- Conteúdo principal -->
-      <div class="col-md-9">
-        <h4 class="text-center text-primary">Bem-vindo ao Sistema Banco do Bem Comum</h4>
-        <p class="text-center">Use o menu lateral para navegar pelas opções do sistema.</p>
+      <!-- Conteúdo principal com botões -->
+      <div class="col-md-9 text-center">
+        <h4 class="mb-4">Escolha o que deseja acessar</h4>
+        <div class="d-grid gap-3">
+          <a href="/contribCad" class="btn btn-outline-success btn-lg">CADASTRO CONTRIBUIÇÕES</a>
+          <a href="/retribCad" class="btn btn-outline-success btn-lg">CADASTRO RETRIBUIÇÕES</a>
+          <a href="/conContrib" class="btn btn-outline-primary btn-lg">CONSULTA CONTRIBUIÇÕES</a>
+          <a href="/conRetrib" class="btn btn-outline-warning btn-lg">CONSULTA RETRIBUIÇÕES</a>
+          <a href="/conGerais" class="btn btn-outline-danger btn-lg">CONSULTAS GERAIS</a>
+        </div>
       </div>
 
     </div>

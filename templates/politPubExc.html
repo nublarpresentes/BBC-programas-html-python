@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Excluir Política Pública</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .table thead th{white-space:nowrap}
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+<!-- Cabeçalho -->
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <!-- Linha com logo e título -->
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+
+    <!-- Linha com o menu principal -->
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC">
+        <i class="bi bi-house-door-fill"></i> Home
+      </a>
+      <a class="nav-link text-white" href="/menuAssent">
+        <i class="bi bi-people-fill"></i> Assentado
+      </a>
+      <a class="nav-link text-white" href="/menuBBC">
+        <i class="bi bi-bank"></i> Banco do Bem Comum
+      </a>
+      <a class="nav-link text-white" href="/menuCaderneta">
+        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
+      </a>
+      <a class="nav-link text-white" href="/faleConosco">
+        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
+      </a>
+    </nav>
+  </div>
+</header>
+
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        {% for cat,msg in msgs %}
+          <div class="alert alert-{{ 'success' if cat=='success' else 'danger' }} text-center">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Lista -->
+    <div class="form-section mb-4">
+      <h4 class="text-danger mb-3">Selecione para Excluir</h4>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Entidade</th>
+              <th>Valor</th>
+              <th>Percentual</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for i in itens %}
+            <tr>
+              <td>{{ i[0] }}</td>
+              <td>{{ i[1] }}</td>
+              <td>{{ i[2] or '' }}</td>
+              <td>{{ i[3] or '' }}</td>
+              <td>{{ i[4] or '' }}</td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-outline-danger" href="/politPubExc?id={{ i[0] }}">Excluir</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if registro %}
+    <div class="form-section border border-danger">
+      <h5 class="text-danger">Confirma excluir este registro?</h5>
+      <div class="row g-3 mt-1">
+        <div class="col-md-2">
+          <label class="form-label fw-bold">ID</label>
+          <input type="text" class="form-control" value="{{ registro[0] }}" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Nome</label>
+          <input type="text" class="form-control" value="{{ registro[1] or '' }}" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Entidade (ID)</label>
+          <input type="text" class="form-control" value="{{ registro[2] or '' }}" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Valor (R$)</label>
+          <input type="text" class="form-control" value="{{ registro[3] or '' }}" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Percentual</label>
+          <div class="input-group">
+            <input type="text" class="form-control" value="{{ registro[4] or '' }}" readonly>
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+      </div>
+
+      <form action="/excPolitPub" method="POST" class="text-center mt-3" onsubmit="return confirm('Confirmar exclusão?');">
+        <input type="hidden" name="idPolPub" value="{{ registro[0] }}">
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="/politPubExc" class="btn btn-secondary ms-1">Cancelar</a>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
