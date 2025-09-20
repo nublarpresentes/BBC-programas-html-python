@@ -17,9 +17,30 @@ from controleBBC import (
 
 # Assentado
 
-from assentado import (
-    consulta_nome_assentado, obter_foto_assentado, incluir_assentado,
-    atualizar_assentado, excluir_assentado, consulta_todos_assentados
+from assent import (
+     obter_foto_assentado, view_assentCad, view_assentAlt, view_assentExc, _valida_cpf_mod11,
+     cadastrar_assent, alterar_assent, excluir_assent
+)
+
+
+# já criados anteriormente
+from tipRecpsa import (
+    view_tipRecpsaCad, cadastrar_tiprecpsa,
+    view_tipRecpsaAlt, alterar_tiprecpsa,
+    view_tipRecpsaExc, excluir_tiprecpsa,
+    conFiltroTipRecpsa
+)
+from tipUsoInfr import (
+    view_tipUsoInfrCad, cadastrar_tipusoinfr,
+    view_tipUsoInfrAlt, alterar_tipusoinfr,
+    view_tipUsoInfrExc, excluir_tipusoinfr,
+    conFiltroTipUsoInfr
+)
+from recpsa import (
+    view_recpsaCad, cadastrar_recpsa,
+    view_recpsaAlt, alterar_recpsa,
+    view_recpsaExc, excluir_recpsa,
+    pagina_conGeralRecpsa, conFiltroRecpsa
 )
 
 
@@ -315,32 +336,49 @@ def excCtgAssent():
 
 
 # ========== ASSENTADO (CAD/ALT/EXC) ==========
+# --- ASSENTADO: rotas (CRUD + Consulta Geral) ---
+from assent import (
+    view_assentCad, cadastrar_assent,
+    view_assentAlt, alterar_assent,
+    view_assentExc, excluir_assent,
+    pagina_conGeralAssent, conFiltroAssent
+)
 
-@app.route('/assentCad')
+@app.get('/menuAssent')
+def menuAssent():
+    return view_assentCad()
+
+@app.get('/assentCad')
 def assentCad():
-    return render_template('assentCad.html')
+    return view_assentCad()
 
-
-@app.route('/cadAssent', methods=['POST'])
+@app.post('/cadAssent')
 def cadAssent():
-    return incluir_assentado()
+    return cadastrar_assent()
 
-@app.route('/assentAlt')
+@app.get('/assentAlt')
 def assentAlt():
-    return render_template('assentAlt.html')
+    return view_assentAlt()
 
-@app.route('/altAssent', methods=['POST'])
+@app.post('/altAssent')
 def altAssent():
-    return atualizar_assentado()
+    return alterar_assent()
 
-@app.route('/assentExc')
+@app.get('/assentExc')
 def assentExc():
-    return render_template('assentExc.html')
+    return view_assentExc()
 
-@app.route('/excAssent', methods=['POST'])
+@app.post('/excAssent')
 def excAssent():
-    return excluir_assentado()
+    return excluir_assent()
 
+@app.get('/conGeralAssent')
+def conGeralAssent():
+    return pagina_conGeralAssent()
+
+@app.route('/conFiltroAssent', methods=['GET', 'POST'])
+def conFiltroAssent_route():
+    return conFiltroAssent()
 
 # ========== SELECTS GERAIS (para telas que precisam) ==========
 
@@ -358,8 +396,10 @@ def _carrega_selects():
         cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
         unidades = cur.fetchall()
 
-        cur.execute('SELECT "matricula","nome","idFamilia" FROM "tbassentado" ORDER BY "nome"')
+        # AQUI trocamos idAssent -> idAssent
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome"')
         assentados = cur.fetchall()
+
         conn.close()
     return categorias, politicas, unidades, assentados
 
@@ -411,22 +451,23 @@ def contribAlt():
 def altContrib():
     return alterar_contrib()
 
+# --- Consulta Geral de Tipos de Contribuição ---
+@app.route('/conGeralTipContrib', methods=['GET'])
+def conGeralTipContrib():
+    from conGeralTipContrib import pagina_conGeralTipContrib
+    return pagina_conGeralTipContrib()
+
+@app.route('/conFiltroTipContrib', methods=['GET','POST'])
+def conFiltroTipContrib():
+    from conGeralTipContrib import conFiltroTipContrib
+    return conFiltroTipContrib()
+
+
+
 # compat
 @app.route('/conContrib')
 def conContrib():
     return redirect(url_for('conGeralContrib', **request.args))
-
-# Consulta Geral Contribuições
-@app.route('/conGeralContrib', methods=['GET'])
-def conGeralContrib():
-    from conGeralContrib import pagina_conGeralContrib
-    return pagina_conGeralContrib()
-
-@app.route('/conFiltroContrib', methods=['GET', 'POST'])
-def conFiltroContrib():
-    from conGeralContrib import conFiltroContrib
-    return conFiltroContrib()
-
 
 # ========== PARTILHA (partlh) — CAD/ALT/EXC + CONSULTA ==========
 
@@ -479,15 +520,18 @@ def excPartlh():
     return excluir_partlh()
 
 # --- Consulta Geral de Partilha ---
-@app.route('/conGeralPartlh', methods=['GET'])
-def conGeralPartlh():
-    from conGeralPartlh import pagina_conGeralPartlh
-    return pagina_conGeralPartlh()
 
-@app.route('/conFiltroPartlh', methods=['GET', 'POST'])
-def conFiltroPartlh():
-    from conGeralPartlh import conFiltroPartlh
-    return conFiltroPartlh()
+# --- Consulta Geral de Tipos de Partilha ---
+@app.route('/conGeralTipPartlh', methods=['GET'])
+def conGeralTipPartlh():
+    from conGeralTipPartlh import pagina_conGeralTipPartlh
+    return pagina_conGeralTipPartlh()
+
+@app.route('/conFiltroTipPartlh', methods=['GET','POST'])
+def conFiltroTipPartlh():
+    from conGeralTipPartlh import conFiltroTipPartlh
+    return conFiltroTipPartlh()
+
 
 # Compat (se menu antigo apontar para /conPartlh)
 @app.route('/conPartlh')
@@ -552,10 +596,6 @@ def menuBBC():
 def menuCaderneta():
     return render_template('menuCaderneta.html')
 
-@app.route('/menuAssent')
-def menuAssent():
-    return render_template('menuAssent.html')
-
 @app.route('/mensagem')
 def mensagem():
     return render_template('mensagem.html')
@@ -563,12 +603,12 @@ def mensagem():
 
 # ========== UTILITÁRIOS / DADOS AUXILIARES ==========
 
-def obter_dados_assent_matricula(matr):
+def obter_dados_assent_idassent(matr):
     conn = conectar_bd()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("SELECT nome, foto FROM tbassentado WHERE matricula = %s", (matr,))
+            cur.execute("SELECT nome, foto FROM tbassentado WHERE idAssent = %s", (matr,))
             assentado = cur.fetchone()
             if not assentado:
                 return None
@@ -587,12 +627,12 @@ def obter_dados_assent_nome(nome):
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("SELECT matricula, nome, foto FROM tbassentado WHERE nome LIKE %s", ('%' + nome + '%',))
+            cur.execute("SELECT idAssent, nome, foto FROM tbassentado WHERE nome LIKE %s", ('%' + nome + '%',))
             assentados = cur.fetchall()
             assentados_corrigidos = []
-            for matricula, nome, foto in assentados:
+            for idAssent, nome, foto in assentados:
                 foto_corrigida = url_for('static', filename='img/' + (foto or ''))
-                assentados_corrigidos.append([matricula, nome, foto_corrigida])
+                assentados_corrigidos.append([idAssent, nome, foto_corrigida])
             conn.close()
             return assentados_corrigidos
         except Exception as e:
@@ -647,9 +687,9 @@ def gerarQRPDF():
 @app.route('/emitirCartao', methods=['GET', 'POST'])
 def emitirCartao():
     if request.method == 'POST':
-        matricula = request.form.get('matricula')
-        if matricula:
-            return dados_cartao(matricula)
+        idAssent = request.form.get('idAssent')
+        if idAssent:
+            return dados_cartao(idAssent)
         return "Matrícula não fornecida."
     return render_template('emitirCartao.html')
 
@@ -695,6 +735,121 @@ def sigConsQTDdia_action():
 @app.route('/sigConsQTDsem', methods=['POST'])
 def sigConsQTDsem_action():
     return consQTDsem()
+
+
+# -------------------------------- REIRIBUIÇÃO ROTAS
+
+# --------- TIPO DE RECOMPENSA (tbtiprecpsa) ---------
+
+@app.route('/tipRecpsaCad')
+def tipRecpsaCad():
+    return view_tipRecpsaCad()
+
+@app.route('/cadTipRecpsa', methods=['POST'])
+def cadTipRecpsa():
+    return cadastrar_tiprecpsa()
+
+@app.route('/tipRecpsaAlt')
+def tipRecpsaAlt():
+    return view_tipRecpsaAlt()
+
+@app.route('/altTipRecpsa', methods=['POST'])
+def altTipRecpsa():
+    return alterar_tiprecpsa()
+
+@app.route('/tipRecpsaExc')
+def tipRecpsaExc():
+    return view_tipRecpsaExc()
+
+@app.route('/excTipRecpsa', methods=['POST'])
+def excTipRecpsa():
+    return excluir_tiprecpsa()
+
+# --- Consulta geral (com filtros)
+@app.route('/conGeralTipRecpsa', methods=['GET'])
+def conGeralTipRecpsa():
+    return pagina_conGeralTipRecpsa()
+
+@app.route('/conFiltroTipRecpsa', methods=['GET', 'POST'])
+def conFiltroTipRecpsa_route():
+    return conFiltroTipRecpsa()
+
+
+# --------- TIPO DE USO DA INFRAESTRUTURA ---------
+@app.route('/tipUsoInfrCad')
+def tipUsoInfrCad():
+    return view_tipUsoInfrCad()
+
+@app.route('/cadTipUsoInfr', methods=['POST'])
+def cadTipUsoInfr():
+    return cadastrar_tipusoinfr()
+
+@app.route('/tipUsoInfrAlt')
+def tipUsoInfrAlt():
+    return view_tipUsoInfrAlt()
+
+@app.route('/altTipUsoInfr', methods=['POST'])
+def altTipUsoInfr():
+    return alterar_tipusoinfr()
+
+@app.route('/tipUsoInfrExc')
+def tipUsoInfrExc():
+    return view_tipUsoInfrExc()
+
+@app.route('/excTipUsoInfr', methods=['POST'])
+def excTipUsoInfr():
+    return excluir_tipusoinfr()
+
+# --- Consulta geral
+@app.route('/conGeralTipUsoInfr', methods=['GET'])
+def conGeralTipUsoInfr():
+    return pagina_conGeralTipUsoInfr()
+
+@app.route('/conFiltroTipUsoInfr', methods=['GET', 'POST'])
+def conFiltroTipUsoInfr_route():
+    return conFiltroTipUsoInfr()
+
+
+# --------- RECOMPENSAS (tbrecpsa) ---------
+@app.route('/recpsaCad')
+def recpsaCad():
+    return view_recpsaCad()
+
+@app.route('/cadRecpsa', methods=['POST'])
+def cadRecpsa():
+    return cadastrar_recpsa()
+
+@app.route('/recpsaAlt')
+def recpsaAlt():
+    return view_recpsaAlt()
+
+@app.route('/altRecpsa', methods=['POST'])
+def altRecpsa():
+    return alterar_recpsa()
+
+@app.route('/recpsaExc')
+def recpsaExc():
+    return view_recpsaExc()
+
+@app.route('/excRecpsa', methods=['POST'])
+def excRecpsa():
+    return excluir_recpsa()
+
+# --- Consulta geral
+@app.route('/conGeralRecpsa', methods=['GET'])
+def conGeralRecpsa():
+    return pagina_conGeralRecpsa()
+
+@app.route('/conFiltroRecpsa', methods=['GET','POST'])
+def conFiltroRecpsa_route():
+    return conFiltroRecpsa()
+
+@app.route('/menuRetrib')
+def menuRetrib():
+    # se você guarda o usuário na sessão, passe aqui; senão remove "usuario=..."
+    return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
+
+
 
 
 # -------------------- RUN --------------------

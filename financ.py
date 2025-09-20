@@ -11,7 +11,7 @@ def cadastrar_financ():
         return redirect(url_for('financCad'))
 
     tipFinancCR   = request.form.get('tipFinancCR')         # 1 ou 2
-    matricula     = request.form.get('matricula')           # FK tbassentado
+    idAssent     = request.form.get('idAssent')           # FK tbassentado
     idCatgFinanc  = request.form.get('idCatgFinanc')        # FK tbtipfinanc
     valFinanc_raw = request.form.get('valFinanc')
     obs           = request.form.get('obs', '')
@@ -30,7 +30,7 @@ def cadastrar_financ():
             valFinanc = None
 
     # Valida mínimos
-    if not tipFinancCR or not matricula or not idCatgFinanc or valFinanc is None:
+    if not tipFinancCR or not idAssent or not idCatgFinanc or valFinanc is None:
         # Poderia renderizar com mensagem, mas vamos voltar para o form
         return redirect(url_for('financCad'))
 
@@ -42,16 +42,16 @@ def cadastrar_financ():
         cur = conn.cursor()
         # Assumindo a tabela "tbfinanc" com PK serial "idSeqFinanc"
         # e colunas compatíveis com estes campos (ajuste nomes se necessário):
-        # idSeqFinanc (serial), tipFinancCR, matricula, idCatgFinanc,
+        # idSeqFinanc (serial), tipFinancCR, idAssent, idCatgFinanc,
         # anoFinanc, mesFinanc, numParcela, valFinanc, obs, datCad
         cur.execute("""
             INSERT INTO "tbfinanc"
-            ("tipFinancCR","matricula","idCatgFinanc",
+            ("tipFinancCR","idAssent","idCatgFinanc",
              "anoFinanc","mesFinanc","numParcela",
              "valFinanc","obs","datCad")
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
-            int(tipFinancCR), matricula, int(idCatgFinanc),
+            int(tipFinancCR), idAssent, int(idCatgFinanc),
             int(anoFinanc) if anoFinanc else None,
             int(mesFinanc) if mesFinanc else None,
             int(numParcela) if numParcela else None,
@@ -77,7 +77,7 @@ def alterar_financ():
     # Você precisará enviar o idSeqFinanc no form de alteração
     idSeqFinanc   = request.form.get('idSeqFinanc')
     tipFinancCR   = request.form.get('tipFinancCR')
-    matricula     = request.form.get('matricula')
+    idAssent     = request.form.get('idAssent')
     idCatgFinanc  = request.form.get('idCatgFinanc')
     anoFinanc     = request.form.get('anoFinanc') or None
     mesFinanc     = request.form.get('mesFinanc') or None
@@ -104,7 +104,7 @@ def alterar_financ():
         cur.execute("""
             UPDATE "tbfinanc"
                SET "tipFinancCR"=%s,
-                   "matricula"=%s,
+                   "idAssent"=%s,
                    "idCatgFinanc"=%s,
                    "anoFinanc"=%s,
                    "mesFinanc"=%s,
@@ -114,7 +114,7 @@ def alterar_financ():
              WHERE "idSeqFinanc"=%s
         """, (
             int(tipFinancCR) if tipFinancCR else None,
-            matricula,
+            idAssent,
             int(idCatgFinanc) if idCatgFinanc else None,
             int(anoFinanc) if anoFinanc else None,
             int(mesFinanc) if mesFinanc else None,

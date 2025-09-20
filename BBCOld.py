@@ -25,12 +25,12 @@ from retrib import cadastrar_retrib , alterar_retrib
 
 #------------------------------------------------------------------------------------------
 
-from assentado import  consulta_nome_assentado, obter_foto_assentado, incluir_assentado, \
+from assent import  consulta_nome_assentado, obter_foto_assentado, incluir_assentado, \
 atualizar_assentado, excluir_assentado, consulta_todos_assentados
 
 
 # depois
-from assentado import (
+from assent import (
     consulta_nome_assentado, obter_foto_assentado, incluir_assentado,
     atualizar_assentado, excluir_assentado, consulta_todos_assentados
 )

@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>SBBC - Menu Principal</title>
+<title>SBBC - Menu Assentado</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -10,68 +10,42 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-.list-heading { font-weight: 700; color: #dc3545; text-align: center; background: #f8f9fa; }
+.list-heading { font-weight:700; color:#dc3545; text-align:center; background:#f8f9fa; }
 
-/* Estilo submenu no hover */
-.dropdown-submenu {
-  position: relative;
-  cursor: pointer;
-}
+/* submenu no hover */
+.dropdown-submenu { position:relative; cursor:pointer; }
 .dropdown-submenu .dropdown-menu {
-  display: none;
-  margin-left: 15px;
-  border-left: 2px solid #ccc;
+  display:none; margin-left:15px; border-left:2px solid #ccc;
 }
-.dropdown-submenu:hover .dropdown-menu {
-  display: block;
-}
+.dropdown-submenu:hover .dropdown-menu { display:block; }
 
-/* Ícone setinha vermelha */
-.dropdown-submenu .arrow {
-  float: right;
-  color: #dc3545;
-  font-size: 0.9rem;
-}
+/* setinha vermelha */
+.dropdown-submenu .arrow { float:right; color:#dc3545; font-size:.9rem; }
 </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
 <!-- Cabeçalho -->
-<!-- Cabeçalho -->
 <header class="bg-success text-white shadow-sm">
   <div class="container">
-    <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
       <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
       <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
     </div>
-
-    <!-- Linha com o menu principal -->
     <nav class="nav justify-content-center border-top border-light pt-2">
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-house-door-fill"></i> Home
-      </a>
-      <a class="nav-link text-white" href="/menuAssent">
-        <i class="bi bi-people-fill"></i> Assentado
-      </a>
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-bank"></i> Banco do Bem Comum
-      </a>
-      <a class="nav-link text-white" href="/menuCaderneta">
-        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
-      </a>
-      <a class="nav-link text-white" href="/faleConosco">
-        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
-      </a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuCaderneta"><i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha</a>
+      <a class="nav-link text-white" href="/faleConosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
   </div>
 </header>
 
-
-<!-- Mensagem de boas-vindas -->
+<!-- Boas-vindas -->
 <div class="container mt-3">
   <div class="alert alert-success text-center" role="alert">
-    Bem-vindo, {{ usuario }}! Selecione uma das opções abaixo:
+    Bem-vindo, {{ session.get('usuario','Usuário') }}! Selecione uma das opções abaixo:
   </div>
 </div>
 
@@ -80,23 +54,26 @@
   <div class="container my-4">
     <div class="row g-4">
 
-      <!-- Menu lateral com setinhas -->
+      <!-- Lateral -->
       <div class="col-md-3">
         <div class="list-group shadow-sm">
-          <div class="list-group-item list-heading">MÓDULOS</div>
 
-          <!-- cad assentando -->
+          <div class="list-group-item list-heading">CADASTROS</div>
+
+          <!-- Assentado -->
           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Cadastro Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
+            <span class="fw-bold">Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
               <a href="/assentCad" class="dropdown-item">Incluir</a>
-              <a href="/assentAlt" class="dropdown-item">Alteração</a>
-              <a href="/assentExc" class="dropdown-item">Exclusao</a>
-              </div>
+              <a href="/assentAlt" class="dropdown-item">Alterar</a>
+              <a href="/assentExc" class="dropdown-item">Excluir</a>
+              <a href="/conGeralAssent" class="dropdown-item">Consulta Geral</a>
+            </div>
           </div>
 
-           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Família Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
+          <!-- Família -->
+          <div class="list-group-item dropdown-submenu">
+            <span class="fw-bold">Família do Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
               <a href="/familiaCad" class="dropdown-item">Incluir</a>
               <a href="/familiaAlt" class="dropdown-item">Alterar</a>
@@ -104,40 +81,44 @@
             </div>
           </div>
 
-            <!-- categoria do assentado -->
+          <!-- Situação do Assentado -->
           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Categoria Assentado<i class="bi bi-caret-right-fill arrow"></i></span>
-             <div class="dropdown-menu">
-              <a href="/ctgAssentCad" class="dropdown-item">Incluir</a>
-              <a href="/ctgAssentAlt" class="dropdown-item">Alterar</a>
-               <a href="/ctgAssentExc" class="dropdown-item">Excluir</a>
-            </div>
-          </div>
-
-          <!-- situacao do assentado -->
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Situação do Assentado<i class="bi bi-caret-right-fill arrow"></i></span>
-             <div class="dropdown-menu">
+            <span class="fw-bold">Situação do Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
               <a href="/sitAssentCad" class="dropdown-item">Incluir</a>
               <a href="/sitAssentAlt" class="dropdown-item">Alterar</a>
-               <a href="/sitAssentExc" class="dropdown-item">Excluir</a>
+              <a href="/sitAssentExc" class="dropdown-item">Excluir</a>
             </div>
           </div>
 
+          <!-- Categoria do Assentado -->
+          <div class="list-group-item dropdown-submenu">
+            <span class="fw-bold">Categoria do Assentado <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+              <a href="/ctgAssentCad" class="dropdown-item">Incluir</a>
+              <a href="/ctgAssentAlt" class="dropdown-item">Alterar</a>
+              <a href="/ctgAssentExc" class="dropdown-item">Excluir</a>
+            </div>
+          </div>
 
+          <div class="list-group-item list-heading">CONSULTAS</div>
+
+          <!-- Consulta Geral -->
+          <a href="/conGeralAssent" class="list-group-item list-group-item-action">
+            <i class="bi bi-search me-1"></i> Consulta Geral de Assentados
+          </a>
 
         </div>
       </div>
 
-      <!-- Conteúdo principal com botões -->
+      <!-- Ações rápidas -->
       <div class="col-md-9 text-center">
-        <h4 class="mb-4">Escolha o que deseja acessar</h4>
+        <h4 class="mb-4">Acesso rápido</h4>
         <div class="d-grid gap-3">
-          <a href="/contribCad" class="btn btn-outline-success btn-lg">CADASTRO CONTRIBUIÇÕES</a>
-          <a href="/retribCad" class="btn btn-outline-success btn-lg">CADASTRO RETRIBUIÇÕES</a>
-          <a href="/conContrib" class="btn btn-outline-primary btn-lg">CONSULTA CONTRIBUIÇÕES</a>
-          <a href="/conRetrib" class="btn btn-outline-warning btn-lg">CONSULTA RETRIBUIÇÕES</a>
-          <a href="/conGerais" class="btn btn-outline-danger btn-lg">CONSULTAS GERAIS</a>
+          <a href="/assentCad" class="btn btn-outline-success btn-lg"><i class="bi bi-person-plus"></i> Cadastrar Assentado</a>
+          <a href="/assentAlt" class="btn btn-outline-primary btn-lg"><i class="bi bi-pencil-square"></i> Alterar Assentado</a>
+          <a href="/assentExc" class="btn btn-outline-danger btn-lg"><i class="bi bi-trash"></i> Excluir Assentado</a>
+          <a href="/conGeralAssent" class="btn btn-outline-dark btn-lg"><i class="bi bi-list-ul"></i> Consulta Geral</a>
         </div>
       </div>
 
@@ -147,9 +128,7 @@
 
 <!-- Rodapé -->
 <footer class="bg-dark text-white text-center py-3 mt-auto">
-  <p class="mb-0">
-    Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA
-  </p>
+  <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
 </footer>
 
 <!-- Bootstrap JS -->

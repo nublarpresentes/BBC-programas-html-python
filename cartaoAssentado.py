@@ -27,7 +27,7 @@ def buscar_assentados():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('SELECT "matricula", "nome", "turno" FROM tbassentado ORDER BY nome LIMIT 5')
+            cur.execute('SELECT "idAssent", "nome", "turno" FROM tbassentado ORDER BY nome LIMIT 5')
             assentados = cur.fetchall()
             conn.close()
             return assentados
@@ -38,18 +38,18 @@ def buscar_assentados():
         return None
 
 
-def gerar_qrcode(matricula):
+def gerar_qrcode(idAssent):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
     )
-    qr.add_data(matricula)
+    qr.add_data(idAssent)
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    img_filename = f"QR{matricula}.jpg"
+    img_filename = f"QR{idAssent}.jpg"
     img.save(img_filename)
     return img_filename
 
@@ -70,13 +70,13 @@ def criar_etiqueta(assentados):
     # Configuração da tabela
     data = []
     for assentado in assentados:
-        matricula = assentado[0]
+        idAssent = assentado[0]
         nome = assentado[1]
         turno = assentado[2]
-        qr_code = gerar_qrcode(matricula)
+        qr_code = gerar_qrcode(idAssent)
         row = [
             f'<img src="{qr_code}" width="72" height="72" />',
-            f"Matr: {matricula} - {nome} - Turno: {turno}",
+            f"Matr: {idAssent} - {nome} - Turno: {turno}",
             "", "", "", "", "", "", "", ""
         ]
         data.append(row)

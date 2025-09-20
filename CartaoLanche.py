@@ -27,7 +27,7 @@ def buscar_alunos():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('SELECT "matricula", "nome", "turno", "qrcode" FROM tbassentado ORDER BY nome LIMIT 5')
+            cur.execute('SELECT "idAssent", "nome", "turno", "qrcode" FROM tbassentado ORDER BY nome LIMIT 5')
             alunos = cur.fetchall()
             conn.close()
             return alunos
@@ -50,7 +50,7 @@ def criar_relatorio(alunos):
     data = []
     row_heights = []  # Altura da primeira linha (QRCode e texto)
     for aluno in alunos:
-        matricula = aluno[0]
+        idAssent = aluno[0]
         nome = aluno[1]
         turno = aluno[2]
         qr_code_path = f"C:\\Users\\USER\\PycharmProjects\\intranet\\static\\img\\{aluno[3]}"
@@ -60,7 +60,7 @@ def criar_relatorio(alunos):
             Paragraph("CONTROLE DOS LANCHES - IFPA", style_normal)
         ]
         row2 = [
-            Paragraph(f"Matrícula: {matricula} - {nome} - Turno: {turno}", style_normal),
+            Paragraph(f"Matrícula: {idAssent} - {nome} - Turno: {turno}", style_normal),
             "", "", "", "", ""
         ]
         row3 = ["2024", "SEG", "TER", "QUA", "QUI", "SEX"]

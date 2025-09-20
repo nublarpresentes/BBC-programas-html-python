@@ -13,7 +13,7 @@ def _carregar_selects():
     assentados, grupos = [], []
     if conn:
         cur = conn.cursor()
-        cur.execute('SELECT "matricula","nome" FROM "tbassentado" ORDER BY "nome" ASC')
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome" ASC')
         assentados = cur.fetchall()
         cur.execute('SELECT "idGrpPartlh","nomGrpParth" FROM "tbgrppartlh" ORDER BY "nomGrpParth" ASC')
         grupos = cur.fetchall()
@@ -24,7 +24,7 @@ def _ler_filtros():
     """Lê filtros de GET/POST e normaliza."""
     src = request.args if request.method == 'GET' else request.form
     filtros = type('F', (), {})()
-    filtros.matricula    = src.get('matricula') or ''
+    filtros.idAssent    = src.get('idAssent') or ''
     filtros.idGrpPartlh  = src.get('idGrpPartlh') or ''
     filtros.mesIni       = src.get('mesIni') or ''
     filtros.anoIni       = src.get('anoIni') or ''
@@ -41,9 +41,9 @@ def _ler_filtros():
 def _montar_where(filtros, params):
     """Monta WHERE para PARTILHA (tipFinancCP = 2)."""
     where = ['f."tipFinancCP" = 2']
-    if filtros.matricula:
-        where.append('f."matricula" = %s')
-        params.append(filtros.matricula)
+    if filtros.idAssent:
+        where.append('f."idAssent" = %s')
+        params.append(filtros.idAssent)
     if filtros.idGrpPartlh:
         where.append('f."idGrpPartlh" = %s')
         params.append(int(filtros.idGrpPartlh))
@@ -76,7 +76,7 @@ def _montar_where(filtros, params):
 def _query_base(where):
     return f'''
       SELECT
-         f."matricula",
+         f."idAssent",
          a."nome" AS nome_assent,
          g."nomGrpParth" AS nom_grupo,
          f."mesFinanc" AS mes,
@@ -90,7 +90,7 @@ def _query_base(where):
            ELSE date_trunc('month', f."dtPagto")::date
          END AS dref
       FROM "tbfinanc" f
-      LEFT JOIN "tbassentado"  a ON a."matricula"=f."matricula"
+      LEFT JOIN "tbassentado"  a ON a."idAssent"=f."idAssent"
       LEFT JOIN "tbgrppartlh"  g ON g."idGrpPartlh"=f."idGrpPartlh"
       WHERE {where}
     '''
@@ -99,7 +99,7 @@ def _pagina_url_factory(filtros):
     """Gera função Jinja para montar URLs de página preservando filtros."""
     def pagina_url(p):
         q = {
-            'matricula': filtros.matricula or '',
+            'idAssent': filtros.idAssent or '',
             'idGrpPartlh': filtros.idGrpPartlh or '',
             'mesIni': filtros.mesIni or '',
             'anoIni': filtros.anoIni or '',

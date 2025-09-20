@@ -92,17 +92,39 @@
               <a href="/tipContribCad" class="dropdown-item">Incluir</a>
               <a href="/tipContribAlt" class="dropdown-item">Alteração</a>
               <a href="/tipContribExc" class="dropdown-item">Exclusao</a>
+              <a href="/conGeralTipContrib" class="dropdown-item">Consultas</a>
+
               </div>
           </div>
 
            <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Tipo de Retribuição <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/tipRetribCad" class="dropdown-item">Incluir</a>
-              <a href="/tipRetribAlt" class="dropdown-item">Alterar</a>
-              <a href="/tipRetribExc" class="dropdown-item">Excluir</a>
-            </div>
-          </div>
+        <span class="fw-bold">Retribuição <i class="bi bi-caret-right-fill arrow"></i></span>
+        <div class="dropdown-menu">
+          <!-- Abre um menu específico da área de retribuição -->
+          <a href="/menuRetrib" class="dropdown-item">Abrir Menu Retribuição</a>
+          <hr class="dropdown-divider">
+
+          <!-- Acesso direto às operações (se preferir manter no menu principal também) -->
+          <div class="dropdown-item fw-semibold text-danger">Tipo de Recompensa</div>
+          <a href="/tipRecpsaCad" class="dropdown-item">Incluir</a>
+          <a href="/tipRecpsaAlt" class="dropdown-item">Alteração</a>
+          <a href="/tipRecpsaExc" class="dropdown-item">Exclusão</a>
+          <a href="/conGeralTipRecpsa" class="dropdown-item">Consultas</a>
+
+          <div class="dropdown-item fw-semibold text-danger mt-2">Tipo de Infraestrutura</div>
+          <a href="/tipUsoInfrCad" class="dropdown-item">Incluir</a>
+          <a href="/tipUsoInfrAlt" class="dropdown-item">Alteração</a>
+          <a href="/tipUsoInfrExc" class="dropdown-item">Exclusão</a>
+          <a href="/conGeralTipUsoInfr" class="dropdown-item">Consultas</a>
+
+          <div class="dropdown-item fw-semibold text-danger mt-2">Recompensa</div>
+          <a href="/recpsaCad" class="dropdown-item">Incluir</a>
+          <a href="/recpsaAlt" class="dropdown-item">Alteração</a>
+          <a href="/recpsaExc" class="dropdown-item">Exclusão</a>
+          <a href="/conGeralRecpsa" class="dropdown-item">Consultas</a>
+        </div>
+      </div>
+
 
           <!-- Categoria de Contribuição -->
           <div class="list-group-item dropdown-submenu">
@@ -111,6 +133,7 @@
               <a href="/ctgFinancCad" class="dropdown-item">Incluir</a>
               <a href="/ctgFinancAlt" class="dropdown-item">Alterar</a>
               <a href="/ctgFinancExc" class="dropdown-item">Excluir</a>
+
             </div>
           </div>
 

@@ -63,16 +63,19 @@
       <form action="/cadContrib" method="POST" class="row g-3">
         <input type="hidden" name="tipFinancCP" value="1">
 
-        <!-- Assentado -->
-        <div class="col-md-8">
-          <label for="matricula" class="form-label fw-bold required">Assentado (Matrícula - Nome)</label>
-          <select id="matricula" name="matricula" class="form-select" required>
-            <option value="">-- Selecione --</option>
-            {% for a in assentados %}
-              <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
-            {% endfor %}
-          </select>
-        </div>
+
+       <!-- Assentado -->
+      <div class="col-md-8">
+        <label for="idAssent" class="form-label fw-bold required">Assentado (ID - Nome)</label>
+        <select id="idAssent" name="idAssent" class="form-select" required>
+          <option value="">-- Selecione --</option>
+          {% for a in assentados %}
+            <!-- a = (idAssent, nome) -->
+            <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
 
         <!-- TIPO DE CONTRIBUIÇÃO (vem de tbtipfinanc) -->
         <div class="col-md-4">

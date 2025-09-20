@@ -5,22 +5,33 @@ from conexao_bd import conectar_bd
 
 # ---------- CADASTRO ----------
 
+
 def cadastrar_contrib():
     if request.method != 'POST':
         return redirect(url_for('contribCad'))
 
-    tipFinancCP = request.form.get('tipFinancCP')  # fixo "1"
-    matricula   = request.form.get('matricula')
-    idTipFinanc = request.form.get('idTipFinanc')
-    obs         = request.form.get('obs','').strip()
+    # tipFinancCP deve ser "1" (contribuição); se vier vazio, força "1"
+    tipFinancCP  = (request.form.get('tipFinancCP') or '1').strip()
+    idAssent     = request.form.get('idAssent') or request.form.get('matricula')  # fallback se o HTML antigo enviar "matricula"
+    idTipFinanc  = request.form.get('idTipFinanc')
+    obs          = request.form.get('obs','').strip()
 
-    idCatgFinanc = request.form.get('idCatgFinanc')
-    catgParcdoSN = request.form.get('catgParcdoSN') or 'N'
-    idPolPub     = request.form.get('idPolPub') or None
-    valFinanc_in = request.form.get('valFinanc')
+    # estes podem vir preenchidos via JS; se não vierem, vamos buscar no BD
+    idCatgFinanc = request.form.get('idCatgFinanc') or ''
+    catgParcdoSN = (request.form.get('catgParcdoSN') or 'N').strip().upper()
+    idPolPub     = request.form.get('idPolPub') or ''
+    valFinanc_in = request.form.get('valFinanc')  # pode vir preenchido pelo JS
 
-    if tipFinancCP != '1' or not matricula or not idTipFinanc or not idCatgFinanc:
+    if tipFinancCP != '1' or not idAssent or not idTipFinanc:
         flash('❌ Dados insuficientes.')
+        return redirect(url_for('contribCad'))
+
+    # Normalizações básicas
+    try:
+        idAssent = int(idAssent)
+        idTipFinanc = int(idTipFinanc)
+    except:
+        flash('❌ Assentado/Tipo inválidos.')
         return redirect(url_for('contribCad'))
 
     ano_atual = datetime.now().year
@@ -33,24 +44,64 @@ def cadastrar_contrib():
     try:
         cur = conn.cursor()
 
-        # --- Valor para Política Pública ou outros tipos ---
-        if idPolPub:
-            # Busca percVal direto do tbtipfinanc
-            cur.execute('SELECT COALESCE("percVal",0) FROM "tbtipfinanc" WHERE "idTipFinanc"=%s', (idTipFinanc,))
-            row_val = cur.fetchone()
-            valFinanc = float(row_val[0] or 0)
-            if valFinanc <= 0:
+        # Carrega do tbtipfinanc caso os hidden não tenham vindo do form
+        if not idCatgFinanc or idPolPub == '':
+            cur.execute("""
+                SELECT 
+                    t."idCatgFinanc",   -- 0
+                    t."idPolPub",       -- 1
+                    t."percVal",        -- 2  (valor pronto para Política Pública)
+                    t."valEqv"          -- 3  (valor padrão para não-política)
+                FROM "tbtipfinanc" t
+                WHERE t."idTipFinanc"=%s
+            """, (idTipFinanc,))
+            row = cur.fetchone()
+            if not row:
                 conn.close()
-                flash('❌ Política Pública sem valor definido em percVal.')
-                return redirect(url_for('contribCad'))
-        else:
-            try:
-                valFinanc = float(valFinanc_in)
-            except:
-                conn.close()
-                flash('❌ Valor inválido.')
+                flash('❌ Tipo de contribuição inexistente.')
                 return redirect(url_for('contribCad'))
 
+            if not idCatgFinanc:
+                idCatgFinanc = row[0]
+            if idPolPub == '':
+                idPolPub = row[1]  # pode ser None
+            percVal = row[2]      # Decimal/float ou None
+            valEqv  = row[3]      # Decimal/float ou None
+        else:
+            # Se já vieram do form, ainda buscamos percVal/valEqv para definir o valor se necessário
+            cur.execute("""
+                SELECT t."percVal", t."valEqv"
+                FROM "tbtipfinanc" t
+                WHERE t."idTipFinanc"=%s
+            """, (idTipFinanc,))
+            row = cur.fetchone()
+            percVal = row[0] if row else None
+            valEqv  = row[1] if row else None
+
+        # Define o valor:
+        # - Se tem idPolPub => Política Pública => usar percVal (valor já calculado no cadastro do tipo)
+        # - Caso contrário => usar valEqv (ou o que veio do form)
+        if idPolPub:
+            try:
+                valFinanc = float(percVal or 0)
+            except:
+                valFinanc = 0.0
+            if valFinanc <= 0:
+                conn.close()
+                flash('❌ Política Pública sem valor definido (percVal).')
+                return redirect(url_for('contribCad'))
+        else:
+            # Não é política: tenta o valor do form; se não houver, usa valEqv
+            try:
+                valFinanc = float(valFinanc_in) if valFinanc_in not in (None, '') else float(valEqv or 0)
+            except:
+                valFinanc = 0.0
+            if valFinanc <= 0:
+                conn.close()
+                flash('❌ Valor da contribuição não informado.')
+                return redirect(url_for('contribCad'))
+
+        # Parcelado?
         inseridos = 0
         if catgParcdoSN == 'S':
             qtd = request.form.get('qtdParcelas')
@@ -63,14 +114,16 @@ def cadastrar_contrib():
                 flash('❌ Informe o nº de parcelas a pagar.')
                 return redirect(url_for('contribCad'))
 
+            # Qual a próxima parcela disponível neste ano?
             cur.execute("""
                 SELECT COALESCE(MAX("numParcela"),0), COUNT(*)
                   FROM "tbfinanc"
-                 WHERE "matricula"=%s AND "idCatgFinanc"=%s AND "tipFinancCP"=1
+                 WHERE "idAssent"=%s
+                   AND "idCatgFinanc"=%s
+                   AND "tipFinancCP"=1
                    AND "anoFinanc"=%s
-            """, (matricula, int(idCatgFinanc), ano_atual))
+            """, (idAssent, int(idCatgFinanc), ano_atual))
             mx, cnt = cur.fetchone() or (0,0)
-
             prox = mx + 1
             restantes = max(0, 12 - cnt)
             if restantes <= 0:
@@ -86,26 +139,27 @@ def cadastrar_contrib():
                 par = prox + i
                 cur.execute("""
                     INSERT INTO "tbfinanc"
-                    ("matricula","anoFinanc","mesFinanc","valFinanc",
+                    ("idAssent","anoFinanc","mesFinanc","valFinanc",
                      "idCatgFinanc","dtPagto","obs","horario",
                      "tipFinancCP","numParcela","catgParcdoSN","idPolPub")
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 """, (
-                    matricula, ano_atual, par, valFinanc,
+                    idAssent, ano_atual, par, valFinanc,
                     int(idCatgFinanc), date.today(), obs, datetime.now().time(),
                     1, par, 'S', int(idPolPub) if idPolPub else None
                 ))
                 inseridos += 1
 
         else:
+            # Não parcelado: mesFinanc = NULL, numParcela = 0
             cur.execute("""
                 INSERT INTO "tbfinanc"
-                ("matricula","anoFinanc","mesFinanc","valFinanc",
+                ("idAssent","anoFinanc","mesFinanc","valFinanc",
                  "idCatgFinanc","dtPagto","obs","horario",
                  "tipFinancCP","numParcela","catgParcdoSN","idPolPub")
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """, (
-                matricula, ano_atual, None, valFinanc,
+                idAssent, ano_atual, None, valFinanc,
                 int(idCatgFinanc), date.today(), obs, datetime.now().time(),
                 1, 0, 'N', int(idPolPub) if idPolPub else None
             ))
@@ -114,6 +168,7 @@ def cadastrar_contrib():
         conn.commit()
         flash(f"✅ Contribuição registrada ({inseridos} registro(s)).")
         return redirect(url_for('contribCad'))
+
     except Exception as e:
         try:
             if conn and not conn.closed:
@@ -127,6 +182,7 @@ def cadastrar_contrib():
         if conn and not conn.closed:
             conn.close()
 
+
 # ---------- helpers ----------
 def _selecoes_cadastro():
     """Assentados e Tipos (com percVal para Política Pública)."""
@@ -136,7 +192,7 @@ def _selecoes_cadastro():
         cur = conn.cursor()
 
         # Assentados (ordem alfabética)
-        cur.execute('SELECT "matricula","nome" FROM "tbassentado" ORDER BY "nome" ASC')
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome" ASC')
         assentados = cur.fetchall()
 
         # Tipos de contribuição + dados necessários p/ JS
@@ -167,7 +223,7 @@ def _selecoes_cadastro():
 def _carregar_filtros_alt():
     src = request.args
     filtros = type('F', (), {})()
-    filtros.matricula = src.get('matricula') or ''
+    filtros.idAssent = src.get('idAssent') or ''
     filtros.idTipFinanc = src.get('idTipFinanc') or ''
     sel_id = src.get('id') or ''
     return filtros, sel_id
@@ -188,25 +244,25 @@ def view_contribAlt():
     if conn:
         cur = conn.cursor()
         # selects para filtros
-        cur.execute('SELECT "matricula","nome" FROM "tbassentado" ORDER BY "nome" ASC')
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome" ASC')
         assentados = cur.fetchall()
         cur.execute('SELECT "idTipFinanc","nomFinanc" FROM "tbtipfinanc" ORDER BY "nomFinanc" ASC')
         tipos = cur.fetchall()
 
         params = [1]  # tipFinancCP = 1
         where = ['f."tipFinancCP" = %s']
-        if filtros.matricula:
-            where.append('f."matricula"=%s'); params.append(filtros.matricula)
+        if filtros.idAssent:
+            where.append('f."idAssent"=%s'); params.append(filtros.idAssent)
         if filtros.idTipFinanc:
             where.append('t."idTipFinanc"=%s'); params.append(int(filtros.idTipFinanc))
 
         cur.execute(f"""
-          SELECT f."idSeqFinanc" AS idseq, f."matricula", a."nome",
+          SELECT f."idSeqFinanc" AS idseq, f."idAssent", a."nome",
                  t."nomFinanc" AS nomtip, c."nomCatgFinanc" AS nomcatg,
                  f."anoFinanc" AS ano, f."mesFinanc" AS mes,
                  f."numParcela" AS numparc, f."valFinanc" AS valor, f."obs" AS obs
             FROM "tbfinanc" f
-            LEFT JOIN "tbassentado"  a ON a."matricula"=f."matricula"
+            LEFT JOIN "tbassentado"  a ON a."idAssent"=f."idAssent"
             LEFT JOIN "tbcatgfinanc" c ON c."idCatgFinanc"=f."idCatgFinanc"
             LEFT JOIN "tbtipfinanc"  t ON t."idCatgFinanc"=f."idCatgFinanc"
            WHERE {" AND ".join(where)}
@@ -219,12 +275,12 @@ def view_contribAlt():
 
         if sel_id:
             cur.execute("""
-              SELECT f."idSeqFinanc" AS idseq, f."matricula", a."nome",
+              SELECT f."idSeqFinanc" AS idseq, f."idAssent", a."nome",
                      t."nomFinanc" AS nomtip, c."nomCatgFinanc" AS nomcatg,
                      f."anoFinanc" AS ano, f."mesFinanc" AS mes,
                      f."numParcela" AS numparc, f."valFinanc" AS valor, f."obs" AS obs
                 FROM "tbfinanc" f
-                LEFT JOIN "tbassentado"  a ON a."matricula"=f."matricula"
+                LEFT JOIN "tbassentado"  a ON a."idAssent"=f."idAssent"
                 LEFT JOIN "tbcatgfinanc" c ON c."idCatgFinanc"=f."idCatgFinanc"
                 LEFT JOIN "tbtipfinanc"  t ON t."idCatgFinanc"=f."idCatgFinanc"
                WHERE f."idSeqFinanc"=%s

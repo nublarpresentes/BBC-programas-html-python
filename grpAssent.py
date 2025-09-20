@@ -11,7 +11,7 @@ def _carregar_selects():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('SELECT "matricula","nome" FROM "tbassentado" ORDER BY "nome" ASC')
+            cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome" ASC')
             assentados = cur.fetchall()
             cur.execute('SELECT "idGrpPartlh","nomGrpParth" FROM "tbgrppartlh" ORDER BY "nomGrpParth" ASC')
             grupos = cur.fetchall()
@@ -19,7 +19,7 @@ def _carregar_selects():
             conn.close()
     return assentados, grupos
 
-def _listar_vinculos(matricula=None, idGrpParth=None):
+def _listar_vinculos(idAssent=None, idGrpParth=None):
     """Lista vínculos com filtros opcionais."""
     conn = conectar_bd()
     itens = []
@@ -28,9 +28,9 @@ def _listar_vinculos(matricula=None, idGrpParth=None):
             cur = conn.cursor()
             where = []
             params = []
-            if matricula:
-                where.append('ag."matricula" = %s')
-                params.append(matricula)
+            if idAssent:
+                where.append('ag."idAssent" = %s')
+                params.append(idAssent)
             if idGrpParth:
                 where.append('ag."idGrpParth" = %s')
                 params.append(int(idGrpParth))
@@ -38,12 +38,12 @@ def _listar_vinculos(matricula=None, idGrpParth=None):
 
             cur.execute(f"""
                 SELECT ag.idassentgrp,
-                       ag.matricula,
+                       ag.idAssent,
                        a."nome" AS nome_assentado,
                        ag."idGrpParth",
                        g."nomGrpParth" AS nome_grupo
                   FROM "tbassentgrp" ag
-             LEFT JOIN "tbassentado" a ON a."matricula" = ag."matricula"
+             LEFT JOIN "tbassentado" a ON a."idAssent" = ag."idAssent"
              LEFT JOIN "tbgrppartlh" g ON g."idGrpPartlh" = ag."idGrpParth"
                 {where_sql}
               ORDER BY ag.idassentgrp DESC
@@ -63,12 +63,12 @@ def _pegar_vinculo(id_):
             cur = conn.cursor()
             cur.execute("""
                 SELECT ag.idassentgrp,
-                       ag.matricula,
+                       ag.idAssent,
                        a."nome" AS nome_assentado,
                        ag."idGrpParth",
                        g."nomGrpParth" AS nome_grupo
                   FROM "tbassentgrp" ag
-             LEFT JOIN "tbassentado" a ON a."matricula" = ag."matricula"
+             LEFT JOIN "tbassentado" a ON a."idAssent" = ag."idAssent"
              LEFT JOIN "tbgrppartlh" g ON g."idGrpPartlh" = ag."idGrpParth"
                  WHERE ag.idassentgrp = %s
             """, (id_,))
@@ -77,7 +77,7 @@ def _pegar_vinculo(id_):
             conn.close()
     return reg
 
-def _ja_existe(matricula, idGrpParth):
+def _ja_existe(idAssent, idGrpParth):
     """Evita duplicar mesma matrícula no mesmo grupo."""
     conn = conectar_bd()
     existe = False
@@ -87,9 +87,9 @@ def _ja_existe(matricula, idGrpParth):
             cur.execute("""
                 SELECT 1
                   FROM "tbassentgrp"
-                 WHERE "matricula"=%s AND "idGrpParth"=%s
+                 WHERE "idAssent"=%s AND "idGrpParth"=%s
                  LIMIT 1
-            """, (matricula, idGrpParth))
+            """, (idAssent, idGrpParth))
             existe = cur.fetchone() is not None
         finally:
             conn.close()
@@ -97,12 +97,12 @@ def _ja_existe(matricula, idGrpParth):
 
 def _ler_filtros():
     """Lê filtros de querystring (GET) p/ listar/filtrar."""
-    matricula = request.args.get('matricula', '').strip()
+    idAssent = request.args.get('idAssent', '').strip()
     idGrpParth = request.args.get('idGrpParth', '').strip()
     # normaliza vazio -> None
-    matricula = matricula or None
+    idAssent = idAssent or None
     idGrpParth = idGrpParth or None
-    return matricula, idGrpParth
+    return idAssent, idGrpParth
 
 # ----------------- PÁGINAS -----------------
 def pagina_grpAssentCad():
@@ -139,14 +139,14 @@ def cadastrar_grpAssent():
     if request.method != 'POST':
         return redirect(url_for('grpAssentCad'))
 
-    matricula  = request.form.get('matricula')
+    idAssent  = request.form.get('idAssent')
     idGrpParth = request.form.get('idGrpParth')  # nome exato do DDL (sem 'l')
 
-    if not matricula or not idGrpParth:
+    if not idAssent or not idGrpParth:
         flash('Informe Assentado e Grupo.', 'warning')
         return redirect(url_for('grpAssentCad'))
 
-    if _ja_existe(matricula, int(idGrpParth)):
+    if _ja_existe(idAssent, int(idGrpParth)):
         flash('⚠️ Esse assentado já está nesse grupo.', 'warning')
         return redirect(url_for('grpAssentCad'))
 
@@ -158,9 +158,9 @@ def cadastrar_grpAssent():
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO "tbassentgrp" ("matricula","idGrpParth")
+            INSERT INTO "tbassentgrp" ("idAssent","idGrpParth")
             VALUES (%s,%s)
-        """, (matricula, int(idGrpParth)))
+        """, (idAssent, int(idGrpParth)))
         conn.commit()
         flash('✅ Vinculado com sucesso!', 'success')
         return redirect(url_for('grpAssentCad'))
@@ -176,15 +176,15 @@ def alterar_grpAssent():
         return redirect(url_for('grpAssentAlt'))
 
     idassentgrp = request.form.get('idassentgrp')
-    matricula   = request.form.get('matricula')
+    idAssent   = request.form.get('idAssent')
     idGrpParth  = request.form.get('idGrpParth')
 
-    if not idassentgrp or not matricula or not idGrpParth:
+    if not idassentgrp or not idAssent or not idGrpParth:
         flash('Dados incompletos.', 'warning')
         return redirect(url_for('grpAssentAlt'))
 
     # evita duplicar destino
-    if _ja_existe(matricula, int(idGrpParth)):
+    if _ja_existe(idAssent, int(idGrpParth)):
         flash('⚠️ Já existe esse vínculo (assentado + grupo).', 'warning')
         return redirect(url_for('grpAssentAlt'))
 
@@ -197,10 +197,10 @@ def alterar_grpAssent():
         cur = conn.cursor()
         cur.execute("""
             UPDATE "tbassentgrp"
-               SET "matricula"=%s,
+               SET "idAssent"=%s,
                    "idGrpParth"=%s
              WHERE idassentgrp=%s
-        """, (matricula, int(idGrpParth), int(idassentgrp)))
+        """, (idAssent, int(idGrpParth), int(idassentgrp)))
         conn.commit()
         flash('✅ Alterado com sucesso!', 'success')
         return redirect(url_for('grpAssentAlt'))

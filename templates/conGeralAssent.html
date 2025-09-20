@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Consulta Geral — Assentados</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .form-section{background:#fff;padding:16px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .pagination .page-link{min-width:40px;text-align:center}
+  </style>
+</head>
+<body class="bg-light">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+    <h1 class="h4 mb-0">Consulta Geral — Assentados</h1>
+  </div>
+</header>
+
+<main class="container my-4">
+
+  <div class="form-section mb-4">
+    <h5 class="text-primary mb-3">Filtros</h5>
+    <form action="/conFiltroAssent" method="GET" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Nome / Parte</label>
+        <input type="text" name="nome" class="form-control" value="{{ filtros.nome or '' }}" maxlength="150">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Bairro</label>
+        <input type="text" name="bairro" class="form-control" value="{{ filtros.bairro or '' }}" maxlength="20">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">CPF</label>
+        <input type="text" name="cpf" class="form-control" value="{{ filtros.cpf or '' }}" maxlength="14" placeholder="Somente números">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">UF Nasc.</label>
+        <select name="ufNasc" class="form-select">
+          <option value="">—</option>
+          {% for u in ufs %}
+            <option value="{{u[0]}}" {{ 'selected' if filtros.ufNasc==u[0] else '' }}>{{u[0]}} - {{u[1]}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-5">
+        <label class="form-label fw-bold">Família</label>
+        <select name="idFamilia" class="form-select">
+          <option value="">—</option>
+          {% for f in familias %}
+            <option value="{{f[0]}}" {{ 'selected' if filtros.idFamilia==f[0] else '' }}>{{f[1]}} ({{f[0]}})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Situação</label>
+        <select name="idSitAssent" class="form-select">
+          <option value="">—</option>
+          <option value="1" {{ 'selected' if filtros.idSitAssent=='1' else '' }}>Ativo</option>
+          <option value="0" {{ 'selected' if filtros.idSitAssent=='0' else '' }}>Inativo</option>
+        </select>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary">Aplicar</button>
+        <a href="/conGeralAssent" class="btn btn-secondary">Limpar</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="form-section">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div><strong>Total:</strong> {{ total }} registro(s)</div>
+      <nav aria-label="Paginação">
+        <ul class="pagination pagination-sm mb-0">
+          {% for p in range(1, pages+1) %}
+            <li class="page-item {{ 'active' if p==page else '' }}">
+              <a class="page-link" href="{{ pagina_url(p) }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Bairro</th>
+            <th>UF/Mun Nasc.</th>
+            <th>E-mail</th>
+            <th>Celular</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.idAssent }}</td>
+            <td>{{ r.nome }}</td>
+            <td>{{ r.cpf or '' }}</td>
+            <td>{{ r.bairro or '' }}</td>
+            <td>{{ (r.ufNasc or '') ~ (' - ' ~ r.nomMun if r.nomMun else '') }}</td>
+            <td>{{ r.email or '' }}</td>
+            <td>{{ r.celular or '' }}</td>
+            <td>{{ 'Ativo' if r.idSitAssent==1 else 'Inativo' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="text-center text-muted">Sem resultados.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-flex justify-content-end mt-2">
+      <nav aria-label="Paginação">
+        <ul class="pagination pagination-sm mb-0">
+          {% for p in range(1, pages+1) %}
+            <li class="page-item {{ 'active' if p==page else '' }}">
+              <a class="page-link" href="{{ pagina_url(p) }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-4">
+  <small>SBBC • Assentado</small>
+</footer>
+
+</body>
+</html>

@@ -84,7 +84,7 @@ def cadastrar_tipcontrib():
     if request.method != 'POST':
         return redirect(url_for('tipContribCad'))
 
-    idTipFinanc  = request.form['idTipFinanc']
+    # idTipFinanc NÃO é mais lido do formulário (auto-incremento no BD)
     nomFinanc    = request.form['nomFinanc']
     idCatgFinanc = request.form['idCatgFinanc']
     idPolPub     = request.form.get('idPolPub') or None
@@ -93,7 +93,7 @@ def cadastrar_tipcontrib():
 
     valPolPub = request.form.get('valPolPub') or None
     perct     = request.form.get('perct') or None
-    valEqv    = request.form.get('valEqv') or None  # NOVO
+    valEqv    = request.form.get('valEqv') or None
 
     # normalização
     try: valPolPub = float(valPolPub) if valPolPub not in (None,'') else None
@@ -110,13 +110,12 @@ def cadastrar_tipcontrib():
         return redirect(url_for('tipContribCad'))
     try:
         cur = conn.cursor()
+        # NÃO informar "idTipFinanc" no INSERT (auto-incremento)
         cur.execute('''
             INSERT INTO "tbtipfinanc"
-            ("idTipFinanc","nomFinanc","idCatgFinanc",
-             "idPolPub","valPolPub","percVal","idTipUnEqv","merecto","valEqv")
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        ''', (idTipFinanc, nomFinanc, idCatgFinanc,
-              idPolPub, valPolPub, percVal, idTipUnEqv, merecto, valEqv))
+            ("nomFinanc","idCatgFinanc","idPolPub","valPolPub","percVal","idTipUnEqv","merecto","valEqv")
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        ''', (nomFinanc, idCatgFinanc, idPolPub, valPolPub, percVal, idTipUnEqv, merecto, valEqv))
         conn.commit()
         conn.close()
         flash("✅ Tipo de contribuição cadastrado com sucesso!")
@@ -131,24 +130,29 @@ def alterar_tipcontrib():
     if request.method != 'POST':
         return redirect(url_for('tipContribAlt'))
 
+    # Aqui o ID continua vindo HIDDEN do formulário de alteração
     idTipFinanc  = request.form['idTipFinanc']
     nomFinanc    = request.form['nomFinanc']
     idCatgFinanc = request.form['idCatgFinanc']
     idPolPub     = request.form.get('idPolPub') or None
     valPolPub    = request.form.get('valPolPub') or None
-    perct        = request.form.get('perct') or None
+    perct        = request.form.get('perct') or None  # usado só para recomputar percVal se necessário
     percVal      = request.form.get('percVal') or None
     idTipUnEqv   = request.form.get('idTipUnEqv') or None
     merecto      = request.form.get('merecto','')
-    valEqv       = request.form.get('valEqv') or None  # NOVO
+    valEqv       = request.form.get('valEqv') or None
 
     # normalização
     try: valPolPub = float(valPolPub) if valPolPub not in (None,'') else None
     except: valPolPub = None
     try: perct = float(perct) if perct not in (None,'') else None
     except: perct = None
-    try: percVal = float(percVal) if percVal not in (None,'') else None
-    except: percVal = None
+    # se vier perct e valPolPub, podemos recalcular; senão, mantém o percVal do form (readonly)
+    if perct is not None and valPolPub is not None:
+        percVal = (valPolPub or 0.0) * perct
+    else:
+        try: percVal = float(percVal) if percVal not in (None,'') else None
+        except: percVal = None
     try: valEqv = float(valEqv) if valEqv not in (None,'') else None
     except: valEqv = None
 

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Excluir — Recompensa ao Assentado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>.form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}</style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/ifpaLogo.png" style="height:60px" class="me-3" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC — Recompensas</h1>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+
+    {% with msgs=get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        {% for cat,msg in msgs %}
+          <div class="alert alert-{{ 'info' if cat not in ['success','warning','danger'] else cat }} mt-2">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-section mb-4">
+      <h4 class="text-primary">Últimos registros</h4>
+      <div class="table-responsive mt-2">
+        <table class="table table-sm table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Assentado</th>
+              <th>Tipo</th>
+              <th>Política</th>
+              <th>Infra</th>
+              <th class="text-end">Valor (R$)</th>
+              <th class="text-center">Qtd</th>
+              <th class="text-center">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in itens %}
+              <tr>
+                <td>{{ i[0] }}</td>
+                <td>{{ i[2] or '' }}</td>
+                <td>{{ i[1] or '' }}</td>
+                <td>{{ i[5] or '' }}</td>
+                <td>{{ i[6] or '' }}</td>
+                <td class="text-end">{{ '%.2f'|format(i[3] or 0) }}</td>
+                <td class="text-center">{{ i[4] or 0 }}</td>
+                <td class="text-center">
+                  <a href="/recpsaExc?id={{ i[0] }}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="8" class="text-center text-muted">Nenhum registro.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if registro %}
+    <div class="form-section">
+      <h4 class="text-danger">Confirmar Exclusão — ID {{ registro.idRecpsa }}</h4>
+      <form action="/excRecpsa" method="POST" onsubmit="return confirm('Excluir o registro {{ registro.idRecpsa }}?');" class="row g-3">
+        <input type="hidden" name="idRecpsa" value="{{ registro.idRecpsa }}">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Assentado</label>
+          <input type="text" class="form-control" value="{{ registro.nom_assent or '' }}" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Tipo</label>
+          <input type="text" class="form-control" value="{{ registro.nomRecpsa or '' }}" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Política Pública</label>
+          <input type="text" class="form-control" value="{{ registro.nomPolPub or '' }}" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Infraestrutura</label>
+          <input type="text" class="form-control" value="{{ registro.nomInfr or '' }}" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Valor (R$)</label>
+          <input type="text" class="form-control" value="{{ '%.2f'|format(registro.valRecpsa or 0) }}" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Qtd</label>
+          <input type="text" class="form-control" value="{{ registro.qtdEqv or 0 }}" readonly>
+        </div>
+
+        <div class="col-12 text-center">
+          <button class="btn btn-danger">Excluir</button>
+          <a href="/recpsaExc" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxx — Abaetetuba-PA</p>
+</footer>
+</body>
+</html>

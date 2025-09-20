@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro — Recompensa ao Assentado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>.form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}.required::after{content:" *";color:#dc3545}</style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/ifpaLogo.png" style="height:60px" class="me-3" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC — Recompensas</h1>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="form-section">
+      <h3 class="text-success">Cadastro de Recompensa</h3>
+
+      {% with msgs=get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat,msg in msgs %}
+            <div class="alert alert-{{ 'info' if cat not in ['success','warning','danger'] else cat }} mt-3">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form action="/cadRecpsa" method="POST" class="row g-3 mt-2">
+        <div class="col-md-6">
+          <label class="form-label fw-bold required">Assentado</label>
+          <select name="idAssent" id="idAssent" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}">{{ a[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold required">Tipo de Recompensa</label>
+          <select name="idTipRecpsa" id="idTipRecpsa" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for t in tipos %}
+              <option value="{{ t[0] }}" data-idpol="{{ t[2] or '' }}">{{ t[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Bloco Política Pública (quando tipo == 1) -->
+        <div class="col-12 d-none" id="grpPol">
+          <div class="alert alert-info py-2">
+            Tipo 1: Política Pública — o valor será calculado automaticamente (valor × percentual).
+          </div>
+        </div>
+
+        <!-- Bloco Infraestrutura (quando tipo != 1) -->
+        <div class="col-md-8 d-none" id="grpInfra">
+          <label class="form-label fw-bold">Tipo de Uso de Infraestrutura</label>
+          <select name="idTipUsoInfr" id="idTipUsoInfr" class="form-select">
+            <option value="">-- Selecione --</option>
+            {% for i in infra %}
+              <option value="{{ i[0] }}" data-valor="{{ i[2] or '' }}">{{ i[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Qtd. Eqv.</label>
+          <input type="number" min="1" step="1" name="qtdEqv" id="qtdEqv" class="form-control" value="1">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Valor Unitário (R$)</label>
+          <input type="text" id="valUnitView" class="form-control" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Valor Total (R$)</label>
+          <input type="text" id="valTotalView" class="form-control" readonly>
+        </div>
+
+        <div class="col-12 text-center">
+          <button type="submit" class="btn btn-success">Cadastrar</button>
+          <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxx — Abaetetuba-PA</p>
+</footer>
+
+<script>
+  const selTipo  = document.getElementById('idTipRecpsa');
+  const grpPol   = document.getElementById('grpPol');
+  const grpInfra = document.getElementById('grpInfra');
+  const selInfra = document.getElementById('idTipUsoInfr');
+
+  const valUnitView  = document.getElementById('valUnitView');
+  const valTotalView = document.getElementById('valTotalView');
+  const qtdEqv       = document.getElementById('qtdEqv');
+
+  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
+  function setMoney(inp, v){ inp.value = isFinite(v) && v>0 ? v.toFixed(2) : ''; }
+
+  function atualizarVis(){
+    const tipo = selTipo?.value;
+    const isPolitica = (tipo === '1');
+    grpPol.classList.toggle('d-none', !isPolitica);
+    grpInfra.classList.toggle('d-none', isPolitica);
+
+    // zera campos
+    setMoney(valUnitView, 0); setMoney(valTotalView, 0);
+
+    if (!isPolitica){
+      // usa valor da infra selecionada
+      const opt = selInfra?.options[selInfra.selectedIndex];
+      const v = n(opt?.getAttribute('data-valor'));
+      const q = Math.max(1, n(qtdEqv.value));
+      setMoney(valUnitView, v);
+      setMoney(valTotalView, v*q);
+    } else {
+      // valor será calculado no back; aqui só mostra "—"
+      valUnitView.value  = '';
+      valTotalView.value = '';
+    }
+  }
+
+  selTipo?.addEventListener('change', atualizarVis);
+  selInfra?.addEventListener('change', atualizarVis);
+  qtdEqv?.addEventListener('input', atualizarVis);
+  atualizarVis();
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Alterar — Recompensa ao Assentado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>.form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}</style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/ifpaLogo.png" style="height:60px" class="me-3" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC — Recompensas</h1>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+
+    {% with msgs=get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        {% for cat,msg in msgs %}
+          <div class="alert alert-{{ 'info' if cat not in ['success','warning','danger'] else cat }} mt-2">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-section mb-4">
+      <h4 class="text-primary">Últimos registros</h4>
+      <div class="table-responsive mt-2">
+        <table class="table table-sm table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Assentado</th>
+              <th>Tipo</th>
+              <th>Política</th>
+              <th>Infra</th>
+              <th class="text-end">Valor (R$)</th>
+              <th class="text-center">Qtd</th>
+              <th class="text-center">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in itens %}
+              <tr>
+                <td>{{ i.idRecpsa }}</td>
+                <td>{{ i.nom_assent or '' }}</td>
+                <td>{{ i.nomRecpsa or '' }}</td>
+                <td>{{ i.nomPolPub or '' }}</td>
+                <td>{{ i.nomInfr or '' }}</td>
+                <td class="text-end">{{ '%.2f'|format(i.valRecpsa or 0) }}</td>
+                <td class="text-center">{{ i.qtdEqv or 0 }}</td>
+                <td class="text-center">
+                  <a href="/recpsaAlt?id={{ i.idRecpsa }}" class="btn btn-sm btn-outline-primary">Alterar</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="8" class="text-center text-muted">Nenhum registro.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if registro %}
+    <div class="form-section">
+      <h4 class="text-success">Alterar — ID {{ registro.idRecpsa }}</h4>
+      <form action="/altRecpsa" method="POST" class="row g-3">
+        <input type="hidden" name="idRecpsa" value="{{ registro.idRecpsa }}"/>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Assentado</label>
+          <select name="idAssent" id="idAssent" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}" {{ 'selected' if registro.idAssent==a[0] else '' }}>{{ a[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Tipo de Recompensa</label>
+          <select name="idTipRecpsa" id="idTipRecpsa" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for t in tipos %}
+              <option value="{{ t[0] }}" data-idpol="{{ t[2] or '' }}" {{ 'selected' if registro.idTipRecpa==t[0] else '' }}>{{ t[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12 d-none" id="grpPol">
+          <div class="alert alert-info py-2">
+            Tipo 1: Política Pública — valor calculado automaticamente.
+          </div>
+        </div>
+
+        <div class="col-md-8 d-none" id="grpInfra">
+          <label class="form-label fw-bold">Tipo de Uso de Infraestrutura</label>
+          <select name="idTipUsoInfr" id="idTipUsoInfr" class="form-select">
+            <option value="">-- Selecione --</option>
+            {% for i in infra %}
+              <option value="{{ i[0] }}" data-valor="{{ i[2] or '' }}" {{ 'selected' if registro.idTipUsoInfr==i[0] else '' }}>{{ i[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Qtd. Eqv.</label>
+          <input type="number" min="1" step="1" name="qtdEqv" id="qtdEqv" class="form-control" value="{{ registro.qtdEqv or 1 }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Valor Unitário (R$)</label>
+          <input type="text" id="valUnitView" class="form-control" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Valor Total (R$)</label>
+          <input type="text" id="valTotalView" class="form-control" readonly>
+        </div>
+
+        <div class="col-12 text-center">
+          <button class="btn btn-primary">Salvar</button>
+          <a href="/recpsaAlt" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxx — Abaetetuba-PA</p>
+</footer>
+
+<script>
+  const selTipo  = document.getElementById('idTipRecpsa');
+  const grpPol   = document.getElementById('grpPol');
+  const grpInfra = document.getElementById('grpInfra');
+  const selInfra = document.getElementById('idTipUsoInfr');
+
+  const valUnitView  = document.getElementById('valUnitView');
+  const valTotalView = document.getElementById('valTotalView');
+  const qtdEqv       = document.getElementById('qtdEqv');
+
+  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
+  function setMoney(inp, v){ inp.value = isFinite(v) && v>0 ? v.toFixed(2) : ''; }
+
+  function atualizarVis(){
+    const tipo = selTipo?.value;
+    const isPolitica = (tipo === '1');
+    grpPol.classList.toggle('d-none', !isPolitica);
+    grpInfra.classList.toggle('d-none', isPolitica);
+
+    setMoney(valUnitView, 0); setMoney(valTotalView, 0);
+
+    if (!isPolitica){
+      const opt = selInfra?.options[selInfra.selectedIndex];
+      const v = n(opt?.getAttribute('data-valor'));
+      const q = Math.max(1, n(qtdEqv.value));
+      setMoney(valUnitView, v);
+      setMoney(valTotalView, v*q);
+    } else {
+      valUnitView.value  = '';
+      valTotalView.value = '';
+    }
+  }
+
+  selTipo?.addEventListener('change', atualizarVis);
+  selInfra?.addEventListener('change', atualizarVis);
+  qtdEqv?.addEventListener('input', atualizarVis);
+  atualizarVis();
+</script>
+</body>
+</html>
