@@ -28,6 +28,13 @@ from retrib import cadastrar_retrib , alterar_retrib
 from assentado import  consulta_nome_assentado, obter_foto_assentado, incluir_assentado, \
 atualizar_assentado, excluir_assentado, consulta_todos_assentados
 
+
+# depois
+from assentado import (
+    consulta_nome_assentado, obter_foto_assentado, incluir_assentado,
+    atualizar_assentado, excluir_assentado, consulta_todos_assentados
+)
+
 from usuario import  acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
 
 

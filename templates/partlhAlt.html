@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alteração - Caderneta de Partilha</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .form-section{background:#fff;padding:16px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .table thead th{white-space:nowrap}
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/ifpaLogo.png" class="me-3" style="height:60px;" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC - Caderneta de Partilha</h1>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+
+    <div class="form-section mb-3">
+      <h5 class="text-primary mb-3">Filtro</h5>
+      <form action="/partlhAlt" method="GET" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Assentado</label>
+          <select name="matricula" class="form-select">
+            <option value="">— Todos —</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}" {{ 'selected' if filtros.matricula==a[0] else '' }}>
+                {{ a[1] }} ({{ a[0] }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Grupo de Partilha</label>
+          <select name="idGrpPartlh" class="form-select">
+            <option value="">— Todos —</option>
+            {% for g in grupos %}
+              <option value="{{ g[0] }}" {{ 'selected' if filtros.idGrpPartlh==g[0] else '' }}>
+                {{ g[1] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary">Aplicar</button>
+          <a href="/partlhAlt" class="btn btn-secondary">Limpar</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section mb-4">
+      <h5 class="text-primary mb-3">Registros (mais recentes primeiro)</h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Assentado</th>
+              <th>Grupo</th>
+              <th>Ano</th>
+              <th>Mês</th>
+              <th class="text-end">Valor</th>
+              <th>Obs</th>
+              <th class="text-center">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for i in itens %}
+            <tr>
+              <td>{{ i.idseq }}</td>
+              <td>{{ i.nom_assent }} ({{ i.matricula }})</td>
+              <td>{{ i.nom_grp or '-' }}</td>
+              <td>{{ i.anoFinanc or '-' }}</td>
+              <td>{{ i.mesFinanc or '-' }}</td>
+              <td class="text-end">{{ '%.2f'|format(i.valFinanc or 0) }}</td>
+              <td>{{ i.obs or '' }}</td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-outline-primary" href="/partlhAlt?id={{ i.idseq }}">Alterar</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if registro %}
+    <div class="form-section">
+      <h5 class="text-success mb-3">Alterar Registro — ID {{ registro.idseq }}</h5>
+      <form action="/altPartlh" method="POST" class="row g-3">
+        <input type="hidden" name="idSeqFinanc" value="{{ registro.idseq }}"/>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Assentado</label>
+          <input class="form-control" value="{{ registro.nom_assent }} ({{ registro.matricula }})" readonly>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Grupo de Partilha</label>
+          <select name="idGrpPartlh" class="form-select" required>
+            {% for g in grupos %}
+              <option value="{{ g[0] }}" {{ 'selected' if registro.idGrpPartlh==g[0] else '' }}>
+                {{ g[1] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Ano</label>
+          <input class="form-control" value="{{ registro.anoFinanc or '' }}" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Mês</label>
+          <input class="form-control" value="{{ registro.mesFinanc or '' }}" readonly>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Valor</label>
+          <input type="number" step="0.01" min="0" name="valFinanc" class="form-control"
+                 value="{{ registro.valFinanc or '' }}" required>
+        </div>
+
+        <div class="col-md-12">
+          <label class="form-label fw-bold">Observação</label>
+          <input type="text" name="obs" maxlength="150" class="form-control" value="{{ registro.obs or '' }}">
+        </div>
+
+        <div class="col-12 text-center">
+          <button class="btn btn-primary">Salvar</button>
+          <a href="/partlhAlt" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxxx - Abaetetuba-PA</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

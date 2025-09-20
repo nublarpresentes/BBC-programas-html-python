@@ -7,56 +7,59 @@ from conexao_bd import conectar_bd
 
 PER_PAGE = 15
 
+
 def _carregar_selects():
-    """Assentados e Grupos de Partilha (ordem ascendente)."""
+    """Assentados e Categorias (ordem ascendente)."""
     conn = conectar_bd()
-    assentados, grupos = [], []
+    assentados, categorias = [], []
     if conn:
         cur = conn.cursor()
         cur.execute('SELECT "matricula","nome" FROM "tbassentado" ORDER BY "nome" ASC')
         assentados = cur.fetchall()
-        cur.execute('SELECT "idGrpPartlh","nomGrpParth" FROM "tbgrppartlh" ORDER BY "nomGrpParth" ASC')
-        grupos = cur.fetchall()
+        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc" ASC')
+        categorias = cur.fetchall()
         conn.close()
-    return assentados, grupos
+    return assentados, categorias
+
 
 def _ler_filtros():
     """Lê filtros de GET/POST e normaliza."""
     src = request.args if request.method == 'GET' else request.form
     filtros = type('F', (), {})()
-    filtros.matricula    = src.get('matricula') or ''
-    filtros.idGrpPartlh  = src.get('idGrpPartlh') or ''
-    filtros.mesIni       = src.get('mesIni') or ''
-    filtros.anoIni       = src.get('anoIni') or ''
-    filtros.mesFim       = src.get('mesFim') or ''
-    filtros.anoFim       = src.get('anoFim') or ''
+    filtros.matricula = src.get('matricula') or ''
+    filtros.idCatgFinanc = src.get('idCatgFinanc') or ''
+    filtros.mesIni = src.get('mesIni') or ''
+    filtros.anoIni = src.get('anoIni') or ''
+    filtros.mesFim = src.get('mesFim') or ''
+    filtros.anoFim = src.get('anoFim') or ''
     try:
         page = int(src.get('page', '1'))
     except:
         page = 1
-    if page < 1:
-        page = 1
+    if page < 1: page = 1
     return filtros, page
 
+
 def _montar_where(filtros, params):
-    """Monta WHERE para PARTILHA (tipFinancCP = 2)."""
-    where = ['f."tipFinancCP" = 2']
+    """Monta WHERE para patilhas (tipFinancCP = 2)."""
+    where = ['(f."tipFinancCP"::text IN (\'2\', \'C\', \'c\'))']
     if filtros.matricula:
         where.append('f."matricula" = %s')
         params.append(filtros.matricula)
-    if filtros.idGrpPartlh:
-        where.append('f."idGrpPartlh" = %s')
-        params.append(int(filtros.idGrpPartlh))
+    if filtros.idCatgFinanc:
+        where.append('f."idCatgFinanc" = %s')
+        params.append(filtros.idCatgFinanc)
 
     # Período: (ano,mes) entre (anoIni,mesIni) e (anoFim,mesFim)
-    # dref = 1º dia do mês de (ano,mes) se existirem; senão, usa dtPagto no 1º dia do mês
+    # --- Período com data de referência (dref) ---
+    # dref = (ano,mes) -> 1º dia do mês; senão, usa dtPag no 1º dia do mês
     if filtros.anoIni and filtros.mesIni and filtros.anoFim and filtros.mesFim:
         where.append("""
              (
                CASE
                  WHEN f."anoFinanc" IS NOT NULL AND f."mesFinanc" IS NOT NULL
                    THEN make_date(f."anoFinanc", f."mesFinanc", 1)
-                 ELSE date_trunc('month', f."dtPagto")::date
+                 ELSE date_trunc('month', f."dtPag")::date
                END
              ) >= make_date(%s,%s,1)
              AND
@@ -64,21 +67,22 @@ def _montar_where(filtros, params):
                CASE
                  WHEN f."anoFinanc" IS NOT NULL AND f."mesFinanc" IS NOT NULL
                    THEN make_date(f."anoFinanc", f."mesFinanc", 1)
-                 ELSE date_trunc('month', f."dtPagto")::date
+                 ELSE date_trunc('month', f."dtPag")::date
                END
              ) < (make_date(%s,%s,1) + INTERVAL '1 month')
-        """)
+           """)
         params.extend([int(filtros.anoIni), int(filtros.mesIni),
                        int(filtros.anoFim), int(filtros.mesFim)])
 
     return ' AND '.join(where) if where else 'TRUE'
+
 
 def _query_base(where):
     return f'''
       SELECT
          f."matricula",
          a."nome" AS nome_assent,
-         g."nomGrpParth" AS nom_grupo,
+         c."nomCatgFinanc" AS nom_catg,
          f."mesFinanc" AS mes,
          f."anoFinanc" AS ano,
          f."valFinanc" AS valor,
@@ -87,28 +91,32 @@ def _query_base(where):
          CASE
            WHEN f."anoFinanc" IS NOT NULL AND f."mesFinanc" IS NOT NULL
              THEN make_date(f."anoFinanc", f."mesFinanc", 1)
-           ELSE date_trunc('month', f."dtPagto")::date
+           ELSE date_trunc('month', f."dtPag")::date
          END AS dref
       FROM "tbfinanc" f
-      LEFT JOIN "tbassentado"  a ON a."matricula"=f."matricula"
-      LEFT JOIN "tbgrppartlh"  g ON g."idGrpPartlh"=f."idGrpPartlh"
+      LEFT JOIN "tbassentado"   a  ON a."matricula"=f."matricula"
+      LEFT JOIN "tbcatgfinanc"  c  ON c."idCatgFinanc"=f."idCatgFinanc"
       WHERE {where}
     '''
 
+
 def _pagina_url_factory(filtros):
     """Gera função Jinja para montar URLs de página preservando filtros."""
+
     def pagina_url(p):
         q = {
             'matricula': filtros.matricula or '',
-            'idGrpPartlh': filtros.idGrpPartlh or '',
+            'idCatgFinanc': filtros.idCatgFinanc or '',
             'mesIni': filtros.mesIni or '',
             'anoIni': filtros.anoIni or '',
             'mesFim': filtros.mesFim or '',
             'anoFim': filtros.anoFim or '',
             'page': p
         }
-        return url_for('conGeralPartlh') + '?' + urlencode(q)
+        return url_for('conGeral´Partlh') + '?' + urlencode(q)
+
     return pagina_url
+
 
 def _executar_consulta(filtros, page):
     conn = conectar_bd()
@@ -128,37 +136,37 @@ def _executar_consulta(filtros, page):
 
         # paginação
         limit = PER_PAGE
-        offset = (page-1)*PER_PAGE
+        offset = (page - 1) * PER_PAGE
         cur.execute(f'''
             {base}
+
             ORDER BY dref DESC, nome_assent ASC
             LIMIT %s OFFSET %s
         ''', params + [limit, offset])
 
+        # transformar em dicts simples para o template
         cols = [d[0] for d in cur.description]
         for r in cur.fetchall():
             rows.append({cols[i]: r[i] for i in range(len(cols))})
         conn.close()
     except Exception as e:
-        try:
-            conn.close()
-        except:
-            pass
+        conn.close()
         print("Erro em consulta de partilhas:", e)
     return rows, total
+
 
 # --------- PÁGINAS ---------
 
 def pagina_conGeralPartlh():
     """GET inicial (ou com querystring)."""
     filtros, page = _ler_filtros()
-    assentados, grupos = _carregar_selects()
+    assentados, categorias = _carregar_selects()
     rows, total = _executar_consulta(filtros, page)
     pages = max(1, math.ceil(total / PER_PAGE))
     return render_template(
-        'conGeralPartlh.html',
+        'conGeralContrib.html',
         assentados=assentados,
-        grupos=grupos,
+        categorias=categorias,
         filtros=filtros,
         rows=rows,
         total=total,
@@ -166,6 +174,7 @@ def pagina_conGeralPartlh():
         pages=pages,
         pagina_url=_pagina_url_factory(filtros)
     )
+
 
 def conFiltroPartlh():
     """Recebe filtros (GET/POST) e renderiza com paginação."""
