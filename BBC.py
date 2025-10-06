@@ -23,25 +23,49 @@ from assent import (
 )
 
 
-# já criados anteriormente
+
+# Retribuição
+from retrib import (
+    view_retribCad, cadastrar_retrib,
+    view_retribAlt, alterar_retrib,
+    view_retribExc, excluir_retrib,
+    pagina_conGeralRetrib, conFiltroRetrib,  # << nomes corretos da consulta geral
+)
+
+
+
+
 from tipRecpsa import (
     view_tipRecpsaCad, cadastrar_tiprecpsa,
     view_tipRecpsaAlt, alterar_tiprecpsa,
     view_tipRecpsaExc, excluir_tiprecpsa,
-    conFiltroTipRecpsa
+    pagina_conGeralTipRecpsa, conFiltroTipRecpsa
 )
+
+
 from tipUsoInfr import (
     view_tipUsoInfrCad, cadastrar_tipusoinfr,
     view_tipUsoInfrAlt, alterar_tipusoinfr,
     view_tipUsoInfrExc, excluir_tipusoinfr,
-    conFiltroTipUsoInfr
+    pagina_conGeralTipUsoInfr,  conFiltroTipUsoInfr
 )
+
 from recpsa import (
-    view_recpsaCad, cadastrar_recpsa,
-    view_recpsaAlt, alterar_recpsa,
-    view_recpsaExc, excluir_recpsa,
-    pagina_conGeralRecpsa, conFiltroRecpsa
+    view_recpsaCad, cadastrar_recpsa
+#   view_recpsaAlt, alterar_recpsa,
+#     view_recpsaAlt, view_recpsaExc,
+#    view_recpsaExc, excluir_recpsa,
+#    pagina_conGeralRecpsa, conFiltroRecpsa
 )
+
+from catgUsoInfr import (
+    view_catgUsoInfrCad, cadastrar_catgUsoInfr,
+    view_catgUsoInfrAlt, alterar_catgUsoInfr,
+    view_catgUsoInfrExc, excluir_catgUsoInfr,
+    view_catgUsoInfrCon
+)
+
+from saldo import pagina_conGeralSaldo, conFiltroSaldo
 
 
 
@@ -540,52 +564,6 @@ def conPartlh():
     return redirect(url_for('conGeralPartlh', **request.args))
 
 
-
-# ========== TIPO DE RETRIBUIÇÃO ==========
-
-@app.route("/tipRetribCad")
-def tipRetribCad():
-    categorias, politicas, unidades, _ = _carrega_selects()
-    return render_template("tipRetribCad.html", message="✅ Tipo de Retribuição Cadastrada com Sucesso!",
-                           categorias=categorias, politicas=politicas, unidades=unidades)
-
-@app.route('/cadTipRetrib', methods=['POST'])
-def cadTipRetrib():
-    return cadastrar_tipretrib()
-
-@app.route('/tipRetribAlt')
-def tipRetribAlt():
-    return render_template('tipRetribAlt.html')
-
-@app.route('/altTipRetrib', methods=['POST'])
-def altTipRetrib():
-    # usar a função importada corretamente
-    return alterar_tipretrib()
-
-@app.route('/tipRetribExc')
-def tipRetribExc():
-    return render_template('tipRetribExc.html')
-
-@app.route('/excTipRetrib', methods=['POST'])
-def excTipRetrib():
-    # se houver função excluir_tipo_retrib, importe e use; mantive como placeholder
-    from tipRetrib import excluir_tipo_retrib
-    return excluir_tipo_retrib()
-
-
-# ========== RETRIBUIÇÃO ==========
-
-@app.route('/retribCad')
-def retribCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template("retribCad.html", message="✅  Retribuição Cadastrada com Sucesso!",
-                           categorias=categorias, assentados=assentados)
-
-@app.route('/cadRetrib', methods=['POST'])
-def cadRetrib():
-    return cadastrar_retrib()
-
-
 # ========== MENUS ==========
 
 @app.route('/menuBBC')
@@ -849,7 +827,83 @@ def menuRetrib():
     # se você guarda o usuário na sessão, passe aqui; senão remove "usuario=..."
     return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
 
+##------------------CATEGORIA USO DA INFRAESTRUTURA
 
+# ---- Categoria do Uso da Infraestrutura ----
+@app.route('/catgUsoInfrCad', methods=['GET'])
+def catgUsoInfrCad():
+    return view_catgUsoInfrCad()
+
+@app.route('/cadCatgUsoInfr', methods=['POST'])
+def cadCatgUsoInfr():
+    return cadastrar_catgUsoInfr()
+
+@app.route('/catgUsoInfrAlt', methods=['GET'])
+def catgUsoInfrAlt():
+    return view_catgUsoInfrAlt()
+
+@app.route('/altCatgUsoInfr', methods=['POST'])
+def altCatgUsoInfr():
+    return alterar_catgUsoInfr()
+
+@app.route('/catgUsoInfrExc', methods=['GET'])
+def catgUsoInfrExc():
+    return view_catgUsoInfrExc()
+
+@app.route('/excCatgUsoInfr', methods=['POST'])
+def excCatgUsoInfr():
+    return excluir_catgUsoInfr()
+
+@app.route('/catgUsoInfrCon', methods=['GET'])
+def catgUsoInfrCon():
+    return view_catgUsoInfrCon()
+
+
+# BBC.py — ROTAS DE RETRIBUIÇÃO
+# -------------------------------------------------
+# ==========  RETRIBUIÇÃO ==========
+
+@app.route('/retribCad', methods=['GET'])
+def retribCad():
+    return view_retribCad()
+
+@app.route('/cadRetrib', methods=['POST'])
+def cadRetrib():
+    return cadastrar_retrib()
+
+@app.route('/retribAlt', methods=['GET'])
+def retribAlt():
+    return view_retribAlt()
+
+@app.route('/altRetrib', methods=['POST'])
+def altRetrib():
+    return alterar_retrib()
+
+@app.route('/retribExc', methods=['GET'])
+def retribExc():
+    return view_retribExc()
+
+@app.route('/excRetrib', methods=['POST'])
+def excRetrib():
+    return excluir_retrib()
+
+# --- Consulta Geral de Retribuições ---
+@app.get('/conGeralRetrib')
+def conGeralRetrib():
+    return pagina_conGeralRetrib()
+
+@app.route('/conFiltroRetrib', methods=['GET', 'POST'])
+def conFiltroRetrib_route():
+    return conFiltroRetrib()
+
+# -------- SALDO (Consulta Geral) --------
+@app.route('/conGeralSaldo', methods=['GET'])
+def conGeralSaldo():
+    return pagina_conGeralSaldo()
+
+@app.route('/conFiltroSaldo', methods=['GET', 'POST'])
+def conFiltroSaldo_route():
+    return conFiltroSaldo()
 
 
 # -------------------- RUN --------------------

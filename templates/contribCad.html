@@ -59,45 +59,35 @@
         {% endif %}
       {% endwith %}
 
-
       <form action="/cadContrib" method="POST" class="row g-3">
         <input type="hidden" name="tipFinancCP" value="1">
 
+        <!-- Assentado -->
+        <div class="col-md-8">
+          <label for="idAssent" class="form-label fw-bold required">Assentado (ID - Nome)</label>
+          <select id="idAssent" name="idAssent" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-       <!-- Assentado -->
-      <div class="col-md-8">
-        <label for="idAssent" class="form-label fw-bold required">Assentado (ID - Nome)</label>
-        <select id="idAssent" name="idAssent" class="form-select" required>
-          <option value="">-- Selecione --</option>
-          {% for a in assentados %}
-            <!-- a = (idAssent, nome) -->
-            <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-
-        <!-- TIPO DE CONTRIBUIÇÃO (vem de tbtipfinanc) -->
+        <!-- TIPO DE CONTRIBUIÇÃO (NÃO inclui Política Pública) -->
         <div class="col-md-4">
           <label class="form-label fw-bold required">Tipo de Contribuição</label>
           <select id="idTipFinanc" name="idTipFinanc" class="form-select" required>
             <option value="">-- Selecione --</option>
             {% for t in tipos %}
-              <!-- Esperado: (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub,
-                              percVal, pol_perc, idTipUnEqv, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
+              <!-- Esperado: (idTipFinanc, nomFinanc, idCatgFinanc, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
               <option
                 value="{{ t[0] }}"
                 data-desc="{{ t[1] }}"
                 data-idcatg="{{ t[2] }}"
-                data-idpol="{{ t[3] or '' }}"
-                data-valpol="{{ t[4] or '' }}"
-                data-percval="{{ t[5] or '' }}"
-                data-polperc="{{ t[6] or '' }}"
-                data-uneqv="{{ t[7] or '' }}"
-                data-valeqv="{{ t[8] or '' }}"
-                data-nomcatg="{{ t[9] or '' }}"
-                data-parc="{{ t[10] or 'N' }}"
-                data-nomuneqv="{{ t[11] or '' }}"
+                data-valeqv="{{ t[3] or '' }}"
+                data-nomcatg="{{ t[4] or '' }}"
+                data-parc="{{ t[5] or 'N' }}"
+                data-nomuneqv="{{ t[6] or '' }}"
               >{{ t[1] }}</option>
             {% endfor %}
           </select>
@@ -121,11 +111,19 @@
           </div>
         </div>
 
-        <!-- Valor (sempre readonly; é definido pela regra do tipo) -->
+        <!-- Valor (readonly; vem do tipo ou do input calculado JS) -->
         <div class="col-md-3">
           <label for="valFinanc_view" class="form-label fw-bold">Valor</label>
           <input type="text" id="valFinanc_view" class="form-control" readonly>
           <input type="hidden" id="valFinanc" name="valFinanc">
+        </div>
+
+        <!-- Quantidade (somente quando NÃO parcelado) -->
+        <div class="col-md-3 d-none" id="grpQtdContr">
+          <label for="qtdContr" class="form-label fw-bold">Quantidade</label>
+          <input type="number" step="0.01" min="0.01" id="qtdContr" name="qtdContr"
+                 class="form-control" value="1">
+          <div class="form-text">Para doações/itens não parcelados. Padrão: 1.</div>
         </div>
 
         <!-- Parcelamento (aparece apenas se catgParcdoSN='S') -->
@@ -144,7 +142,6 @@
         <!-- Guardas p/ backend -->
         <input type="hidden" id="idCatgFinanc" name="idCatgFinanc">
         <input type="hidden" id="catgParcdoSN" name="catgParcdoSN">
-        <input type="hidden" id="idPolPub" name="idPolPub">
 
         <div class="col-12 text-center mt-2">
           <button type="submit" class="btn btn-success">Cadastrar</button>
@@ -174,7 +171,9 @@
 
   const hidIdCatg   = document.getElementById('idCatgFinanc');
   const hidParcSN   = document.getElementById('catgParcdoSN');
-  const hidPolPub   = document.getElementById('idPolPub');
+
+  const grpQtdContr = document.getElementById('grpQtdContr');
+  const qtdContr    = document.getElementById('qtdContr');
 
   function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
 
@@ -183,8 +182,9 @@
     if(!opt || !opt.value){
       descTipo.value = ''; catgTipo.value = ''; uneqvTipo.value = '';
       valView.value = ''; valHidden.value = '';
-      hidIdCatg.value = ''; hidParcSN.value='N'; hidPolPub.value='';
+      hidIdCatg.value = ''; hidParcSN.value='N';
       grpParcelas.classList.add('d-none'); qtdParcelas.value='';
+      grpQtdContr.classList.add('d-none'); if(qtdContr) qtdContr.value='1';
       return;
     }
 
@@ -193,23 +193,15 @@
     const uneqv   = opt.getAttribute('data-nomuneqv') || '';
     const idCatg  = opt.getAttribute('data-idcatg') || '';
     const parcSN  = (opt.getAttribute('data-parc') || 'N');
-    const idPol   = opt.getAttribute('data-idpol') || '';
-    const percVal = n(opt.getAttribute('data-percval'));  // valor pronto do BD (tbtipfinanc.percVal)
-    const valEqv  = n(opt.getAttribute('data-valeqv'));   // usado p/ mensalidade e demais
-
-    // Política pública se tiver idPolPub
-    const isPolitica = !!idPol;
-
-    // Regra do valor: Política -> percVal ; outras/mensalidade -> valEqv
-    let valor = isPolitica ? percVal : valEqv;
+    const valEqv  = n(opt.getAttribute('data-valeqv'));
 
     descTipo.value  = desc;
     catgTipo.value  = nomcatg;
     uneqvTipo.value = uneqv;
 
-    if (isFinite(valor) && valor > 0){
-      valView.value   = valor.toFixed(2);
-      valHidden.value = valor.toString();
+    if (isFinite(valEqv) && valEqv > 0){
+      valView.value   = valEqv.toFixed(2);
+      valHidden.value = valEqv.toString();
     } else {
       valView.value   = '';
       valHidden.value = '';
@@ -217,15 +209,19 @@
 
     hidIdCatg.value = idCatg;
     hidParcSN.value = parcSN;
-    hidPolPub.value = idPol || '';
 
-    // Parcelas só se categoria for parcelada
-    grpParcelas.classList.toggle('d-none', parcSN !== 'S');
-    if (parcSN !== 'S') qtdParcelas.value = '';
+    // Parcelas só quando categoria permite
+    const showParcelas = (parcSN === 'S');
+    grpParcelas.classList.toggle('d-none', !showParcelas);
+    if (!showParcelas) qtdParcelas.value = '';
+
+    // Quantidade: aparece quando NÃO parcelado
+    const showQtd = (parcSN !== 'S');
+    grpQtdContr.classList.toggle('d-none', !showQtd);
+    if (!showQtd && qtdContr) qtdContr.value = '1';
   }
 
   selTipo?.addEventListener('change', atualizarTipo);
-  // aplica ao carregar (caso já exista um tipo pré-selecionado)
   atualizarTipo();
 </script>
 

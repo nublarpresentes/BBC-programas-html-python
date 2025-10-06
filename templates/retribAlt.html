@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Alterar Contribuições</title>
+  <title>Alterar Retribuições</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
@@ -22,24 +22,40 @@
 <main class="flex-grow-1">
   <div class="container my-4">
 
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        <div class="container px-0 mb-3">
+          {% for cat, msg in msgs %}
+            {% set cls = {
+              'success':'alert-success',
+              'warning':'alert-warning',
+              'danger':'alert-danger',
+              'info':'alert-info'
+            }[cat] if cat in ['success','warning','danger','info'] else 'alert-info' %}
+            <div class="alert {{ cls }} text-center mb-3" role="alert">
+              {{ msg }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <!-- Filtros -->
     <div class="form-section mb-4">
-      <form action="/contribAlt" method="GET" class="row g-3">
-        <div class="col-md-6">
+      <form action="/retribAlt" method="GET" class="row g-3">
+        <div class="col-md-4">
           <label class="form-label fw-bold">Assentado</label>
           <select name="idAssent" class="form-select">
             <option value="">-- Todos --</option>
             {% for a in assentados %}
-               <option value="{{ a[0] }}" {{ 'selected' if (filtros.idAssent|string)==(a[0]|string) else '' }}>
-
-             {{ a[0] }} - {{ a[1] }}
+              <option value="{{ a[0] }}" {{ 'selected' if filtros.idAssent==a[0]|string else '' }}>
+                {{ a[0] }} - {{ a[1] }}
               </option>
-
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-6">
-          <label class="form-label fw-bold">Tipo de Contribuição</label>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Tipo (Política Pública)</label>
           <select name="idTipFinanc" class="form-select">
             <option value="">-- Todos --</option>
             {% for t in tipos %}
@@ -49,17 +65,21 @@
             {% endfor %}
           </select>
         </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Ano</label>
+          <input type="number" name="ano" class="form-control" value="{{ filtros.ano or '' }}" min="2000" max="2100" placeholder="ex.: 2025">
+        </div>
 
         <div class="col-12 text-end">
           <button class="btn btn-primary">Filtrar</button>
-          <a class="btn btn-secondary" href="/contribAlt">Limpar</a>
+          <a class="btn btn-secondary" href="/retribAlt">Limpar</a>
         </div>
       </form>
     </div>
 
     <!-- Lista -->
     <div class="form-section mb-4">
-      <h4 class="text-primary mb-3">Contribuições</h4>
+      <h4 class="text-primary mb-3">Retribuições</h4>
       <div class="table-responsive">
         <table class="table table-sm table-striped align-middle">
           <thead class="table-light">
@@ -67,11 +87,9 @@
               <th>ID</th>
               <th>Assentado</th>
               <th>Tipo</th>
-              <th>Categoria</th>
               <th>Ano</th>
               <th>Parcela/Mês</th>
               <th>Valor</th>
-              <th>Qtd.</th> <!-- NOVO -->
               <th class="text-center">Ações</th>
             </tr>
           </thead>
@@ -81,17 +99,16 @@
               <td>{{ r.idseq }}</td>
               <td>{{ r.idassent }} - {{ r.nome }}</td>
               <td>{{ r.nomtip }}</td>
-              <td>{{ r.nomcatg }}</td>
               <td>{{ r.ano }}</td>
               <td>{{ r.numparc or r.mes }}</td>
               <td>{{ "%.2f"|format(r.valor or 0) }}</td>
-              <td>{{ r.qtdcontr if r.qtdcontr is not none else '-' }}</td> <!-- NOVO -->
               <td class="text-center">
-                <a class="btn btn-sm btn-outline-primary" href="/contribAlt?id={{ r.idseq }}">Alterar</a>
+                <a class="btn btn-sm btn-outline-primary" href="/retribAlt?id={{ r.idseq }}">Alterar</a>
+                <a class="btn btn-sm btn-outline-danger"  href="/retribExc?id={{ r.idseq }}">Excluir</a>
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="9" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
+            <tr><td colspan="7" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -100,8 +117,8 @@
 
     {% if registro %}
     <div class="form-section">
-      <h4 class="text-success mb-3">Alterar Contribuição — ID {{ registro.idseq }}</h4>
-      <form action="/altContrib" method="POST" class="row g-3">
+      <h4 class="text-success mb-3">Alterar Retribuição — ID {{ registro.idseq }}</h4>
+      <form action="/altRetrib" method="POST" class="row g-3">
         <input type="hidden" name="idSeqFinanc" value="{{ registro.idseq }}"/>
 
         <div class="col-md-6">
@@ -117,37 +134,21 @@
           <label class="form-label fw-bold">Ano</label>
           <input class="form-control" value="{{ registro.ano }}" readonly>
         </div>
-
         <div class="col-md-3">
-            <label class="form-label fw-bold">Parcela/Mês</label>
-            {% if registro.numparc %}
-              <!-- Parcelado: permitir editar 1..12 -->
-              <input type="number" name="numParcela" class="form-control"
-                     value="{{ registro.numparc }}" min="1" max="12" required>
-            {% else %}
-              <!-- Não parcelado: somente leitura -->
-              <input class="form-control" value="" readonly>
-            {% endif %}
+          <label class="form-label fw-bold">Parcela/Mês</label>
+          <input class="form-control" value="{{ registro.numparc or registro.mes }}" readonly>
         </div>
-       <div class="col-md-3">
+        <div class="col-md-3">
           <label class="form-label fw-bold">Valor</label>
           <input class="form-control" value="{{ "%.2f"|format(registro.valor or 0) }}" readonly>
         </div>
 
-       {% if not registro.numparc %}
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Quantidade</label>
-            {% set qtd = registro.qtdcontr|default(1, true) %}
-            <input
-              type="number"
-              name="qtdContr"
-              class="form-control"
-              value="{{ qtd }}"
-              step="0.01"
-              min="0.01">
-          </div>
-        {% endif %}
-
+        <!-- PP permite alterar o número da parcela -->
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Novo nº da Parcela</label>
+          <input type="number" name="numParcela" class="form-control" min="1" max="12"
+                 placeholder="ex.: 5">
+        </div>
 
         <div class="col-md-12">
           <label class="form-label fw-bold">Observação</label>
@@ -157,7 +158,7 @@
 
         <div class="col-12 text-center mt-2">
           <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-          <a href="/contribAlt" class="btn btn-secondary">Cancelar</a>
+          <a href="/retribAlt" class="btn btn-secondary">Cancelar</a>
         </div>
       </form>
     </div>

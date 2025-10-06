@@ -27,14 +27,12 @@
       <form action="/contribAlt" method="GET" class="row g-3">
         <div class="col-md-6">
           <label class="form-label fw-bold">Assentado</label>
-          <select name="idAssent" class="form-select">
+          <select name="matricula" class="form-select">
             <option value="">-- Todos --</option>
             {% for a in assentados %}
-               <option value="{{ a[0] }}" {{ 'selected' if (filtros.idAssent|string)==(a[0]|string) else '' }}>
-
-             {{ a[0] }} - {{ a[1] }}
+              <option value="{{ a[0] }}" {{ 'selected' if filtros.matricula==a[0] else '' }}>
+                {{ a[0] }} - {{ a[1] }}
               </option>
-
             {% endfor %}
           </select>
         </div>
@@ -71,7 +69,6 @@
               <th>Ano</th>
               <th>Parcela/Mês</th>
               <th>Valor</th>
-              <th>Qtd.</th> <!-- NOVO -->
               <th class="text-center">Ações</th>
             </tr>
           </thead>
@@ -79,19 +76,18 @@
           {% for r in itens %}
             <tr>
               <td>{{ r.idseq }}</td>
-              <td>{{ r.idassent }} - {{ r.nome }}</td>
+              <td>{{ r.matricula }} - {{ r.nome }}</td>
               <td>{{ r.nomtip }}</td>
               <td>{{ r.nomcatg }}</td>
               <td>{{ r.ano }}</td>
               <td>{{ r.numparc or r.mes }}</td>
               <td>{{ "%.2f"|format(r.valor or 0) }}</td>
-              <td>{{ r.qtdcontr if r.qtdcontr is not none else '-' }}</td> <!-- NOVO -->
               <td class="text-center">
                 <a class="btn btn-sm btn-outline-primary" href="/contribAlt?id={{ r.idseq }}">Alterar</a>
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="9" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted">Nenhum registro encontrado.</td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -106,7 +102,7 @@
 
         <div class="col-md-6">
           <label class="form-label fw-bold">Assentado</label>
-          <input class="form-control" value="{{ registro.idassent }} - {{ registro.nome }}" readonly>
+          <input class="form-control" value="{{ registro.matricula }} - {{ registro.nome }}" readonly>
         </div>
         <div class="col-md-6">
           <label class="form-label fw-bold">Tipo</label>
@@ -117,38 +113,14 @@
           <label class="form-label fw-bold">Ano</label>
           <input class="form-control" value="{{ registro.ano }}" readonly>
         </div>
-
         <div class="col-md-3">
-            <label class="form-label fw-bold">Parcela/Mês</label>
-            {% if registro.numparc %}
-              <!-- Parcelado: permitir editar 1..12 -->
-              <input type="number" name="numParcela" class="form-control"
-                     value="{{ registro.numparc }}" min="1" max="12" required>
-            {% else %}
-              <!-- Não parcelado: somente leitura -->
-              <input class="form-control" value="" readonly>
-            {% endif %}
+          <label class="form-label fw-bold">Parcela/Mês</label>
+          <input class="form-control" value="{{ registro.numparc or registro.mes }}" readonly>
         </div>
-       <div class="col-md-3">
+        <div class="col-md-3">
           <label class="form-label fw-bold">Valor</label>
           <input class="form-control" value="{{ "%.2f"|format(registro.valor or 0) }}" readonly>
         </div>
-
-       {% if not registro.numparc %}
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Quantidade</label>
-            {% set qtd = registro.qtdcontr|default(1, true) %}
-            <input
-              type="number"
-              name="qtdContr"
-              class="form-control"
-              value="{{ qtd }}"
-              step="0.01"
-              min="0.01">
-          </div>
-        {% endif %}
-
-
         <div class="col-md-12">
           <label class="form-label fw-bold">Observação</label>
           <input type="text" name="obs" class="form-control" maxlength="150"

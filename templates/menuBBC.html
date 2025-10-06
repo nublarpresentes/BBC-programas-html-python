@@ -83,26 +83,54 @@
       <!-- Menu lateral com setinhas -->
       <div class="col-md-3">
         <div class="list-group shadow-sm">
+           <div class="list-group-item list-heading">MÓDULOS</div>
+
+           <div class="list-group-item dropdown-submenu">
+            <span>CADASTRO CONTRIBUIÇÃO <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+               <a href="/contribCad" class="dropdown-item">Incluir</a>
+               <a href="/contribAlt" class="dropdown-item">Alteração</a>
+               <a href="/contribExc" class="dropdown-item">Exclusão</a>
+               <a href="/conGeralContrib" class="dropdown-item">Consultas</a>
+            </div>
+          </div>
+
+           <div class="list-group-item dropdown-submenu">
+            <span>CADASTRO RETRIBUIÇÃO <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+               <a href="/retribCad" class="dropdown-item">Incluir</a>
+               <a href="/retribAlt" class="dropdown-item">Alteração</a>
+               <a href="/retribExc" class="dropdown-item">Exclusão</a>
+               <a href="/conGeralRetrib" class="dropdown-item">Consultas</a>
+            </div>
+          </div>
+
+            <div class="list-group-item dropdown-submenu">
+            <span>CADASTRO RECOMPENSA <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+               <a href="/recpsaCad" class="dropdown-item">Incluir</a>
+               <a href="/recpsaAlt" class="dropdown-item">Alteração</a>
+               <a href="/recpsaExc" class="dropdown-item">Exclusão</a>
+               <a href="/conGeralRecpsa" class="dropdown-item">Consultas</a>
+            </div>
+          </div>
+
+
           <div class="list-group-item list-heading">TABELAS</div>
 
           <!-- Tipo de Contribuição -->
           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Tipo de Contribuição <i class="bi bi-caret-right-fill arrow"></i></span>
+            <span>Tipo de Contribuição <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
               <a href="/tipContribCad" class="dropdown-item">Incluir</a>
               <a href="/tipContribAlt" class="dropdown-item">Alteração</a>
               <a href="/tipContribExc" class="dropdown-item">Exclusao</a>
               <a href="/conGeralTipContrib" class="dropdown-item">Consultas</a>
-
-              </div>
+            </div>
           </div>
 
-           <div class="list-group-item dropdown-submenu">
-        <span class="fw-bold">Retribuição <i class="bi bi-caret-right-fill arrow"></i></span>
-        <div class="dropdown-menu">
-          <!-- Abre um menu específico da área de retribuição -->
-          <a href="/menuRetrib" class="dropdown-item">Abrir Menu Retribuição</a>
-          <hr class="dropdown-divider">
+          <div class="list-group-item dropdown-submenu">
+           <div class="dropdown-menu">
 
           <!-- Acesso direto às operações (se preferir manter no menu principal também) -->
           <div class="dropdown-item fw-semibold text-danger">Tipo de Recompensa</div>
@@ -117,45 +145,64 @@
           <a href="/tipUsoInfrExc" class="dropdown-item">Exclusão</a>
           <a href="/conGeralTipUsoInfr" class="dropdown-item">Consultas</a>
 
-          <div class="dropdown-item fw-semibold text-danger mt-2">Recompensa</div>
-          <a href="/recpsaCad" class="dropdown-item">Incluir</a>
-          <a href="/recpsaAlt" class="dropdown-item">Alteração</a>
-          <a href="/recpsaExc" class="dropdown-item">Exclusão</a>
-          <a href="/conGeralRecpsa" class="dropdown-item">Consultas</a>
-        </div>
+          </div>
       </div>
 
 
-          <!-- Categoria de Contribuição -->
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Categorias-(Contribição/Retribuição)<i class="bi bi-caret-right-fill arrow"></i></span>
+       <div class="list-group-item dropdown-submenu">
+            <span>Tipo de Recompensa <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
-              <a href="/ctgFinancCad" class="dropdown-item">Incluir</a>
-              <a href="/ctgFinancAlt" class="dropdown-item">Alterar</a>
-              <a href="/ctgFinancExc" class="dropdown-item">Excluir</a>
+              <a href="/tipRecpsaCad" class="dropdown-item">Incluir</a>
+              <a href="/tipRecpsaAlt" class="dropdown-item">Alteração</a>
+              <a href="/tipRecpsaExc" class="dropdown-item">Exclusão</a>
+              <a href="/conGeralTipRecpsa" class="dropdown-item">Consultas</a>
+            </div>
+        </div>
 
+        <div class="list-group-item dropdown-submenu">
+            <span>Tipo de Infraestrutura <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+               <a href="/tipUsoInfrCad" class="dropdown-item">Incluir</a>
+               <a href="/tipUsoInfrAlt" class="dropdown-item">Alteração</a>
+               <a href="/tipUsoInfrExc" class="dropdown-item">Exclusão</a>
+               <a href="/conGeralTipUsoInfr" class="dropdown-item">Consultas</a>
+            </div>
+        </div>
+
+             <!-- categoria uso da infra  -->
+          <div class="list-group-item dropdown-submenu">
+            <span>Categoria Uso da Infraestrutura <i class="bi bi-caret-right-fill arrow"></i></span>
+            <div class="dropdown-menu">
+              <a href="/catgUsoInfrCad" class="dropdown-item">Incluir</a>
+              <a href="/catgUsoInfrAlt" class="dropdown-item">Alterar</a>
+              <a href="/catgUsoInfrExc" class="dropdown-item">Excluir</a>
+              <a href="/catgUsoInfrCon" class="dropdown-item">Consulta</a>
             </div>
           </div>
 
-          <!-- Política Pública -->
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Política Pública <i class="bi bi-caret-right-fill arrow"></i></span>
+
+
+         <div class="list-group-item dropdown-submenu">
+            <span>Política Pública <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
               <a href="/politPubCad" class="dropdown-item">Incluir</a>
               <a href="/politPubAlt" class="dropdown-item">Alterar</a>
               <a href="/politPubExc" class="dropdown-item">Excluir</a>
             </div>
-          </div>
+        </div>
 
-          <!-- Unidade Equivalente -->
+
+           <!-- Unidade Equivalente -->
           <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Unidade de Equivalia <i class="bi bi-caret-right-fill arrow"></i></span>
+            <span>Unidade de Equivalia <i class="bi bi-caret-right-fill arrow"></i></span>
             <div class="dropdown-menu">
               <a href="/unEqvCad" class="dropdown-item">Incluir</a>
               <a href="/unEqvAlt" class="dropdown-item">Alterar</a>
               <a href="/unEqvExc" class="dropdown-item">Excluir</a>
             </div>
           </div>
+
+
 
         </div>
       </div>
@@ -165,11 +212,13 @@
         <h4 class="mb-4">Escolha o que deseja acessar</h4>
         <div class="d-grid gap-3">
           <a href="/contribCad" class="btn btn-outline-success btn-lg">CADASTRO CONTRIBUIÇÕES</a>
-          <a href="/conGeralContrib" class="btn btn-outline-success btn-lg">CADASTRO RETRIBUIÇÕES</a>
-          <a href="/conContrib" class="btn btn-outline-primary btn-lg">CONSULTA CONTRIBUIÇÕES</a>
-          <a href="/conRetrib" class="btn btn-outline-warning btn-lg">CONSULTA RETRIBUIÇÕES</a>
-          <a href="/conGerais" class="btn btn-outline-danger btn-lg">CONSULTAS GERAIS</a>
-        </div>
+           <a href="/retribCad" class="btn btn-outline-success btn-lg">CADASTRO RETRIBUIÇÕES</a>
+          <a href="/recpsaCad" class="btn btn-outline-success btn-lg">CADASTRO RECOMPENSAS</a>
+          <a href="/conGeralContrib" class="btn btn-outline-primary btn-lg">CONSULTA CONTRIBUIÇÕES</a>
+           <a href="/conGeralRetrib" class="btn btn-outline-primary btn-lg">CONSULTA RETRIBUIÇÕES</a>
+          <a href="/conGeralRecpsa" class="btn btn-outline-warning btn-lg">CONSULTA RECOMPENSAS</a>
+           <a href="/conGeralSaldo" class="btn btn-outline-primary btn-lg">CONSULTA SALDOS</a>
+         </div>
       </div>
 
     </div>

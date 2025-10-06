@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Alterar — Categoria Uso Infra</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>.box{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}</style>
+</head>
+<body class="bg-light">
+<header class="bg-success text-white py-2">
+  <div class="container"><h1 class="h5 m-0">SBBC — Categoria do Uso da Infraestrutura</h1></div>
+</header>
+
+<main class="container my-4">
+  <div class="box mb-4">
+    <h3 class="text-primary">Categorias</h3>
+    <div class="table-responsive mt-2">
+      <table class="table table-sm table-striped align-middle">
+        <thead class="table-light"><tr><th>ID</th><th>Nome</th><th></th></tr></thead>
+        <tbody>
+        {% for r in itens %}
+          <tr>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+            <td><a class="btn btn-sm btn-outline-primary" href="/catgUsoInfrAlt?id={{ r[0] }}">Alterar</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" class="text-center text-muted">Nenhum registro.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% with msgs=get_flashed_messages(with_categories=true) %}
+    {% for cat,msg in msgs %}
+      <div class="alert alert-{{ 'info' if cat not in ['success','warning','danger'] else cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if registro %}
+  <div class="box">
+    <h4 class="text-success">Alterar — ID {{ registro.id }}</h4>
+    <form action="/altCatgUsoInfr" method="POST" class="row g-3 mt-2">
+      <input type="hidden" name="idCatgUsoInfr" value="{{ registro.id }}">
+      <div class="col-md-8">
+        <label class="form-label fw-bold">Nome</label>
+        <input type="text" name="nomCatgUsoInfr" class="form-control" maxlength="100" value="{{ registro.nome or '' }}" required>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary">Salvar</button>
+        <a class="btn btn-secondary" href="/catgUsoInfrAlt">Cancelar</a>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</main>
+</body>
+</html>

@@ -4,150 +4,207 @@
   <meta charset="UTF-8" />
   <title>Cadastro de Retribuição</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    .form-section { background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
-    .required::after { content:" *"; color:#dc3545; }
-    .badge-big { font-size:1rem; padding:.6rem .9rem; }
+    .form-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .required::after{content:" *";color:#dc3545}
+    .badge-big{font-size:1rem;padding:.6rem .9rem}
   </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <!-- Cabeçalho padrão SBBC -->
- <!-- Cabeçalho -->
 <header class="bg-success text-white shadow-sm">
   <div class="container">
-    <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
-      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <img src="/static/img/ifpaLogo.png" class="me-3" style="height:60px;" alt="IFPA">
       <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
     </div>
-
-    <!-- Linha com o menu principal -->
     <nav class="nav justify-content-center border-top border-light pt-2">
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-house-door-fill"></i> Home
-      </a>
-      <a class="nav-link text-white" href="/menuAssent">
-        <i class="bi bi-people-fill"></i> Assentado
-      </a>
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-bank"></i> Banco do Bem Comum
-      </a>
-      <a class="nav-link text-white" href="/menuCaderneta">
-        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
-      </a>
-      <a class="nav-link text-white" href="/faleConosco">
-        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
-      </a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuCaderneta"><i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha</a>
+      <a class="nav-link text-white" href="/faleConosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
   </div>
 </header>
 
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="form-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <h3 class="text-success mb-3">Cadastro de Retribuição</h3>
+        <span class="badge text-bg-success badge-big">RETRIBUIÇÃO</span>
+      </div>
 
-  <main class="flex-grow-1">
-    <div class="container my-4">
-      <div class="form-section">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-          <h3 class="text-primary mb-3">Cadastro de Retribuição</h3>
-          <span class="badge text-bg-primary badge-big">RETRIBUIÇÃO</span>
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="container px-0">
+            {% for cat, msg in msgs %}
+              {% set cls = {
+                'success':'alert-success',
+                'warning':'alert-warning',
+                'danger':'alert-danger',
+                'info':'alert-info'
+              }[cat] if cat in ['success','warning','danger','info'] else 'alert-info' %}
+              <div class="alert {{ cls }} text-center mb-3" role="alert">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form action="/cadRetrib" method="POST" class="row g-3">
+
+         <!-- ... dentro do <form action="/cadRetrib" method="POST" class="row g-3"> ... -->
+
+          <!-- HIDDENs necessários para o backend -->
+          <input type="hidden" id="idCatgFinanc" name="idCatgFinanc" value="1">
+          <input type="hidden" id="catgParcdoSN" name="catgParcdoSN" value="S">
+          <input type="hidden" id="idPolPub"     name="idPolPub"     value="">
+
+        <!-- Assentado -->
+        <div class="col-md-8">
+          <label for="idAssent" class="form-label fw-bold required">Assentado (ID - Nome)</label>
+          <select id="idAssent" name="idAssent" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+            {% endfor %}
+          </select>
         </div>
 
-        {% if message %}
-          <div class="alert alert-info text-center">{{ message }}</div>
-        {% endif %}
+        <!-- Tipo (apenas Política Pública) -->
+        <div class="col-md-4">
+          <label class="form-label fw-bold required">Tipo de Retribuição (Política Pública)</label>
+          <select id="idTipFinanc" name="idTipFinanc" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for t in tipos %}
+              <!-- t: (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub, percVal, pol_perc, idTipUnEqv, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
+              <option
+                value="{{ t[0] }}"
+                data-desc="{{ t[1] }}"
+                data-idcatg="{{ t[2] }}"
+                data-idpol="{{ t[3] or '' }}"
+                data-percval="{{ t[5] or '' }}"
+                data-nomcatg="{{ t[9] or '' }}"
+                data-parc="{{ t[10] or 'S' }}"
+                data-nomuneqv="{{ t[11] or '' }}"
+              >{{ t[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-        <!-- IMPORTANTE: ação alterada p/ cadTipRetri -->
-        <form action="/cadRetri" method="POST" class="row g-3">
-          <!-- Tipo fixo (escondido) -->
-          <input type="hidden" name="tipFinancCR" value="2">
-
-          <!-- Assentado (matrícula - nome) -->
-          <div class="col-md-8">
-            <label for="matricula" class="form-label fw-bold required">Assentado (Matrícula - Nome)</label>
-            <select id="matricula" name="matricula" class="form-select" required>
-              <option value="">-- Selecione --</option>
-              {% for a in assentados %}
-                <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Categoria (Retribuição) -->
-          <div class="col-md-4">
-            <label for="idCatgFinanc" class="form-label fw-bold required">Categoria de Retribuição</label>
-            <select id="idCatgFinanc" name="idCatgFinanc" class="form-select" required>
-              <option value="">-- Selecione --</option>
-              {% for c in categorias %}
-                <option value="{{ c[0] }}" data-parcelado="{{ c[2] }}">{{ c[1] }}</option>
-              {% endfor %}
-            </select>
-            <div class="form-text">Se a categoria for parcelada (S), os campos de parcelas aparecerão.</div>
-          </div>
-
-          <!-- Valor -->
-          <div class="col-md-4">
-            <label for="valFinanc" class="form-label fw-bold required">Valor</label>
-            <input type="number" step="0.01" min="0" id="valFinanc" name="valFinanc" class="form-control" placeholder="0.00" required>
-          </div>
-
-          <!-- Observação -->
-          <div class="col-md-8">
-            <label for="obs" class="form-label fw-bold">Observação</label>
-            <input type="text" id="obs" name="obs" class="form-control" maxlength="150" placeholder="até 150 caracteres">
-          </div>
-
-          <!-- BLOCO de Parcelas (só quando categoria catgParcdoSN = 'S') -->
-          <div id="grpParcelas" class="row g-3 d-none">
-            <div class="col-12">
-              <hr class="my-2">
-              <h6 class="text-primary mb-2">Parcelamento</h6>
+        <!-- “Cartão” informativo -->
+        <div class="col-12">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Descrição</label>
+              <input type="text" id="descTipo" class="form-control" readonly>
             </div>
-            <div class="col-md-3">
-              <label for="anoFinanc" class="form-label fw-bold">Ano</label>
-              <input type="number" id="anoFinanc" name="anoFinanc" class="form-control" min="2000" max="2100" placeholder="AAAA">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Categoria</label>
+              <input type="text" id="catgTipo" class="form-control" readonly>
             </div>
-            <div class="col-md-3">
-              <label for="mesFinanc" class="form-label fw-bold">Mês</label>
-              <input type="number" id="mesFinanc" name="mesFinanc" class="form-control" min="1" max="12" placeholder="1-12">
-            </div>
-            <div class="col-md-3">
-              <label for="numParcela" class="form-label fw-bold">Nº Parcela</label>
-              <input type="number" id="numParcela" name="numParcela" class="form-control" min="1" placeholder="1, 2, 3...">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Igualdade Proporcional</label>
+              <input type="text" id="uneqvTipo" class="form-control" readonly>
             </div>
           </div>
+        </div>
 
-          <div class="col-12 text-center mt-2">
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
-            <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
-          </div>
-        </form>
-      </div>
+        <!-- Valor (PP usa percVal) -->
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Valor (por parcela)</label>
+          <input type="text" id="valFinanc_view" class="form-control" readonly>
+        </div>
+
+        <!-- Nº de parcelas a lançar agora -->
+        <div class="col-md-3">
+          <label for="qtdParcelas" class="form-label fw-bold required">Nº de Parcelas (lançar agora)</label>
+          <input type="number" id="qtdParcelas" name="qtdParcelas" class="form-control" min="1" max="12" required placeholder="ex.: 3">
+          <div class="form-text">Máximo 12/ano (o sistema considera as já lançadas).</div>
+        </div>
+
+        <!-- Observação -->
+        <div class="col-md-6">
+          <label for="obs" class="form-label fw-bold">Observação</label>
+          <input type="text" id="obs" name="obs" class="form-control" maxlength="150" placeholder="até 150 caracteres">
+        </div>
+
+        <div class="col-12 text-center mt-2">
+          <button type="submit" class="btn btn-success">Cadastrar</button>
+          <a href="/menuBBC" class="btn btn-secondary">Cancelar</a>
+        </div>
+
+
+
+<!-- resto do formulário... -->
+
+
+
+
+      </form>
     </div>
-  </main>
+  </div>
+</main>
 
-  <footer class="bg-dark text-white text-center py-3 mt-auto">
-    <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
-  </footer>
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA</p>
+</footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Parcelas: mostra quando a categoria tem data-parcelado="S"
-    const selCat  = document.getElementById('idCatgFinanc');
-    const grpParc = document.getElementById('grpParcelas');
-    function atualizaParcelas() {
-      const opt = selCat?.options[selCat.selectedIndex];
-      const parc = opt ? (opt.getAttribute('data-parcelado') || 'N') : 'N';
-      grpParc.classList.toggle('d-none', parc !== 'S');
-      if (parc !== 'S') {
-        document.getElementById('anoFinanc').value = '';
-        document.getElementById('mesFinanc').value = '';
-        document.getElementById('numParcela').value = '';
-      }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const selTipo   = document.getElementById('idTipFinanc');
+  const descTipo  = document.getElementById('descTipo');
+  const catgTipo  = document.getElementById('catgTipo');
+  const uneqvTipo = document.getElementById('uneqvTipo');
+  const valView   = document.getElementById('valFinanc_view');
+
+  // hidden inputs que o backend espera
+  const hidIdCatg = document.getElementById('idCatgFinanc');
+  const hidParcSN = document.getElementById('catgParcdoSN');
+  const hidPolPub = document.getElementById('idPolPub');
+
+  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
+
+  function atualizarTipo(){
+    const opt = selTipo?.options[selTipo.selectedIndex];
+    if(!opt || !opt.value){
+      descTipo.value = '';
+      catgTipo.value = '';
+      uneqvTipo.value = '';
+      valView.value = '';
+
+      // zera hidden
+      hidIdCatg.value = '1';
+      hidParcSN.value = 'S';
+      hidPolPub.value = '';
+      return;
     }
-    selCat?.addEventListener('change', atualizaParcelas);
-    atualizaParcelas();
-  </script>
+
+    const desc     = opt.getAttribute('data-desc')   || '';
+    const nomcatg  = opt.getAttribute('data-nomcatg')|| 'Política Pública';
+    const uneqv    = opt.getAttribute('data-nomuneqv') || '';
+    const idPol    = opt.getAttribute('data-idpol')  || '';
+    const percVal  = n(opt.getAttribute('data-percval')); // valor por parcela (PP)
+
+    descTipo.value  = desc;
+    catgTipo.value  = nomcatg;
+    uneqvTipo.value = uneqv;
+    valView.value   = (isFinite(percVal) && percVal>0) ? percVal.toFixed(2) : '';
+
+    // Como é PP, garanta catg=1 e parcelado
+    hidIdCatg.value = '1';
+    hidParcSN.value = 'S';
+    hidPolPub.value = idPol; // ESSENCIAL para o backend
+  }
+
+  selTipo?.addEventListener('change', atualizarTipo);
+  atualizarTipo();
+</script>
+
 </body>
 </html>

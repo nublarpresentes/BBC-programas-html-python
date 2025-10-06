@@ -9,6 +9,7 @@ def conectar_bd():
             host="localhost",
             port=5432
         )
+        conn.autocommit = True
         return conn
     except psycopg2.Error as e:
         print("** Erro ao conectar ao banco de dados:", str(e))

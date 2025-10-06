@@ -26,7 +26,7 @@ def listar_tiprecpsa():
     if conn:
         cur = conn.cursor()
         cur.execute("""
-            SELECT t."idTipRecpsa", t."nomRecpsa", t."idPolPub",
+            SELECT t."idTipRecpsa", t."nomTipRecpsa", t."idPolPub",
                    p."nomPolPub"
               FROM "tbtiprecpsa" t
               LEFT JOIN "tbpolitpub" p ON p."idPolPub"=t."idPolPub"
@@ -44,7 +44,7 @@ def pegar_tiprecpsa(id_):
         return None
     cur = conn.cursor()
     cur.execute("""
-        SELECT t."idTipRecpsa", t."nomRecpsa", t."idPolPub"
+        SELECT t."idTipRecpsa", t."nomTipRecpsa", t."idPolPub"
           FROM "tbtiprecpsa" t
          WHERE t."idTipRecpsa"=%s
     """, (id_,))
@@ -82,10 +82,10 @@ def cadastrar_tiprecpsa():
     if request.method != 'POST':
         return redirect(url_for('tipRecpsaCad'))
 
-    nomRecpsa = (request.form.get('nomRecpsa') or '').strip()
+    nomTipRecpsa = (request.form.get('nomTipRecpsa') or '').strip()
     idPolPub  = request.form.get('idPolPub') or None
 
-    if not nomRecpsa:
+    if not nomTipRecpsa:
         flash('❌ Informe o nome da recompensa.')
         return redirect(url_for('tipRecpsaCad'))
 
@@ -97,9 +97,9 @@ def cadastrar_tiprecpsa():
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO "tbtiprecpsa" ("nomRecpsa","idPolPub")
+            INSERT INTO "tbtiprecpsa" ("nomTipRecpsa","idPolPub")
             VALUES (%s, %s)
-        """, (nomRecpsa, int(idPolPub) if idPolPub else None))
+        """, (nomTipRecpsa, int(idPolPub) if idPolPub else None))
         conn.commit()
         conn.close()
         flash('✅ Tipo de recompensa cadastrado com sucesso!', 'success')
@@ -116,10 +116,10 @@ def alterar_tiprecpsa():
         return redirect(url_for('tipRecpsaAlt'))
 
     idTipRecpsa = request.form.get('idTipRecpsa')
-    nomRecpsa   = (request.form.get('nomRecpsa') or '').strip()
+    nomTipRecpsa   = (request.form.get('nomTipRecpsa') or '').strip()
     idPolPub    = request.form.get('idPolPub') or None
 
-    if not idTipRecpsa or not nomRecpsa:
+    if not idTipRecpsa or not nomTipRecpsa:
         flash('❌ Dados insuficientes.')
         return redirect(url_for('tipRecpsaAlt'))
 
@@ -132,9 +132,9 @@ def alterar_tiprecpsa():
         cur = conn.cursor()
         cur.execute("""
             UPDATE "tbtiprecpsa"
-               SET "nomRecpsa"=%s, "idPolPub"=%s
+               SET "nomTipRecpsa"=%s, "idPolPub"=%s
              WHERE "idTipRecpsa"=%s
-        """, (nomRecpsa, int(idPolPub) if idPolPub else None, int(idTipRecpsa)))
+        """, (nomTipRecpsa, int(idPolPub) if idPolPub else None, int(idTipRecpsa)))
         conn.commit()
         conn.close()
         flash('✅ Tipo de recompensa alterado com sucesso!', 'success')
@@ -192,7 +192,7 @@ def _ler_filtros():
 def _montar_where(filtros, params):
     where = ['TRUE']
     if filtros.nome:
-        where.append('UPPER(t."nomRecpsa") LIKE UPPER(%s)')
+        where.append('UPPER(t."nomTipRecpsa") LIKE UPPER(%s)')
         params.append(f'%{filtros.nome}%')
     if filtros.idPolPub:
         where.append('t."idPolPub"=%s')
@@ -207,7 +207,7 @@ def _executar_consulta(filtros, page):
     params = []
     where = _montar_where(filtros, params)
     base = f"""
-        SELECT t."idTipRecpsa", t."nomRecpsa", t."idPolPub", p."nomPolPub"
+        SELECT t."idTipRecpsa", t."nomTipRecpsa", t."idPolPub", p."nomPolPub"
           FROM "tbtiprecpsa" t
           LEFT JOIN "tbpolitpub" p ON p."idPolPub"=t."idPolPub"
          WHERE {where}
@@ -221,7 +221,7 @@ def _executar_consulta(filtros, page):
         offset = (page-1)*PER_PAGE
         cur.execute(f"""
             {base}
-            ORDER BY t."nomRecpsa" ASC
+            ORDER BY t."nomTipRecpsa" ASC
             LIMIT %s OFFSET %s
         """, params + [limit, offset])
         cols = [d[0] for d in cur.description]

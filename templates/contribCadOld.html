@@ -41,20 +41,41 @@
       {% if message %}
         <div class="alert alert-info text-center">{{ message }}</div>
       {% endif %}
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="container px-0">
+            {% for cat, msg in msgs %}
+              {% set cls = {
+                'success':'alert-success',
+                'warning':'alert-warning',
+                'danger':'alert-danger',
+                'info':'alert-info'
+              }[cat] if cat in ['success','warning','danger','info'] else 'alert-info' %}
+              <div class="alert {{ cls }} text-center mb-3" role="alert">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
 
       <form action="/cadContrib" method="POST" class="row g-3">
         <input type="hidden" name="tipFinancCP" value="1">
 
-        <!-- Assentado -->
-        <div class="col-md-8">
-          <label for="matricula" class="form-label fw-bold required">Assentado (Matrícula - Nome)</label>
-          <select id="matricula" name="matricula" class="form-select" required>
-            <option value="">-- Selecione --</option>
-            {% for a in assentados %}
-              <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
-            {% endfor %}
-          </select>
-        </div>
+
+       <!-- Assentado -->
+      <div class="col-md-8">
+        <label for="idAssent" class="form-label fw-bold required">Assentado (ID - Nome)</label>
+        <select id="idAssent" name="idAssent" class="form-select" required>
+          <option value="">-- Selecione --</option>
+          {% for a in assentados %}
+            <!-- a = (idAssent, nome) -->
+            <option value="{{ a[0] }}">{{ a[0] }} - {{ a[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
 
         <!-- TIPO DE CONTRIBUIÇÃO (vem de tbtipfinanc) -->
         <div class="col-md-4">
@@ -62,27 +83,27 @@
           <select id="idTipFinanc" name="idTipFinanc" class="form-select" required>
             <option value="">-- Selecione --</option>
             {% for t in tipos %}
-              <!-- Esperado: (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub, perct, idTipUnEqv, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
-             <option
+              <!-- Esperado: (idTipFinanc, nomFinanc, idCatgFinanc, idPolPub, valPolPub,
+                              percVal, pol_perc, idTipUnEqv, valEqv, nomCatg, catgParcdoSN, nomUnEqv) -->
+              <option
                 value="{{ t[0] }}"
                 data-desc="{{ t[1] }}"
                 data-idcatg="{{ t[2] }}"
                 data-idpol="{{ t[3] or '' }}"
                 data-valpol="{{ t[4] or '' }}"
-                data-percval="{{ t[5] or '' }}"  <!-- AQUI: percVal direto -->
+                data-percval="{{ t[5] or '' }}"
                 data-polperc="{{ t[6] or '' }}"
                 data-uneqv="{{ t[7] or '' }}"
                 data-valeqv="{{ t[8] or '' }}"
                 data-nomcatg="{{ t[9] or '' }}"
                 data-parc="{{ t[10] or 'N' }}"
                 data-nomuneqv="{{ t[11] or '' }}"
-              >{{ t[1] }}
-            </option>
+              >{{ t[1] }}</option>
             {% endfor %}
           </select>
         </div>
 
-        <!-- Linha de “cartão” de informações do tipo escolhido -->
+        <!-- “Cartão” informativo do tipo selecionado -->
         <div class="col-12">
           <div class="row g-2">
             <div class="col-md-4">
@@ -140,89 +161,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const selTipo = document.getElementById('idTipFinanc');
-  const descTipo= document.getElementById('descTipo');
-  const catgTipo= document.getElementById('catgTipo');
-  const uneqvTipo= document.getElementById('uneqvTipo');
+  const selTipo     = document.getElementById('idTipFinanc');
+  const descTipo    = document.getElementById('descTipo');
+  const catgTipo    = document.getElementById('catgTipo');
+  const uneqvTipo   = document.getElementById('uneqvTipo');
 
-  const valView = document.getElementById('valFinanc_view');
-  const valHidden = document.getElementById('valFinanc');
-
-  const grpParcelas = document.getElementById('grpParcelas');
-  const qtdParcelas = document.getElementById('qtdParcelas');
-
-  const hidIdCatg = document.getElementById('idCatgFinanc');
-  const hidParcSN = document.getElementById('catgParcdoSN');
-  const hidPolPub = document.getElementById('idPolPub');
-
-  function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
-
-  function atualizarTipo(){
-    const opt = selTipo?.options[selTipo.selectedIndex];
-    if(!opt || !opt.value){
-      descTipo.value = ''; catgTipo.value = ''; uneqvTipo.value = '';
-      valView.value = ''; valHidden.value = '';
-      hidIdCatg.value = ''; hidParcSN.value='N'; hidPolPub.value='';
-      grpParcelas.classList.add('d-none'); qtdParcelas.value='';
-      return;
-    }
-
-    const desc = opt.getAttribute('data-desc') || '';
-    const nomcatg = opt.getAttribute('data-nomcatg') || '';
-    const uneqv = opt.getAttribute('data-nomuneqv') || '';
-    const idCatg = opt.getAttribute('data-idcatg') || '';
-    const parcSN = (opt.getAttribute('data-parc') || 'N');
-    const idPol  = opt.getAttribute('data-idpol') || '';
-    const valPol = n(opt.getAttribute('data-valpol'));
-    const perct  = n(opt.getAttribute('data-perct'));
-    const valEqv = n(opt.getAttribute('data-valeqv'));
-
-    // Valor pela regra:
-    // Política Pública -> valPolPub * perct; Mensalidade -> valEqv; Outras -> valEqv
-    let valor = valEqv;
-    const nomeC = nomcatg.toUpperCase();
-    const isPolitica = (idPol && (nomeC.includes('POLIT')));
-    const isMensal   = nomeC.includes('MENSAL');
-
-    if(isPolitica) valor = valPol * perct;
-    else if(isMensal) valor = valEqv;
-
-    descTipo.value = desc;
-    catgTipo.value = nomcatg;
-    uneqvTipo.value = uneqv;
-
-    valView.value = isFinite(valor)? valor.toFixed(2) : '';
-    valHidden.value = isFinite(valor)? valor.toString() : '';
-
-    hidIdCatg.value = idCatg;
-    hidParcSN.value = parcSN;
-    hidPolPub.value = idPol || '';
-
-    // Parcelas só se categoria for parcelada
-    grpParcelas.classList.toggle('d-none', parcSN !== 'S');
-    if(parcSN !== 'S'){ qtdParcelas.value=''; }
-  }
-
-  selTipo?.addEventListener('change', atualizarTipo);
-  atualizarTipo();
-</script>
-
-<!-- mantém seu <select id="idTipFinanc"> como está -->
-<script>
-  const selTipo    = document.getElementById('idTipFinanc');
-  const descTipo   = document.getElementById('descTipo');
-  const catgTipo   = document.getElementById('catgTipo');
-  const uneqvTipo  = document.getElementById('uneqvTipo');
-
-  const valView    = document.getElementById('valFinanc_view');
-  const valHidden  = document.getElementById('valFinanc');
+  const valView     = document.getElementById('valFinanc_view');
+  const valHidden   = document.getElementById('valFinanc');
 
   const grpParcelas = document.getElementById('grpParcelas');
   const qtdParcelas = document.getElementById('qtdParcelas');
 
-  const hidIdCatg  = document.getElementById('idCatgFinanc');
-  const hidParcSN  = document.getElementById('catgParcdoSN');
-  const hidPolPub  = document.getElementById('idPolPub');
+  const hidIdCatg   = document.getElementById('idCatgFinanc');
+  const hidParcSN   = document.getElementById('catgParcdoSN');
+  const hidPolPub   = document.getElementById('idPolPub');
 
   function n(v){ v=(v??'').toString().replace(',','.').trim(); return v?Number(v):0; }
 
@@ -242,18 +194,14 @@
     const idCatg  = opt.getAttribute('data-idcatg') || '';
     const parcSN  = (opt.getAttribute('data-parc') || 'N');
     const idPol   = opt.getAttribute('data-idpol') || '';
-    const valPol  = n(opt.getAttribute('data-valpol'));   // ex.: 1000
-    let   perct   = n(opt.getAttribute('data-perct'));    // pode vir 0.12 ou 12
-    const valEqv  = n(opt.getAttribute('data-valeqv'));
+    const percVal = n(opt.getAttribute('data-percval'));  // valor pronto do BD (tbtipfinanc.percVal)
+    const valEqv  = n(opt.getAttribute('data-valeqv'));   // usado p/ mensalidade e demais
 
-    // normaliza percentual: se vier 12, converte p/ 0.12
-    if (perct > 1) perct = perct / 100;
-
-    // política pública = presença de idPolPub
+    // Política pública se tiver idPolPub
     const isPolitica = !!idPol;
 
-    // Valor: Política -> valPol * perct ; outras/mensalidade -> valEqv
-    let valor = isPolitica ? (valPol * perct) : valEqv;
+    // Regra do valor: Política -> percVal ; outras/mensalidade -> valEqv
+    let valor = isPolitica ? percVal : valEqv;
 
     descTipo.value  = desc;
     catgTipo.value  = nomcatg;
@@ -271,6 +219,7 @@
     hidParcSN.value = parcSN;
     hidPolPub.value = idPol || '';
 
+    // Parcelas só se categoria for parcelada
     grpParcelas.classList.toggle('d-none', parcSN !== 'S');
     if (parcSN !== 'S') qtdParcelas.value = '';
   }
