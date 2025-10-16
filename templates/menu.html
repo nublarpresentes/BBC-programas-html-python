@@ -42,7 +42,7 @@
   <div class="container">
     <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
-      <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
       <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
     </div>
 
@@ -86,7 +86,27 @@
           <div class="list-group-item list-heading">MÓDULOS</div>
           <a href="/menuBBC" class="list-group-item list-group-item-action">BANCO DO BEM COMUM</a>
           <a href="/menuCaderneta" class="list-group-item list-group-item-action">CADERNETA DA PARTILHA</a>
-          <a href="/menuAssent" class="list-group-item list-group-item-action">ASSENTADO</a>
+
+
+         <div class="list-group-item dropdown-submenu">
+          <span class="fw-bold">ASSENTADO <i class="bi bi-caret-right-fill arrow"></i></span>
+          <div class="dropdown-menu">
+            <a href="/assentCad"       class="dropdown-item">Cadastro Assentado</a>
+            <a href="/assentAlt"       class="dropdown-item">Altera Assentado</a>
+            <a href="/assentExc"       class="dropdown-item">Exclui Assentado</a>
+            <div class="dropdown-divider"></div>
+            <a href="/familiaCad"      class="dropdown-item">Cadastro Família</a>
+            <a href="/familiaAlt"      class="dropdown-item">Altera Família</a>
+            <a href="/familiaExc"      class="dropdown-item">Exclui Família</a>
+            <a href="/familiaCon"      class="dropdown-item">Consulta Família</a>
+            <div class="dropdown-divider"></div>
+            <a href="/gerarCarteira"   class="dropdown-item">Gerar Carteiras</a>
+          </div>
+        </div>
+
+
+
+
           <a href="/menuEventos" class="list-group-item list-group-item-action">EVENTOS</a>
           <!-- TABELAS DO SISTEMA -->
          <div class="list-group-item list-heading mt-2">TABELAS DO SISTEMA</div>

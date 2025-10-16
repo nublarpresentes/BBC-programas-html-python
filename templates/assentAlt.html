@@ -5,13 +5,16 @@
   <title>Alterar Assentado</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <style>.form-section{background:#fff;padding:18px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}</style>
+  <style>
+    .form-section { background:#fff; padding:18px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
+    .table-hover tbody tr:hover { background-color: #f0f8f5; }
+  </style>
 </head>
 <body class="bg-light">
 
 <header class="bg-primary text-white shadow-sm">
   <div class="container d-flex align-items-center py-2">
-    <img src="/static/img/ifpaLogo.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+    <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
     <h1 class="h4 mb-0">Alteração de Assentado</h1>
   </div>
 </header>
@@ -25,156 +28,58 @@
     {% endif %}
   {% endwith %}
 
-  <!-- Lista -->
-  <div class="form-section mb-4">
-    <h5 class="text-primary mb-3">Registros (recentes primeiro)</h5>
+  <!-- ================== LISTAGEM LATERAL ================== -->
+  <div class="mb-4">
+    <h5>Assentados cadastrados</h5>
     <div class="table-responsive">
-      <table class="table table-sm table-striped align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>ID</th><th>Nome</th><th>CPF</th><th>Bairro</th><th>Situação</th><th class="text-center">Ações</th>
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr class="table-success">
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Bairro</th>
+            <th>Status</th>
+            <th>Ação</th>
           </tr>
         </thead>
         <tbody>
-        {% for i in itens %}
+        {% for item in itens %}
           <tr>
-            <td>{{ i[0] }}</td>
-            <td>{{ i[1] }}</td>
-            <td>{{ i[2] or '' }}</td>
-            <td>{{ i[3] or '' }}</td>
-            <td>{{ 'Ativo' if i[4]==1 else 'Inativo' }}</td>
-            <td class="text-center">
-              <a class="btn btn-sm btn-outline-primary" href="/assentAlt?id={{ i[0] }}">Editar</a>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>
+              {% if item[4] == 1 %}
+                <span class="badge bg-success">Ativo</span>
+              {% else %}
+                <span class="badge bg-danger">Inativo</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('assentAlt') }}?id={{ item[0] }}" class="btn btn-sm btn-outline-primary">
+                Editar
+              </a>
             </td>
           </tr>
-        {% else %}
-          <tr><td colspan="6" class="text-center text-muted">Sem registros.</td></tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 
+  <!-- ================== FORMULÁRIO DE ALTERAÇÃO ================== -->
   {% if registro %}
-  <!-- Form de edição -->
   <form action="/altAssent" method="POST" class="form-section row g-3">
-    <h5 class="text-success">Editar — ID {{ registro[0] }}</h5>
-    <input type="hidden" name="idAssent" value="{{ registro[0] }}"/>
+    <input type="hidden" name="idAssent" value="{{ registro[0] }}">
 
     <div class="col-md-6">
-      <label class="form-label fw-bold">Nome</label>
-      <input type="text" name="nome" class="form-control" maxlength="150" value="{{ registro[1] or '' }}" required>
+      <label class="form-label fw-bold">Nome *</label>
+      <input type="text" name="nome" class="form-control" value="{{ registro[1] }}" required>
     </div>
 
     <div class="col-md-2">
-      <label class="form-label fw-bold">Gênero</label>
-      <select name="genero" class="form-select">
-        <option value="">—</option>
-        <option value="M" {{ 'selected' if registro[2]=='M' else '' }}>M</option>
-        <option value="F" {{ 'selected' if registro[2]=='F' else '' }}>F</option>
-      </select>
-    </div>
+      <label class="form-label fw-bold">Gênero *</label>
+      <select name="genero" class="form
 
-    <div class="col-md-4">
-      <label class="form-label fw-bold">Mãe</label>
-      <input type="text" name="mae" class="form-control" maxlength="80" value="{{ registro[3] or '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label fw-bold">Endereço</label>
-      <input type="text" name="endereco" class="form-control" maxlength="250" value="{{ registro[4] or '' }}">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Bairro</label>
-      <input type="text" name="bairro" class="form-control" maxlength="20" value="{{ registro[5] or '' }}">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">CPF</label>
-      <input type="text" name="cpf" class="form-control" maxlength="14" value="{{ registro[6] or '' }}">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">RG</label>
-      <input type="text" name="rg" class="form-control" maxlength="40" value="{{ registro[7] or '' }}">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Órgão RG</label>
-      <input type="text" name="rgOrgExp" class="form-control" maxlength="20" value="{{ registro[8] or '' }}">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Data Nascimento</label>
-      <input type="date" name="dtNasc" class="form-control" value="{{ registro[9] }}">
-    </div>
-
-    <div class="col-md-2">
-      <label class="form-label fw-bold">UF Nasc.</label>
-      <select name="ufNasc" id="ufNasc" class="form-select">
-        <option value="">—</option>
-        {% for u in ufs %}
-          <option value="{{u[0]}}" {{ 'selected' if registro[10]==u[0] else '' }}>{{u[0]}} - {{u[1]}}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-7">
-      <label class="form-label fw-bold">Município Nascimento</label>
-      <select name="codMunNas" id="codMunNas" class="form-select">
-        <option value="">—</option>
-        {% for m in municipios %}
-          <option value="{{m[0]}}" {{ 'selected' if registro[11]==m[0] else '' }}>{{m[1]}}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label fw-bold">E-mail</label>
-      <input type="email" name="email" class="form-control" maxlength="100" value="{{ registro[12] or '' }}">
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label fw-bold">WhatsApp</label>
-      <input type="text" name="noWhatsapp" class="form-control" maxlength="20" value="{{ registro[13] or '' }}">
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label fw-bold">Celular</label>
-      <input type="text" name="celular" class="form-control" maxlength="13" value="{{ registro[14] or '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label fw-bold">Família Assentado</label>
-      <select name="idFamilia" class="form-select">
-        <option value="">—</option>
-        {% for f in familias %}
-          <option value="{{f[0]}}" {{ 'selected' if registro[15]==f[0] else '' }}>{{f[1]}} ({{f[0]}})</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Situação</label>
-      <select name="idSitAssent" class="form-select">
-        <option value="">—</option>
-        <option value="1" {{ 'selected' if registro[16]==1 else '' }}>Ativo</option>
-        <option value="0" {{ 'selected' if registro[16]==0 else '' }}>Inativo</option>
-      </select>
-    </div>
-
-    <div class="col-12 text-center">
-      <button class="btn btn-primary">Salvar Alterações</button>
-      <a href="/assentAlt" class="btn btn-secondary">Cancelar</a>
-    </div>
-  </form>
-  {% endif %}
-</main>
-
-<footer class="bg-dark text-white text-center py-3 mt-4">
-  <small>SBBC • Assentado</small>
-</footer>
-
-</body>
-</html>

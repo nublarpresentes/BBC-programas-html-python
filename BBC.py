@@ -1,4 +1,5 @@
 import psycopg2
+
 from datetime import datetime
 
 from flask import Flask, request, render_template, redirect, url_for, session, flash
@@ -19,7 +20,7 @@ from controleBBC import (
 
 from assent import (
      obter_foto_assentado, view_assentCad, view_assentAlt, view_assentExc, _valida_cpf_mod11,
-     cadastrar_assent, alterar_assent, excluir_assent
+     cadastrar_assent, alterar_assent, ver_carteira_assentado, view_gerarCarteira, post_gerarCarteira
 )
 
 
@@ -50,6 +51,14 @@ from tipUsoInfr import (
     pagina_conGeralTipUsoInfr,  conFiltroTipUsoInfr
 )
 
+from entidade import (
+    view_entidadeCad, cadastrar_entidade,
+    view_entidadeAlt, alterar_entidade,
+    view_entidadeExc, excluir_entidade,
+    pagina_conEntidade, conFiltroEntidade
+)
+
+
 from recpsa import (
     view_recpsaCad, cadastrar_recpsa
 #   view_recpsaAlt, alterar_recpsa,
@@ -64,6 +73,13 @@ from catgUsoInfr import (
     view_catgUsoInfrExc, excluir_catgUsoInfr,
     view_catgUsoInfrCon
 )
+
+from polPub import (
+    cadastrar_politpub, alterar_politpub, excluir_politpub,
+    listar_politpub, pegar_politpub, _listar_entidades,
+    pagina_conPolitPub, conFiltroPolitPub
+)
+
 
 from saldo import pagina_conGeralSaldo, conFiltroSaldo
 
@@ -251,6 +267,12 @@ def excPolitPub():
     return excluir_politpub()
 
 
+@app.route('/politPubCon')
+def politPubCon():
+    entidades = _listar_entidades()
+    return render_template('politPubCon.html', entidades=entidades)
+
+
 # ========== UNIDADE DE EQUIVALÊNCIA ==========
 
 @app.route('/unEqvCad')
@@ -361,12 +383,16 @@ def excCtgAssent():
 
 # ========== ASSENTADO (CAD/ALT/EXC) ==========
 # --- ASSENTADO: rotas (CRUD + Consulta Geral) ---
+
+
+# ASSENTADO
 from assent import (
     view_assentCad, cadastrar_assent,
     view_assentAlt, alterar_assent,
-    view_assentExc, excluir_assent,
-    pagina_conGeralAssent, conFiltroAssent
+    view_assentExc, ver_carteira_assentado,
+    view_gerarCarteira, post_gerarCarteira
 )
+
 
 @app.get('/menuAssent')
 def menuAssent():
@@ -904,6 +930,93 @@ def conGeralSaldo():
 @app.route('/conFiltroSaldo', methods=['GET', 'POST'])
 def conFiltroSaldo_route():
     return conFiltroSaldo()
+
+# ========== ENTIDADES ==========
+
+@app.route('/entidadeCad')
+def entidadeCad():
+    return view_entidadeCad()
+
+@app.route('/cadEntidade', methods=['POST'])
+def cadEntidade():
+    return cadastrar_entidade()
+
+@app.route('/entidadeAlt')
+def entidadeAlt():
+    return view_entidadeAlt()
+
+@app.route('/altEntidade', methods=['POST'])
+def altEntidade():
+    return alterar_entidade()
+
+@app.route('/entidadeExc')
+def entidadeExc():
+    return view_entidadeExc()
+
+@app.route('/excEntidade', methods=['POST'])
+def excEntidade():
+    return excluir_entidade()
+
+@app.route('/entidadeCon', methods=['GET', 'POST'])
+def conEntidade():
+    # GET com querystring e POST caem na mesma página
+    return pagina_conEntidade()
+
+# ========== CONSULTA — POLÍTICAS PÚBLICAS ==========
+@app.route('/conPolitPub', methods=['GET'])
+def conPolitPub():
+    return pagina_conPolitPub()
+
+@app.route('/conFiltroPolitPub', methods=['GET','POST'])
+def conFiltroPolitPub_route():
+    return conFiltroPolitPub()
+
+
+
+# --- SALDO (por assentado) ---
+@app.route('/saldoAssent', methods=['GET'])
+def saldoAssent():
+    from saldo import pagina_saldoAssent
+    return pagina_saldoAssent()
+
+# rota:
+@app.route("/carteira/<int:idAssent>")
+def verCarteiraAssentado(idAssent):
+    return ver_carteira_assentado(idAssent)
+
+# ...
+
+app.add_url_rule("/gerarCarteira", view_func=view_gerarCarteira, methods=["GET"], endpoint="gerarCarteira")
+app.add_url_rule("/gerarCarteira", view_func=post_gerarCarteira,   methods=["POST"])
+# ...
+
+# --- Assentado ---
+app.add_url_rule("/assentCad", view_func=view_assentCad, methods=["GET"])
+app.add_url_rule("/assentCad", view_func=cadastrar_assent, methods=["POST"])
+
+app.add_url_rule("/assentAlt", view_func=view_assentAlt, methods=["GET"])
+app.add_url_rule("/assentAlt", view_func=alterar_assent, methods=["POST"])
+
+app.add_url_rule("/assentExc", view_func=view_assentExc, methods=["GET"])
+# (se tiver POST de exclusão do assentado, adicione aqui)
+
+app.add_url_rule("/carteira/<int:idAssent>", view_func=ver_carteira_assentado, methods=["GET"])
+
+app.add_url_rule("/gerarCarteira", view_func=view_gerarCarteira, methods=["GET"], endpoint="gerarCarteira")
+app.add_url_rule("/gerarCarteira", view_func=post_gerarCarteira, methods=["POST"])
+
+# --- Família ---
+# app.add_url_rule("/familiaCad", view_func=view_familiaCad, methods=["GET"])
+app.add_url_rule("/familiaCad", view_func=cadastrar_familia, methods=["POST"])
+
+# app.add_url_rule("/familiaAlt", view_func=view_familiaAlt, methods=["GET"])
+app.add_url_rule("/familiaAlt", view_func=alterar_familia, methods=["POST"])
+
+# app.add_url_rule("/familiaExc", view_func=view_familiaExc, methods=["GET"])
+app.add_url_rule("/familiaExc", view_func=excluir_familia, methods=["POST"])
+
+#app.add_url_rule("/familiaCon", view_func=view_familiaCon, methods=["GET"])
+
 
 
 # -------------------- RUN --------------------

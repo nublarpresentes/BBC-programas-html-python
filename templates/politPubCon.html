@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Consulta Geral — Políticas Públicas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .form-section{background:#fff;padding:16px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .pagination .page-link{min-width:40px;text-align:center}
+    .table thead th{white-space:nowrap}
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/logo_bbc.png" style="height:60px" class="me-3" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC — Políticas Públicas</h1>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+
+    <!-- Filtros -->
+    <div class="form-section mb-3">
+      <h5 class="text-primary mb-3">Filtros</h5>
+      <form action="/conPolitPub" method="GET" class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Nome contém</label>
+          <input type="text" name="nome" class="form-control" value="{{ filtros.nome or '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Entidade</label>
+          <select name="idEntidade" class="form-select">
+            <option value="">— Todas —</option>
+            {% for e in entidades %}
+              <option value="{{ e[0] }}" {{ 'selected' if filtros.idEntidade==e[0]|string else '' }}>
+                {{ e[1] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Valor mín.</label>
+          <input type="number" step="0.01" min="0" name="valMin" class="form-control" value="{{ filtros.valMin or '' }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Valor máx.</label>
+          <input type="number" step="0.01" min="0" name="valMax" class="form-control" value="{{ filtros.valMax or '' }}">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">% mín.</label>
+          <input type="number" step="0.01" min="0" name="percMin" class="form-control" value="{{ filtros.percMin or '' }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">% máx.</label>
+          <input type="number" step="0.01" min="0" name="percMax" class="form-control" value="{{ filtros.percMax or '' }}">
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary">Aplicar</button>
+          <a href="/conPolitPub" class="btn btn-secondary">Limpar</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabela -->
+    <div class="form-section">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div><strong>Total:</strong> {{ total }} registro(s)</div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% for p in range(1, pages+1) %}
+              <li class="page-item {{ 'active' if p==page else '' }}">
+                <a class="page-link" href="{{ pagina_url(p) }}">{{ p }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Política</th>
+              <th>Entidade</th>
+              <th class="text-end">Valor</th>
+              <th class="text-end">%</</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td>{{ r.idPolPub }}</td>
+                <td>{{ r.nomPolPub }}</td>
+                <td>{{ r.nom_entidade }}</td>
+                <td class="text-end">{{ '%.2f'|format(r.valor or 0) }}</td>
+                <td class="text-end">{{ '%.2f'|format(r.perct or 0) }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-center text-muted">Sem resultados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end mt-2">
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% for p in range(1, pages+1) %}
+              <li class="page-item {{ 'active' if p==page else '' }}">
+                <a class="page-link" href="{{ pagina_url(p) }}">{{ p }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxx — Abaetetuba-PA</p>
+</footer>
+</body>
+</html>

@@ -24,35 +24,35 @@ def buscar_matricula_assentado():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("SELECT matricula FROM tbassentado ORDER BY nome")
-            matriculas = cur.fetchall()
+            cur.execute("SELECT 'idAssent' FROM tbassentado ORDER BY nome")
+            idAssents = cur.fetchall()
             conn.close()
-            return matriculas
+            return idAssents
         except Exception as e:
             print("Erro ao buscar matrículas dos asentados:", e)
             return None
     else:
         return None
 
-def gerar_qrcode(matricula):
+def gerar_qrcode(idAssent):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
     )
-    qr.add_data(matricula)
+    qr.add_data(idAssent)
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    img.save(f"QR{matricula}.jpg")
+    img.save(f"QR{idAssent}.jpg")
 
 def main():
-    matriculas = buscar_matricula_aluno()
-    if matriculas:
-        for matricula in matriculas:
-            matricula_str = str(matricula[0])
-            gerar_qrcode(matricula_str)
+    idAssents = buscar_matricula_assentado()
+    if idAssents:
+        for idAssent in idAssents:
+            idAssent_str = str(idAssent[0])
+            gerar_qrcode(idAssent_str)
     else:
         print("Não foi possível buscar as matrículas dos assentados.")
 
