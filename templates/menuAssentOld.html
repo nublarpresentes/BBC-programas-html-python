@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>SBBC — Menu Assentado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    body{background:#f5f7fb}
+    .shadow-soft{box-shadow:0 8px 20px rgba(0,0,0,.06)}
+    .card-rounded{border-radius:14px}
+    .list-group a.list-group-item{border:none;border-radius:10px;margin-bottom:8px}
+    .list-group a.list-group-item:hover{background:#e9f5ef}
+    .form-section{background:#fff;padding:14px;border-radius:12px}
+    .table thead th{background:#f0f3f7}
+    .menu-section-title{font-weight:bold;color:#198754;margin-top:12px;margin-bottom:4px;font-size:0.9rem}
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- HEADER -->
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC" title="Ir para a Home" aria-label="Ir para a Home" data-bs-toggle="tooltip"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent" title="Área de Assentados" aria-label="Área de Assentados" data-bs-toggle="tooltip"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" aria-label="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuEventos" title="Eventos" aria-label="Eventos" data-bs-toggle="tooltip"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco" aria-label="Fale Conosco" data-bs-toggle="tooltip"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="row g-4">
+
+      <!-- MENU LATERAL -->
+      <aside class="col-lg-3">
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Assentado</h5>
+
+            <!-- Assentado -->
+            <div class="menu-section-title">Assentado</div>
+            <div class="list-group">
+              <a href="/assentCad" class="list-group-item list-group-item-action"
+                 title="Cadastrar novo assentado" aria-label="Cadastrar novo assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-person-plus me-2"></i>Cadastro
+              </a>
+              <a href="/assentAlt" class="list-group-item list-group-item-action"
+                 title="Alterar dados de um assentado" aria-label="Alterar dados de um assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-pencil-square me-2"></i>Alterar
+              </a>
+              <a href="/assentExc" class="list-group-item list-group-item-action"
+                 title="Excluir um assentado" aria-label="Excluir um assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-person-dash me-2"></i>Excluir
+              </a>
+              <a href="/conGeralAssent" class="list-group-item list-group-item-action"
+                 title="Consulta geral de assentados" aria-label="Consulta geral de assentados" data-bs-toggle="tooltip">
+                <i class="bi bi-search me-2"></i>Consulta
+              </a>
+              <a href="/saldoAssent" class="list-group-item list-group-item-action"
+                 title="Ver saldo por assentado" aria-label="Ver saldo por assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-clipboard-data me-2"></i>Saldo
+              </a>
+              <a href="/eventosAssent" class="list-group-item list-group-item-action"
+                 title="Eventos do assentado" aria-label="Eventos do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-calendar-event me-2"></i>Eventos
+              </a>
+            </div>
+
+            <!-- Família -->
+            <div class="menu-section-title mt-3">Família</div>
+            <div class="list-group">
+              <a href="/familiaCad" class="list-group-item list-group-item-action"
+                 title="Cadastrar família" aria-label="Cadastrar família" data-bs-toggle="tooltip">
+                <i class="bi bi-people me-2"></i>Cadastro
+              </a>
+              <a href="/familiaAlt" class="list-group-item list-group-item-action"
+                 title="Alterar família" aria-label="Alterar família" data-bs-toggle="tooltip">
+                <i class="bi bi-pencil me-2"></i>Alterar
+              </a>
+              <a href="/familiaExc" class="list-group-item list-group-item-action"
+                 title="Excluir família" aria-label="Excluir família" data-bs-toggle="tooltip">
+                <i class="bi bi-person-x me-2"></i>Excluir
+              </a>
+              <a href="/familiaCon" class="list-group-item list-group-item-action"
+                 title="Consultar família" aria-label="Consultar família" data-bs-toggle="tooltip">
+                <i class="bi bi-search-heart me-2"></i>Consulta
+              </a>
+            </div>
+
+            <!-- Situação -->
+            <div class="menu-section-title mt-3">Situação do Assentado</div>
+            <div class="list-group">
+              <a href="/sitAssentCad" class="list-group-item list-group-item-action"
+                 title="Incluir situação do assentado" aria-label="Incluir situação do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-plus-circle me-2"></i>Incluir
+              </a>
+              <a href="/sitAssentAlt" class="list-group-item list-group-item-action"
+                 title="Alterar situação do assentado" aria-label="Alterar situação do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-pencil me-2"></i>Alterar
+              </a>
+              <a href="/sitAssentExc" class="list-group-item list-group-item-action"
+                 title="Excluir situação do assentado" aria-label="Excluir situação do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-x-circle me-2"></i>Excluir
+              </a>
+            </div>
+
+            <!-- Categoria -->
+            <div class="menu-section-title mt-3">Categoria do Assentado</div>
+            <div class="list-group">
+              <a href="/ctgAssentCad" class="list-group-item list-group-item-action"
+                 title="Incluir categoria do assentado" aria-label="Incluir categoria do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-plus-circle me-2"></i>Incluir
+              </a>
+              <a href="/ctgAssentAlt" class="list-group-item list-group-item-action"
+                 title="Alterar categoria do assentado" aria-label="Alterar categoria do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-pencil me-2"></i>Alterar
+              </a>
+              <a href="/ctgAssentExc" class="list-group-item list-group-item-action"
+                 title="Excluir categoria do assentado" aria-label="Excluir categoria do assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-x-circle me-2"></i>Excluir
+              </a>
+            </div>
+
+            <!-- Carteiras -->
+            <div class="menu-section-title mt-3">Carteiras</div>
+            <div class="list-group">
+              <a href="/gerarCarteira" class="list-group-item list-group-item-action"
+                 title="Gerar carteiras" aria-label="Gerar carteiras" data-bs-toggle="tooltip">
+                <i class="bi bi-card-text me-2"></i>Gerar Carteiras
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CONTEÚDO CENTRAL -->
+      <section class="col-lg-9">
+        <!-- Acesso rápido -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <h5 class="mb-0 me-2"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i>Acesso rápido:</h5>
+
+              <a class="btn btn-outline-primary btn-sm"
+                 href="/conGeralAssent"
+                 title="Consulta geral de assentados" aria-label="Consulta geral de assentados" data-bs-toggle="tooltip">
+                <i class="bi bi-person-lines-fill me-1"></i>Assentados
+              </a>
+
+              <a class="btn btn-outline-primary btn-sm"
+                 href="/conGeralContrib"
+                 title="Consultar contribuições" aria-label="Consultar contribuições" data-bs-toggle="tooltip">
+                <i class="bi bi-cash-coin me-1"></i>Contribuições
+              </a>
+
+              <a class="btn btn-outline-primary btn-sm"
+                 href="/conGeralRetrib"
+                 title="Consultar retribuições" aria-label="Consultar retribuições" data-bs-toggle="tooltip">
+                <i class="bi bi-gift-fill me-1"></i>Retribuições
+              </a>
+
+              <a class="btn btn-outline-primary btn-sm"
+                 href="/conGeralSaldo"
+                 title="Consulta geral de saldos" aria-label="Consulta geral de saldos" data-bs-toggle="tooltip">
+                <i class="bi bi-graph-up-arrow me-1"></i>Saldo
+              </a>
+
+              <a class="btn btn-outline-secondary btn-sm"
+                 href="/saldoAssent"
+                 title="Saldo por assentado" aria-label="Saldo por assentado" data-bs-toggle="tooltip">
+                <i class="bi bi-clipboard-data me-1"></i>Saldo por Assentado
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body">
+            <form action="/conGeralAssent" method="GET" class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Assentado</label>
+                <select name="idAssent" class="form-select" title="Filtrar por assentado" aria-label="Filtrar por assentado" data-bs-toggle="tooltip">
+                  <option value="">— Todos —</option>
+                  {% for a in assentados or [] %}
+                    <option value="{{ a[0] }}" {{ 'selected' if (filtros and filtros.idAssent==a[0]|string) else '' }}>{{ a[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Família</label>
+                <select name="idFamilia" class="form-select" title="Filtrar por família" aria-label="Filtrar por família" data-bs-toggle="tooltip">
+                  <option value="">— Todas —</option>
+                  {% for f in familias or [] %}
+                    <option value="{{ f[0] }}" {{ 'selected' if (filtros and filtros.idFamilia==f[0]|string) else '' }}>{{ f[1] }} ({{ f[0] }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-12 d-flex gap-2">
+                <button class="btn btn-primary" title="Aplicar filtros" aria-label="Aplicar filtros" data-bs-toggle="tooltip">
+                  <i class="bi bi-funnel-fill me-1"></i>Aplicar Filtros
+                </button>
+                <a class="btn btn-secondary" href="/menuAssent" title="Limpar filtros" aria-label="Limpar filtros" data-bs-toggle="tooltip">
+                  <i class="bi bi-eraser-fill me-1"></i>Limpar
+                </a>
+
+                {% if filtros and filtros.idAssent %}
+                  <a class="btn btn-outline-success ms-auto"
+                     href="/saldoAssent?idAssent={{ filtros.idAssent }}"
+                     title="Ver saldo deste assentado" aria-label="Ver saldo deste assentado" data-bs-toggle="tooltip">
+                    <i class="bi bi-clipboard-data me-1"></i> Ver Saldo
+                  </a>
+                  <a class="btn btn-outline-success"
+                     href="/conGeralContrib?idAssent={{ filtros.idAssent }}"
+                     title="Ver contribuições deste assentado" aria-label="Ver contribuições deste assentado" data-bs-toggle="tooltip">
+                    <i class="bi bi-cash-coin me-1"></i> Contribuições
+                  </a>
+                  <a class="btn btn-outline-success"
+                     href="/conGeralRetrib?idAssent={{ filtros.idAssent }}"
+                     title="Ver retribuições deste assentado" aria-label="Ver retribuições deste assentado" data-bs-toggle="tooltip">
+                    <i class="bi bi-gift me-1"></i> Retribuições
+                  </a>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tabela dos assentados -->
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Assentados</h5>
+              <small class="text-muted">Mostrando alguns registros (ordem alfabética)</small>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>Matrícula</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Município Nasc.</th>
+                    <th>E-mail</th>
+                    <th>Celular</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if rows and rows|length %}
+                    {% for r in rows %}
+                      {% set rid = r.idAssent or r.idassent %}
+                      <tr>
+                        <td>{{ r.idassent or r.idAssent }}</td>
+                        <td>{{ r.nome }}</td>
+                        <td>{{ r.cpf or '-' }}</td>
+                        <td>{{ r.nommun or r.nomMun or '-' }}</td>
+                        <td>{{ r.email or '-' }}</td>
+                        <td>{{ r.celular or '-' }}</td>
+                        <td class="text-center">
+                          <a class="btn btn-sm btn-outline-primary"
+                             href="/assentAlt?id={{ rid }}"
+                             title="Alterar este assentado" aria-label="Alterar este assentado" data-bs-toggle="tooltip">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                          <a class="btn btn-sm btn-outline-secondary"
+                             href="/saldoAssent?idAssent={{ rid }}"
+                             title="Ver saldo deste assentado" aria-label="Ver saldo deste assentado" data-bs-toggle="tooltip">
+                            <i class="bi bi-clipboard-data"></i>
+                          </a>
+                          <a class="btn btn-sm btn-outline-success"
+                             href="/conGeralContrib?idAssent={{ rid }}"
+                             title="Ver contribuições deste assentado" aria-label="Ver contribuições deste assentado" data-bs-toggle="tooltip">
+                            <i class="bi bi-cash-coin"></i>
+                          </a>
+                          <a class="btn btn-sm btn-outline-success"
+                             href="/conGeralRetrib?idAssent={{ rid }}"
+                             title="Ver retribuições deste assentado" aria-label="Ver retribuições deste assentado" data-bs-toggle="tooltip">
+                            <i class="bi bi-gift"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr><td colspan="7" class="text-center text-muted">Sem registros para exibir.</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <small>Endereço: xxxxxxxxx — Abaetetuba-PA • SBBC</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Inicializa tooltips do Bootstrap
+  document.addEventListener('DOMContentLoaded', function () {
+    var triggers = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    triggers.forEach(function (el) { new bootstrap.Tooltip(el); });
+  });
+</script>
+</body>
+</html>

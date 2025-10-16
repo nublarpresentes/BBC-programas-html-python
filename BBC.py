@@ -1,11 +1,8 @@
 import psycopg2
-
 from datetime import datetime
-
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 
 # -------------------- IMPORTS DO PROJETO --------------------
-
 from conexao_bd import conectar_bd
 
 # Controle/WhatsApp/Cartão
@@ -16,25 +13,25 @@ from controleBBC import (
     dados_cartao_curso, cartao_curso
 )
 
-# Assentado
-
+# Assentado (tudo que a UI precisa)
 from assent import (
-     obter_foto_assentado, view_assentCad, view_assentAlt, view_assentExc, _valida_cpf_mod11,
-     cadastrar_assent, alterar_assent, ver_carteira_assentado, view_gerarCarteira, post_gerarCarteira
+    view_menuAssent,
+    obter_foto_assentado,
+    view_assentCad, cadastrar_assent,
+    view_assentAlt, alterar_assent,
+    view_assentExc,
+    ver_carteira_assentado,
+    view_gerarCarteira, post_gerarCarteira,
+    pagina_conGeralAssent, conFiltroAssent
 )
-
-
 
 # Retribuição
 from retrib import (
     view_retribCad, cadastrar_retrib,
     view_retribAlt, alterar_retrib,
     view_retribExc, excluir_retrib,
-    pagina_conGeralRetrib, conFiltroRetrib,  # << nomes corretos da consulta geral
+    pagina_conGeralRetrib, conFiltroRetrib,
 )
-
-
-
 
 from tipRecpsa import (
     view_tipRecpsaCad, cadastrar_tiprecpsa,
@@ -43,12 +40,11 @@ from tipRecpsa import (
     pagina_conGeralTipRecpsa, conFiltroTipRecpsa
 )
 
-
 from tipUsoInfr import (
     view_tipUsoInfrCad, cadastrar_tipusoinfr,
     view_tipUsoInfrAlt, alterar_tipusoinfr,
     view_tipUsoInfrExc, excluir_tipusoinfr,
-    pagina_conGeralTipUsoInfr,  conFiltroTipUsoInfr
+    pagina_conGeralTipUsoInfr, conFiltroTipUsoInfr
 )
 
 from entidade import (
@@ -58,13 +54,9 @@ from entidade import (
     pagina_conEntidade, conFiltroEntidade
 )
 
-
 from recpsa import (
     view_recpsaCad, cadastrar_recpsa
-#   view_recpsaAlt, alterar_recpsa,
-#     view_recpsaAlt, view_recpsaExc,
-#    view_recpsaExc, excluir_recpsa,
-#    pagina_conGeralRecpsa, conFiltroRecpsa
+    # (demais telas de recpsa podem ser adicionadas quando necessário)
 )
 
 from catgUsoInfr import (
@@ -80,10 +72,7 @@ from polPub import (
     pagina_conPolitPub, conFiltroPolitPub
 )
 
-
 from saldo import pagina_conGeralSaldo, conFiltroSaldo
-
-
 
 # Usuário / Login
 from usuario import acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
@@ -98,7 +87,7 @@ from tipContrib import (
 )
 
 # Tipo Retribuição
-from tipRetrib import cadastrar_tipretrib, alterar_tipretrib  # nomes corretos
+from tipRetrib import cadastrar_tipretrib, alterar_tipretrib
 
 # Contribuição
 from contrib import cadastrar_contrib, alterar_contrib, view_contribCad, view_contribAlt
@@ -108,15 +97,6 @@ from partlh import (
     view_partlhCad, cadastrar_partlh,
     view_partlhAlt, alterar_partlh,
     view_partlhExc, excluir_partlh
-)
-
-# Retribuição
-from retrib import cadastrar_retrib, alterar_retrib
-
-# Política Pública
-from polPub import (
-    cadastrar_politpub, alterar_politpub, excluir_politpub,
-    listar_politpub, pegar_politpub, _listar_entidades
 )
 
 # Unidade de Equivalência
@@ -150,20 +130,17 @@ from grpAssent import (
 )
 
 # -------------------- FLASK APP --------------------
-
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = '@Sigma4321'
 app.secret_key = "um_segredo_bem_dificil"
 
-# -------------------- BÁSICO --------------------
-
+#============  *00 *BÁSICO ==================================================================
 @app.route('/')
 def index():
+    # Se não houver index.html, você pode trocar para: return view_menuAssent()
     return render_template('index.html')
 
-
-# ========== LOGIN / USUÁRIO ==========
-
+# ========== *01 *USUÁRIO ================================================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     return acessoUsuario()
@@ -201,7 +178,7 @@ def altSenha():
     return alterar_senha()
 
 
-# ========== TIPO DE EVENTO ==========
+# ========== *02 *EVENTO ================================================================
 
 @app.route('/tipEvtCad')
 def tipEvtCad():
@@ -227,9 +204,7 @@ def tipEvtExc():
 def excTipEvt():
     return excluir_tipevt()
 
-
-# ========== POLÍTICA PÚBLICA ==========
-
+# ============= *03 *POLÍTICA PÚBLICA  ================================================================
 @app.route('/politPubCad')
 def politPubCad():
     entidades = _listar_entidades()
@@ -266,15 +241,22 @@ def politPubExc():
 def excPolitPub():
     return excluir_politpub()
 
-
 @app.route('/politPubCon')
 def politPubCon():
     entidades = _listar_entidades()
     return render_template('politPubCon.html', entidades=entidades)
 
 
-# ========== UNIDADE DE EQUIVALÊNCIA ==========
+@app.route('/conPolitPub', methods=['GET'])
+def conPolitPub():
+    return pagina_conPolitPub()
 
+@app.route('/conFiltroPolitPub', methods=['GET','POST'])
+def conFiltroPolitPub_route():
+    return conFiltroPolitPub()
+
+
+# ============  *04   *UNIDADE EQUIVALÊNCIA  ==================================================
 @app.route('/unEqvCad')
 def unEqvCad():
     return render_template('unEqvCad.html')
@@ -300,7 +282,7 @@ def excUnEqv():
     return excluir_uneqv()
 
 
-# ========== FAMÍLIA ==========
+# =============  *05   *FAMÍLIA =========================================================
 
 @app.route('/familiaCad')
 def familiaCad():
@@ -327,8 +309,7 @@ def excFamilia():
     return excluir_familia()
 
 
-# ========== SITUAÇÃO ASSENTADO ==========
-
+# ============ *06  *SITUAÇÃO ASSENTADO  =========================================================
 @app.route('/sitAssentCad')
 def sitAssentCad():
     return render_template('sitAssentCad.html')
@@ -353,9 +334,7 @@ def sitAssentExc():
 def excSitAssent():
     return excluir_sitassent()
 
-
-# ========== CATEGORIA ASSENTADO ==========
-
+# ============   *07 *CATEGORIA ASSENTADO  =======================================================
 @app.route('/ctgAssentCad')
 def ctgAssentCad():
     return render_template('ctgAssentCad.html')
@@ -380,37 +359,35 @@ def ctgAssentExc():
 def excCtgAssent():
     return excluir_ctgassent()
 
-
-# ========== ASSENTADO (CAD/ALT/EXC) ==========
-# --- ASSENTADO: rotas (CRUD + Consulta Geral) ---
-
-
-# ASSENTADO
-from assent import (
-    view_assentCad, cadastrar_assent,
-    view_assentAlt, alterar_assent,
-    view_assentExc, ver_carteira_assentado,
-    view_gerarCarteira, post_gerarCarteira
-)
-
-
+# =============  *08  *ASSENTADO  ===============================================================
 @app.get('/menuAssent')
 def menuAssent():
-    return view_assentCad()
+    # Renderiza menu + grade inicial (15 primeiros por ordem alfabética)
+    return view_menuAssent()
+
+@app.get('/conGeralAssent')
+def conGeralAssent():
+    # Aplica filtros e renderiza na mesma tela (menuAssent.html)
+    return pagina_conGeralAssent()
+
+@app.route('/conFiltroAssent', methods=['GET', 'POST'])
+def conFiltroAssent_route():
+    return conFiltroAssent()
 
 @app.get('/assentCad')
 def assentCad():
     return view_assentCad()
 
-@app.post('/cadAssent')
+@app.post('/assentCad')
 def cadAssent():
+    # Grava e gera a carteira PDF (QR = matrícula) conforme assent.py
     return cadastrar_assent()
 
 @app.get('/assentAlt')
 def assentAlt():
     return view_assentAlt()
 
-@app.post('/altAssent')
+@app.post('/assentAlt')
 def altAssent():
     return alterar_assent()
 
@@ -418,194 +395,21 @@ def altAssent():
 def assentExc():
     return view_assentExc()
 
-@app.post('/excAssent')
-def excAssent():
-    return excluir_assent()
+@app.get('/carteira/<int:idAssent>')
+def verCarteiraAssentado(idAssent: int):
+    return ver_carteira_assentado(idAssent)
 
-@app.get('/conGeralAssent')
-def conGeralAssent():
-    return pagina_conGeralAssent()
+@app.get('/fotoAssent/<int:idAssent>')
+def fotoAssent(idAssent: int):
+    return obter_foto_assentado(idAssent)
 
-@app.route('/conFiltroAssent', methods=['GET', 'POST'])
-def conFiltroAssent_route():
-    return conFiltroAssent()
+@app.get("/gerarCarteira")
+def gerarCarteira_get():
+    return view_gerarCarteira()
 
-# ========== SELECTS GERAIS (para telas que precisam) ==========
-
-def _carrega_selects():
-    conn = conectar_bd()
-    categorias, politicas, unidades, assentados = [], [], [], []
-    if conn:
-        cur = conn.cursor()
-        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc","catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
-        categorias = cur.fetchall()
-
-        cur.execute('SELECT "idPolPub","nomPolPub","valor","perct" FROM "tbpolitpub" ORDER BY "nomPolPub"')
-        politicas = cur.fetchall()
-
-        cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
-        unidades = cur.fetchall()
-
-        # AQUI trocamos idAssent -> idAssent
-        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome"')
-        assentados = cur.fetchall()
-
-        conn.close()
-    return categorias, politicas, unidades, assentados
-
-
-# ========== TIPO DE CONTRIBUIÇÃO (CAD/ALT/EXC) ==========
-
-@app.route("/tipContribCad")
-def tipContribCad():
-    categorias, politicas, unidades, _ = _carrega_selects()
-    return render_template("tipContribCad.html", message="✅ Tipo de Contribuição Cadastrada com Sucesso!",
-                           categorias=categorias, politicas=politicas, unidades=unidades)
-
-@app.route('/cadTipContrib', methods=['POST'])
-def cadTipContrib():
-    return cadastrar_tipcontrib()
-
-@app.route('/tipContribAlt')
-def tipContribAlt():
-    return view_tipContribAlt()
-
-@app.route('/tipContribExc')
-def tipContribExc():
-    return view_tipContribExc()
-
-@app.route('/altTipContrib', methods=['POST'])
-def altTipContrib():
-    return alterar_tipcontrib()
-
-@app.route('/excTipContrib', methods=['POST'])
-def excTipContrib():
-    return excluir_tipo_contrib()
-
-
-# ========== CONTRIBUIÇÃO (CAD/ALT + CONSULTA) ==========
-
-@app.route('/contribCad')
-def contribCad():
-    return view_contribCad()
-
-@app.route('/cadContrib', methods=['POST'])
-def cadContrib():
-    return cadastrar_contrib()
-
-@app.route('/contribAlt')
-def contribAlt():
-    return view_contribAlt()
-
-@app.route('/altContrib', methods=['POST'])
-def altContrib():
-    return alterar_contrib()
-
-# --- Consulta Geral de Tipos de Contribuição ---
-@app.route('/conGeralTipContrib', methods=['GET'])
-def conGeralTipContrib():
-    from conGeralTipContrib import pagina_conGeralTipContrib
-    return pagina_conGeralTipContrib()
-
-@app.route('/conFiltroTipContrib', methods=['GET','POST'])
-def conFiltroTipContrib():
-    from conGeralTipContrib import conFiltroTipContrib
-    return conFiltroTipContrib()
-
-
-
-# compat
-@app.route('/conContrib')
-def conContrib():
-    return redirect(url_for('conGeralContrib', **request.args))
-
-# ========== PARTILHA (partlh) — CAD/ALT/EXC + CONSULTA ==========
-
-# Consulta Geral Partilha
-
-
-def view_partlhAlt():
-    return "Tela de Alteração de Partilha em construção"
-
-def alterar_partlh():
-    return "Alteração de Partilha em construção"
-
-def view_partlhExc():
-    return "Tela de Exclusão de Partilha em construção"
-
-def excluir_partlh():
-    return "Exclusão de Partilha em construção"
-
-from partlh import (
-    view_partlhCad, cadastrar_partlh,
-    view_partlhAlt, alterar_partlh,
-    view_partlhExc, excluir_partlh
-)
-
-# CAD
-@app.get("/partlhCad")
-def partlhCad():
-    return view_partlhCad()
-
-@app.post("/cadPartlh")
-def route_cadPartlh():
-    return cadastrar_partlh()
-
-# ALT
-@app.get("/partlhAlt")
-def partlhAlt():
-    return view_partlhAlt()
-
-@app.post("/altPartlh")
-def altPartlh():
-    return alterar_partlh()
-
-# EXC
-@app.get("/partlhExc")
-def partlhExc():
-    return view_partlhExc()
-
-@app.post("/excPartlh")
-def excPartlh():
-    return excluir_partlh()
-
-# --- Consulta Geral de Partilha ---
-
-# --- Consulta Geral de Tipos de Partilha ---
-@app.route('/conGeralTipPartlh', methods=['GET'])
-def conGeralTipPartlh():
-    from conGeralTipPartlh import pagina_conGeralTipPartlh
-    return pagina_conGeralTipPartlh()
-
-@app.route('/conFiltroTipPartlh', methods=['GET','POST'])
-def conFiltroTipPartlh():
-    from conGeralTipPartlh import conFiltroTipPartlh
-    return conFiltroTipPartlh()
-
-
-# Compat (se menu antigo apontar para /conPartlh)
-@app.route('/conPartlh')
-def conPartlh():
-    from flask import redirect, url_for, request
-    return redirect(url_for('conGeralPartlh', **request.args))
-
-
-# ========== MENUS ==========
-
-@app.route('/menuBBC')
-def menuBBC():
-    return render_template('menuBBC.html')
-
-@app.route('/menuCaderneta')
-def menuCaderneta():
-    return render_template('menuCaderneta.html')
-
-@app.route('/mensagem')
-def mensagem():
-    return render_template('mensagem.html')
-
-
-# ========== UTILITÁRIOS / DADOS AUXILIARES ==========
+@app.post("/gerarCarteira")
+def gerarCarteira_post():
+    return post_gerarCarteira()
 
 def obter_dados_assent_idassent(matr):
     conn = conectar_bd()
@@ -645,38 +449,6 @@ def obter_dados_assent_nome(nome):
             return []
     return []
 
-@app.route('/usuario')
-def obter_todos_usuario():
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT usuario, senha, nome, nivel, email FROM tbusuario ORDER BY nome")
-            usuario = cur.fetchall()
-            conn.close()
-            return usuario
-        except Exception as e:
-            print("Erro ao obter dados dos usuarios:", e)
-            return []
-    return []
-
-
-# ========== WHATSAPP / QRCODE / CARTÕES ==========
-
-@app.route('/whatsapp', methods=['GET', 'POST'])
-def rotina_whatsapp():
-    session['mensagem'] = "  "
-    return dados_whatsapp()
-
-@app.route('/enviarWhatsapp', methods=['POST'])
-def enviar_msg_whatsapp():
-    session['mensagem'] = "  "
-    return enviar_whatsapp()
-
-@app.route('/qrMatricula', methods=['POST'])
-def qr_matricula():
-    session['mensagem'] = "  "
-    return atualizar_matricula()
 
 @app.route('/cartaoQR', methods=['GET', 'POST'])
 def cartaoQRassent():
@@ -688,62 +460,164 @@ def gerarQRPDF():
     session['mensagem'] = "  "
     return gerar_pdf_Cartao()
 
-@app.route('/emitirCartao', methods=['GET', 'POST'])
-def emitirCartao():
-    if request.method == 'POST':
-        idAssent = request.form.get('idAssent')
-        if idAssent:
-            return dados_cartao(idAssent)
-        return "Matrícula não fornecida."
-    return render_template('emitirCartao.html')
-
-@app.route('/emitirCartaoTurno', methods=['GET', 'POST'])
-def emitirCartaoTurno():
-    if request.method == 'POST':
-        turno = request.form.get('turno')
-        if turno:
-            return dados_cartao_turno(turno)
-        return "Turno não fornecido."
-    return render_template('emitirCartaoTurno.html')
-
-@app.route('/emitirCartaoCurso', methods=['GET', 'POST'])
-def emitirCartaoCurso():
-    if request.method == 'POST':
-        curso = request.form.get('curso')
-        if curso:
-            return dados_cartao_curso(curso)
-        return "Curso não fornecido."
-    return render_template('emitirCartaoCurso.html')
 
 
-# ========== CONSULTAS SÍNTESE ==========
+# =============   *09 *TIPO CONTRIBUIÇÃO  ==========================================================
 
-@app.route('/sigQTDdia', methods=['GET', 'POST'])
-def sigQTDdia():
-    data_atual = datetime.now().date()
-    ano_sistema = datetime.now().year
-    session['mensagem'] = "  "
-    return render_template('consQTDdia.html', data_atual=data_atual, ano_sistema=ano_sistema)
+@app.route("/tipContribCad")
+def tipContribCad():
+    categorias, politicas, unidades, _ = _carrega_selects()
+    return render_template(
+        "tipContribCad.html",
+        message="✅ Tipo de Contribuição Cadastrada com Sucesso!",
+        categorias=categorias, politicas=politicas, unidades=unidades
+    )
 
-@app.route('/sigQTDsem', methods=['GET', 'POST'])
-def sigQTDsem():
-    data_atual = datetime.now().date()
-    ano_sistema = datetime.now().year
-    session['mensagem'] = "  "
-    return render_template('consQTDsem.html', data_atual=data_atual, ano_sistema=ano_sistema)
+@app.route('/cadTipContrib', methods=['POST'])
+def cadTipContrib():
+    return cadastrar_tipcontrib()
 
-@app.route('/sigConsQTDdia', methods=['POST'])
-def sigConsQTDdia_action():
-    return consQTDdia()
+@app.route('/tipContribAlt')
+def tipContribAlt():
+    return view_tipContribAlt()
 
-@app.route('/sigConsQTDsem', methods=['POST'])
-def sigConsQTDsem_action():
-    return consQTDsem()
+@app.route('/tipContribExc')
+def tipContribExc():
+    return view_tipContribExc()
+
+@app.route('/altTipContrib', methods=['POST'])
+def altTipContrib():
+    return alterar_tipcontrib()
+
+@app.route('/excTipContrib', methods=['POST'])
+def excTipContrib():
+    return excluir_tipo_contrib()
+
+# --- Consulta Geral de Tipos de Contribuição ---
+@app.route('/conGeralTipContrib', methods=['GET'])
+def conGeralTipContrib():
+    from conGeralTipContrib import pagina_conGeralTipContrib
+    return pagina_conGeralTipContrib()
+
+@app.route('/conFiltroTipContrib', methods=['GET','POST'])
+def conFiltroTipContrib():
+    from conGeralTipContrib import conFiltroTipContrib
+    return conFiltroTipContrib()
 
 
-# -------------------------------- REIRIBUIÇÃO ROTAS
+# =============   *10  *CONTRIBUIÇÃO  ==============================================================
+@app.route('/contribCad')
+def contribCad():
+    return view_contribCad()
 
-# --------- TIPO DE RECOMPENSA (tbtiprecpsa) ---------
+@app.route('/cadContrib', methods=['POST'])
+def cadContrib():
+    return cadastrar_contrib()
+
+@app.route('/contribAlt')
+def contribAlt():
+    return view_contribAlt()
+
+@app.route('/altContrib', methods=['POST'])
+def altContrib():
+    return alterar_contrib()
+
+
+@app.route('/conContrib')
+def conContrib():
+    return redirect(url_for('conGeralContrib', **request.args))
+
+@app.route('/conGeralContrib', methods=['GET'])
+def conGeralContrib():
+    from conGeralTipContrib import pagina_conGeralTipContrib
+    return pagina_conGeralTipContrib()
+
+@app.route('/conFiltroContrib', methods=['GET', 'POST'])
+def conFiltroContrib():
+    from conGeralTipContrib import conFiltroTipContrib
+    return conFiltroTipContrib()
+
+
+# ============  *11  *PARTILHA ===============================================================
+@app.get("/partlhCad")
+def partlhCad():
+    return view_partlhCad()
+
+@app.post("/cadPartlh")
+def route_cadPartlh():
+    return cadastrar_partlh()
+
+@app.get("/partlhAlt")
+def partlhAlt():
+    return view_partlhAlt()
+
+@app.post("/altPartlh")
+def altPartlh():
+    return alterar_partlh()
+
+@app.get("/partlhExc")
+def partlhExc():
+    return view_partlhExc()
+
+@app.post("/excPartlh")
+def excPartlh():
+    return excluir_partlh()
+
+# --- Consulta Geral de Tipos de Partilha ---
+@app.route('/conGeralTipPartlh', methods=['GET'])
+def conGeralTipPartlh():
+    from conGeralTipPartlh import pagina_conGeralTipPartlh
+    return pagina_conGeralTipPartlh()
+
+@app.route('/conFiltroTipPartlh', methods=['GET','POST'])
+def conFiltroTipPartlh():
+    from conGeralTipPartlh import conFiltroTipPartlh
+    return conFiltroTipPartlh()
+
+@app.route('/conPartlh')
+def conPartlh():
+    return redirect(url_for('conGeralPartlh', **request.args))
+
+
+# =============  *12  *RETRIBUIÇÃO ===========================================
+
+@app.route('/retribCad', methods=['GET'])
+def retribCad():
+    return view_retribCad()
+
+@app.route('/cadRetrib', methods=['POST'])
+def cadRetrib():
+    return cadastrar_retrib()
+
+@app.route('/retribAlt', methods=['GET'])
+def retribAlt():
+    return view_retribAlt()
+
+@app.route('/altRetrib', methods=['POST'])
+def altRetrib():
+    return alterar_retrib()
+
+@app.route('/retribExc', methods=['GET'])
+def retribExc():
+    return view_retribExc()
+
+@app.route('/excRetrib', methods=['POST'])
+def excRetrib():
+    return excluir_retrib()
+
+# --- Consulta Geral de Retribuições ---
+@app.get('/conGeralRetrib')
+def conGeralRetrib():
+    return pagina_conGeralRetrib()
+
+@app.route('/conFiltroRetrib', methods=['GET', 'POST'])
+def conFiltroRetrib_route():
+    return conFiltroRetrib()
+
+# (Opcional) Alias para compatibilidade com links antigos:
+
+
+#================  *13  *TIPO RECOMPENSA  =====================================================
 
 @app.route('/tipRecpsaCad')
 def tipRecpsaCad():
@@ -779,7 +653,8 @@ def conFiltroTipRecpsa_route():
     return conFiltroTipRecpsa()
 
 
-# --------- TIPO DE USO DA INFRAESTRUTURA ---------
+#================  *14  *USO DA INFRAESTRUTURA     ============================================
+
 @app.route('/tipUsoInfrCad')
 def tipUsoInfrCad():
     return view_tipUsoInfrCad()
@@ -814,7 +689,9 @@ def conFiltroTipUsoInfr_route():
     return conFiltroTipUsoInfr()
 
 
-# --------- RECOMPENSAS (tbrecpsa) ---------
+
+#===============  *15  *RECOMPENSAS  ====================================================
+
 @app.route('/recpsaCad')
 def recpsaCad():
     return view_recpsaCad()
@@ -823,39 +700,29 @@ def recpsaCad():
 def cadRecpsa():
     return cadastrar_recpsa()
 
-@app.route('/recpsaAlt')
-def recpsaAlt():
-    return view_recpsaAlt()
+# (Se/Quando implementar as telas de alt/exc de recpsa, adicione rotas aqui)
 
-@app.route('/altRecpsa', methods=['POST'])
-def altRecpsa():
-    return alterar_recpsa()
+# --- Consulta geral de recompensas
 
-@app.route('/recpsaExc')
-def recpsaExc():
-    return view_recpsaExc()
+@app.get('/conGeralRecpsa')
+def conGeralRecpsa_alias():
+    return pagina_conGeralRetrib()
 
-@app.route('/excRecpsa', methods=['POST'])
-def excRecpsa():
-    return excluir_recpsa()
 
-# --- Consulta geral
+
 @app.route('/conGeralRecpsa', methods=['GET'])
 def conGeralRecpsa():
+    from recpsa import pagina_conGeralRecpsa
     return pagina_conGeralRecpsa()
 
 @app.route('/conFiltroRecpsa', methods=['GET','POST'])
 def conFiltroRecpsa_route():
+    from recpsa import conFiltroRecpsa
     return conFiltroRecpsa()
 
-@app.route('/menuRetrib')
-def menuRetrib():
-    # se você guarda o usuário na sessão, passe aqui; senão remove "usuario=..."
-    return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
 
-##------------------CATEGORIA USO DA INFRAESTRUTURA
+#==============  *16  *CATEGORIA USO INFRAESTRUTURA  ==========================================
 
-# ---- Categoria do Uso da Infraestrutura ----
 @app.route('/catgUsoInfrCad', methods=['GET'])
 def catgUsoInfrCad():
     return view_catgUsoInfrCad()
@@ -885,54 +752,7 @@ def catgUsoInfrCon():
     return view_catgUsoInfrCon()
 
 
-# BBC.py — ROTAS DE RETRIBUIÇÃO
-# -------------------------------------------------
-# ==========  RETRIBUIÇÃO ==========
-
-@app.route('/retribCad', methods=['GET'])
-def retribCad():
-    return view_retribCad()
-
-@app.route('/cadRetrib', methods=['POST'])
-def cadRetrib():
-    return cadastrar_retrib()
-
-@app.route('/retribAlt', methods=['GET'])
-def retribAlt():
-    return view_retribAlt()
-
-@app.route('/altRetrib', methods=['POST'])
-def altRetrib():
-    return alterar_retrib()
-
-@app.route('/retribExc', methods=['GET'])
-def retribExc():
-    return view_retribExc()
-
-@app.route('/excRetrib', methods=['POST'])
-def excRetrib():
-    return excluir_retrib()
-
-# --- Consulta Geral de Retribuições ---
-@app.get('/conGeralRetrib')
-def conGeralRetrib():
-    return pagina_conGeralRetrib()
-
-@app.route('/conFiltroRetrib', methods=['GET', 'POST'])
-def conFiltroRetrib_route():
-    return conFiltroRetrib()
-
-# -------- SALDO (Consulta Geral) --------
-@app.route('/conGeralSaldo', methods=['GET'])
-def conGeralSaldo():
-    return pagina_conGeralSaldo()
-
-@app.route('/conFiltroSaldo', methods=['GET', 'POST'])
-def conFiltroSaldo_route():
-    return conFiltroSaldo()
-
-# ========== ENTIDADES ==========
-
+# ============  *18  *ENTIDADES   ==========================================================
 @app.route('/entidadeCad')
 def entidadeCad():
     return view_entidadeCad()
@@ -959,66 +779,73 @@ def excEntidade():
 
 @app.route('/entidadeCon', methods=['GET', 'POST'])
 def conEntidade():
-    # GET com querystring e POST caem na mesma página
     return pagina_conEntidade()
 
-# ========== CONSULTA — POLÍTICAS PÚBLICAS ==========
-@app.route('/conPolitPub', methods=['GET'])
-def conPolitPub():
-    return pagina_conPolitPub()
 
-@app.route('/conFiltroPolitPub', methods=['GET','POST'])
-def conFiltroPolitPub_route():
-    return conFiltroPolitPub()
+#=============   *19   *SALDO  =====================================================================
+
+@app.route('/conGeralSaldo', methods=['GET'])
+def conGeralSaldo():
+    return pagina_conGeralSaldo()
+
+@app.route('/conFiltroSaldo', methods=['GET', 'POST'])
+def conFiltroSaldo_route():
+    return conFiltroSaldo()
 
 
 
-# --- SALDO (por assentado) ---
-@app.route('/saldoAssent', methods=['GET'])
-def saldoAssent():
-    from saldo import pagina_saldoAssent
-    return pagina_saldoAssent()
+# =============  *20   *SELECT  - MENU -   UTILITÁRIO - QRCODE - WHATSAPP ===================================
 
-# rota:
-@app.route("/carteira/<int:idAssent>")
-def verCarteiraAssentado(idAssent):
-    return ver_carteira_assentado(idAssent)
+def _carrega_selects():
+    conn = conectar_bd()
+    categorias, politicas, unidades, assentados = [], [], [], []
+    if conn:
+        cur = conn.cursor()
+        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc","catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
+        categorias = cur.fetchall()
 
-# ...
+        cur.execute('SELECT "idPolPub","nomPolPub","valor","perct" FROM "tbpolitpub" ORDER BY "nomPolPub"')
+        politicas = cur.fetchall()
 
-app.add_url_rule("/gerarCarteira", view_func=view_gerarCarteira, methods=["GET"], endpoint="gerarCarteira")
-app.add_url_rule("/gerarCarteira", view_func=post_gerarCarteira,   methods=["POST"])
-# ...
+        cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
+        unidades = cur.fetchall()
 
-# --- Assentado ---
-app.add_url_rule("/assentCad", view_func=view_assentCad, methods=["GET"])
-app.add_url_rule("/assentCad", view_func=cadastrar_assent, methods=["POST"])
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome"')
+        assentados = cur.fetchall()
+        conn.close()
+    return categorias, politicas, unidades, assentados
 
-app.add_url_rule("/assentAlt", view_func=view_assentAlt, methods=["GET"])
-app.add_url_rule("/assentAlt", view_func=alterar_assent, methods=["POST"])
 
-app.add_url_rule("/assentExc", view_func=view_assentExc, methods=["GET"])
-# (se tiver POST de exclusão do assentado, adicione aqui)
+@app.route('/menuBBC')
+def menuBBC():
+    return render_template('menuBBC.html')
 
-app.add_url_rule("/carteira/<int:idAssent>", view_func=ver_carteira_assentado, methods=["GET"])
+@app.route('/menuCaderneta')
+def menuCaderneta():
+    return render_template('menuCaderneta.html')
 
-app.add_url_rule("/gerarCarteira", view_func=view_gerarCarteira, methods=["GET"], endpoint="gerarCarteira")
-app.add_url_rule("/gerarCarteira", view_func=post_gerarCarteira, methods=["POST"])
+@app.route('/mensagem')
+def mensagem():
+    return render_template('mensagem.html')
 
-# --- Família ---
-# app.add_url_rule("/familiaCad", view_func=view_familiaCad, methods=["GET"])
-app.add_url_rule("/familiaCad", view_func=cadastrar_familia, methods=["POST"])
 
-# app.add_url_rule("/familiaAlt", view_func=view_familiaAlt, methods=["GET"])
-app.add_url_rule("/familiaAlt", view_func=alterar_familia, methods=["POST"])
+@app.route('/menuRetrib')
+def menuRetrib():
+    return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
 
-# app.add_url_rule("/familiaExc", view_func=view_familiaExc, methods=["GET"])
-app.add_url_rule("/familiaExc", view_func=excluir_familia, methods=["POST"])
 
-#app.add_url_rule("/familiaCon", view_func=view_familiaCon, methods=["GET"])
+@app.route('/whatsapp', methods=['GET', 'POST'])
+def rotina_whatsapp():
+    session['mensagem'] = "  "
+    return dados_whatsapp()
 
+@app.route('/enviarWhatsapp', methods=['POST'])
+def enviar_msg_whatsapp():
+    session['mensagem'] = "  "
+    return enviar_whatsapp()
 
 
 # -------------------- RUN --------------------
 if __name__ == '__main__':
+    # Se abrir direto e aparecer "Not Found", acesse: http://127.0.0.1:5000/menuAssent
     app.run(host='0.0.0.0', port=5000, debug=True)
