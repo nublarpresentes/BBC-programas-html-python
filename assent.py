@@ -5,7 +5,7 @@ import psycopg2
 from datetime import datetime, date
 from PIL import Image, ImageOps
 import qrcode
-
+from werkzeug.utils import secure_filename  # no topo do arquivo
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
@@ -126,13 +126,17 @@ def view_assentCad():
     ufs = _listar_ufs()
     familias = _listar_familias()
     municipios_all = _listar_municipios_all()  # (codMun, nomMun, uf)
+    categorias = _listar_ctgassent()
+
     return render_template(
         'assentCad.html',
         ufs=ufs,
         familias=familias,
         municipios_all=municipios_all,
+        categorias=categorias,
         message=''
     )
+
 
 def cadastrar_assent():
     if request.method != 'POST':
@@ -154,6 +158,9 @@ def cadastrar_assent():
     celular    = _digits(request.form.get('celular') or '')
     idFamilia  = (request.form.get('idFamilia') or '').strip() or None
 
+    # >>> NOVO: categoria obrigatória
+    idCtgAssent = (request.form.get('idCtgAssent') or '').strip()
+
     # validações obrigatórias
     obrigatorios_faltando = []
     if not nome: obrigatorios_faltando.append("Nome")
@@ -164,6 +171,7 @@ def cadastrar_assent():
     if not ufNasc: obrigatorios_faltando.append("UF de Nascimento")
     if not celular: obrigatorios_faltando.append("Celular")
     if not email: obrigatorios_faltando.append("E-mail")
+    if not idCtgAssent: obrigatorios_faltando.append("Categoria do Assentado")
 
     if obrigatorios_faltando:
         flash("Campos obrigatórios faltando: " + ", ".join(obrigatorios_faltando), "warning")
@@ -179,6 +187,12 @@ def cadastrar_assent():
         flash("Data de nascimento inválida.", "danger")
         return redirect(url_for('assentCad'))
 
+    try:
+        idCtgAssent = int(idCtgAssent)  # valida tipo
+    except:
+        flash("Categoria do Assentado inválida.", "danger")
+        return redirect(url_for('assentCad'))
+
     # conexão
     conn = conectar_bd()
     if not conn:
@@ -190,19 +204,37 @@ def cadastrar_assent():
         novo_id = _gerar_idassent(conn)
         idSitAssent = 1  # ATIVO
 
+        # >>> ATENÇÃO: esta INSERT agora inclui "idCtgAssent" e "foto"
         cur.execute('''
-          INSERT INTO "tbassentado"
+          INSERT INTO tbassentado
             ("idAssent", nome, genero, mae, endereco, cpf, rg, "rgOrgExp",
              "dtNasc", "ufNasc", "codMunNas", email, "noWhatsapp", celular,
-             "idFamilia", "idSitAssent")
-          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+             "idFamilia", "idSitAssent", "idCtgAssent", foto)
+          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ''', (novo_id, nome, genero, mae, endereco, cpf, rg, rgOrgExp,
               dtNasc, ufNasc,
               int(codMunNas) if codMunNas else None,
               email, int(noWhatsapp) if noWhatsapp else None,
-              celular, idFamilia, idSitAssent))
-
+              celular, idFamilia, idSitAssent, idCtgAssent, None))
         conn.commit()
+
+        # >>> NOVO: upload da foto (opcional)
+        foto = request.files.get('foto')
+        if foto and foto.filename:
+            pasta = _pasta_imagens()
+            filename = secure_filename(foto.filename)
+            ext = ''
+            if '.' in filename:
+                ext = filename.rsplit('.', 1)[1].lower()
+            if ext not in ('jpg', 'jpeg', 'png', 'webp'):
+                ext = 'jpg'
+            final_name = f"{novo_id}.{ext}"
+            foto.save(os.path.join(pasta, final_name))
+
+            # grava nome do arquivo na coluna foto
+            cur = conn.cursor()
+            cur.execute('UPDATE tbassentado SET foto=%s WHERE "idAssent"=%s', (final_name, novo_id))
+            conn.commit()
 
         # === GERA A CARTEIRA (QR em memória, PDF em static/carteiras) ===
         try:
@@ -262,21 +294,26 @@ def obter_foto_assentado(idAssent):
 # ==========================
 # Alteração/Exclusão
 # ==========================
+
 def view_assentAlt():
-    itens   = _listar_assentados_basico()
-    sel_id  = request.args.get('id')
-    reg     = _pegar_assentado(sel_id) if sel_id else None
-    ufs     = _listar_ufs()
-    familias = _listar_familias()
+    itens      = _listar_assentados_basico()
+    sel_id     = request.args.get('id')
+    registro   = _pegar_assentado_dict(sel_id) if sel_id else None
+    ufs        = _listar_ufs()
+    familias   = _listar_familias()
     municipios = _listar_municipios_all()
+    categorias = _listar_categorias_assentado()   # <<< NOVO
+
     return render_template(
         'assentAlt.html',
         itens=itens,
-        registro=reg,
+        registro=registro,         # agora é dict
         ufs=ufs,
         familias=familias,
-        municipios_all=municipios
+        municipios_all=municipios,
+        categorias=categorias      # <<< NOVO (para o select obrigatório)
     )
+
 
 def view_assentExc():
     itens  = _listar_assentados_basico()
@@ -310,6 +347,17 @@ def alterar_assent():
     idFamilia  = (request.form.get('idFamilia') or '').strip() or None
     idSitAssent = request.form.get('idSitAssent')
 
+    # >>> NOVO: categoria obrigatória
+    idCtgAssent = (request.form.get('idCtgAssent') or '').strip()
+    if not idCtgAssent:
+        flash("Categoria do Assentado é obrigatória.", "danger")
+        return redirect(url_for('assentAlt', id=idAssent))
+    try:
+        idCtgAssent = int(idCtgAssent)
+    except:
+        flash("Categoria do Assentado inválida.", "danger")
+        return redirect(url_for('assentAlt', id=idAssent))
+
     if cpf and not _valida_cpf_mod11(cpf):
         flash("CPF inválido (módulo 11).", "danger")
         return redirect(url_for('assentAlt', id=idAssent))
@@ -329,16 +377,34 @@ def alterar_assent():
         cur = conn.cursor()
         cur.execute('''
           UPDATE tbassentado
-             SET nome=%s, genero=%s, mae=%s, endereco=%s, bairro=%s, cpf=%s, rg=%s, "rgOrgExp"=%s,
+             SET nome=%s, genero=%s, mae=%s, endereco=%s, bairro=%s, cpf=%s, rg=%s, "rgOrgExp"%s,
                  "dtNasc"=%s, "ufNasc"=%s, "codMunNas"=%s, email=%s, "noWhatsapp"=%s, celular=%s,
-                 "idFamilia"=%s, "idSitAssent"=%s
+                 "idFamilia"=%s, "idSitAssent"=%s, "idCtgAssent"=%s
            WHERE "idAssent"=%s
         ''', (nome, genero, mae, endereco, bairro, cpf, rg, rgOrgExp,
               dtNasc, ufNasc or None, int(codMunNas) if codMunNas else None,
               email, int(noWhatsapp) if noWhatsapp else None, celular,
               idFamilia, int(idSitAssent) if idSitAssent is not None else None,
-              int(idAssent)))
+              idCtgAssent, int(idAssent)))
         conn.commit()
+
+        # >>> NOVO: upload de foto (opcional)
+        foto = request.files.get('foto')
+        if foto and foto.filename:
+            pasta = _pasta_imagens()
+            filename = secure_filename(foto.filename)
+            ext = ''
+            if '.' in filename:
+                ext = filename.rsplit('.', 1)[1].lower()
+            if ext not in ('jpg', 'jpeg', 'png', 'webp'):
+                ext = 'jpg'
+            final_name = f"{int(idAssent)}.{ext}"
+            foto.save(os.path.join(pasta, final_name))
+
+            cur = conn.cursor()
+            cur.execute('UPDATE tbassentado SET foto=%s WHERE "idAssent"=%s', (final_name, int(idAssent)))
+            conn.commit()
+
         conn.close()
         flash("✅ Assentado alterado com sucesso!", "success")
         return redirect(url_for('assentAlt', id=idAssent))
@@ -348,6 +414,8 @@ def alterar_assent():
         print("ERRO alterar_assent:", e)
         flash("❌ Não foi possível alterar.", "danger")
         return redirect(url_for('assentAlt', id=idAssent))
+
+
 
 # ==========================
 # Carteira (QR em memória)
@@ -377,51 +445,6 @@ def _draw_qr_vector(c, data: str, x_pt: float, y_pt: float, size_mm: float):
     d.add(widget)
     renderPDF.draw(d, c, x_pt, y_pt)
 
-def _gerar_carteira_pdf(id_assent: int) -> str:
-    """
-    Gera/atualiza a carteira PDF do assentado (com QR e dados básicos).
-    Salva em <app>/static/carteiras/<id>.pdf
-    """
-    pdf_path = _carteira_pdf_path(id_assent)
-    nome = _buscar_nome_assentado(id_assent) or "-"
-
-    c = canvas.Canvas(pdf_path, pagesize=A4)
-    W, H = A4  # ~ 595 x 842 pt
-
-    card_w = 85 * mm
-    card_h = 54 * mm
-    x = (W - card_w) / 2
-    y = H - card_h - 40 * mm
-
-    # moldura
-    c.roundRect(x, y, card_w, card_h, 6, stroke=1, fill=0)
-
-    # título
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(x + card_w/2, y + card_h - 10*mm, "SBBC — Carteira do Assentado")
-
-    # dados
-    c.setFont("Helvetica", 11)
-    c.drawString(x + 8*mm, y + card_h - 20*mm, f"Nome: {nome}")
-    c.drawString(x + 8*mm, y + card_h - 27*mm, f"ID do Assentado: {id_assent}")
-
-    # QR à direita
-    try:
-        qr_size_mm = 22
-        qr_x = x + card_w - 28 * mm
-        qr_y = y + 6 * mm
-        _draw_qr_vector(c, str(id_assent), qr_x, qr_y, qr_size_mm)
-    except Exception as e:
-        print("Falha ao inserir QR vetorial:", e)
-
-    # rodapé
-    c.setFont("Helvetica-Oblique", 9)
-    c.drawCentredString(x + card_w/2, y + 5*mm,
-                        "Apresente esta carteira nas atividades/benefícios da associação.")
-
-    c.showPage()
-    c.save()
-    return pdf_path
 
 def ver_carteira_assentado(idAssent: int):
     """
@@ -777,3 +800,184 @@ def post_gerarCarteira():
     out = _gerar_pdf_carteiras_lote(ids)
     return send_file(out, mimetype="application/pdf", as_attachment=True,
                      download_name="carteiras_lote.pdf")
+
+def _listar_ctgassent():
+    """Carrega (idCtgAssent, nomCtgAssent, sigla) para popular o select."""
+    conn = conectar_bd(); itens = []
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT "idCtgAssent","nomCtgAssent", COALESCE(sigla, \'\') FROM tbctgassent ORDER BY "nomCtgAssent"')
+            itens = cur.fetchall()
+        finally:
+            try: conn.close()
+            except: pass
+    return itens
+def _listar_categorias_assentado():
+    """
+    Retorna [(idCtgAssent, nomCtgAssent, sigla), ...]
+    """
+    conn = conectar_bd()
+    itens = []
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute('''
+                SELECT "idCtgAssent","nomCtgAssent", COALESCE(sigla,'')
+                  FROM "tbctgassent"
+                 ORDER BY "nomCtgAssent"
+            ''')
+            itens = cur.fetchall()
+        finally:
+            try: conn.close()
+            except: pass
+    return itens
+def _pegar_assentado_dict(sel_id):
+    """
+    Retorna um dicionário com os campos do assentado.
+    """
+    if not sel_id:
+        return None
+    conn = conectar_bd()
+    reg = None
+    if conn:
+        try:
+            cur = conn.cursor()
+            # Liste explicitamente os campos que você usa no template/alteração:
+            cur.execute('''
+                SELECT
+                  a."idAssent", a.nome, a.genero, a.mae, a.endereco, a.bairro,
+                  a.cpf, a.rg, a."rgOrgExp", a."dtNasc", a."ufNasc", a."codMunNas",
+                  a.email, a."noWhatsapp", a.celular, a."idFamilia", a."idSitAssent",
+                  a."idCtgAssent", a.foto
+                FROM tbassentado a
+               WHERE a."idAssent"=%s
+            ''', (int(sel_id),))
+            row = cur.fetchone()
+            if row:
+                reg = {
+                    "idAssent": row[0],
+                    "nome": row[1],
+                    "genero": row[2],
+                    "mae": row[3],
+                    "endereco": row[4],
+                    "bairro": row[5],
+                    "cpf": row[6],
+                    "rg": row[7],
+                    "rgOrgExp": row[8],
+                    "dtNasc": row[9],       # date
+                    "ufNasc": row[10],
+                    "codMunNas": row[11],
+                    "email": row[12],
+                    "noWhatsapp": row[13],
+                    "celular": row[14],
+                    "idFamilia": row[15],
+                    "idSitAssent": row[16],
+                    "idCtgAssent": row[17],
+                    "foto": row[18],        # nome do arquivo (ex.: "12345.jpg")
+                }
+        finally:
+            try: conn.close()
+            except: pass
+    return reg
+
+# --- AJUDETES NOVOS ---------------------------------
+def _buscar_dados_carteira(id_assent: int):
+    """
+    Retorna dict com nome, cpf e nome_familia do assentado.
+    """
+    conn = conectar_bd()
+    dados = {"nome": "", "cpf": "", "familia": ""}
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT a.nome,
+                       COALESCE(a.cpf,'') AS cpf,
+                       COALESCE(f."nomeFam",'') AS familia
+                  FROM tbassentado a
+             LEFT JOIN tbfamilia f ON f."idFamilia" = a."idFamilia"
+                 WHERE a."idAssent" = %s
+            """, (int(id_assent),))
+            row = cur.fetchone()
+            if row:
+                dados["nome"]    = row[0] or ""
+                dados["cpf"]     = row[1] or ""
+                dados["familia"] = row[2] or ""
+        finally:
+            try: conn.close()
+            except: pass
+    return dados
+
+
+# --- SUBSTITUA ESTA FUNÇÃO PELA VERSÃO ABAIXO --------
+def _gerar_carteira_pdf(id_assent: int) -> str:
+    """
+    Gera/atualiza a carteira PDF do assentado no layout com LOGO,
+    Matrícula, Nome, CPF, Família e QR code (igual ao do lote).
+    Salva em <app>/static/carteiras/<id>.pdf
+    """
+    pdf_path = _carteira_pdf_path(id_assent)
+    dados = _buscar_dados_carteira(id_assent)  # nome, cpf, familia
+
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+
+    c = canvas.Canvas(pdf_path, pagesize=A4)
+    W, H = A4
+
+    card_w = 85*mm
+    card_h = 54*mm
+    x = (W - card_w) / 2
+    y = H - card_h - 40*mm
+    pad = 6*mm
+
+    # Moldura
+    c.roundRect(x, y, card_w, card_h, 6, stroke=1, fill=0)
+
+    # LOGO no topo-esquerdo
+    try:
+        logo_path = os.path.join(_pasta_static("img"), "logo_bbc.png")
+        if os.path.isfile(logo_path):
+            c.drawImage(logo_path, x + pad, y + card_h - 14*mm, width=12*mm, height=12*mm, mask='auto')
+    except Exception as e:
+        print("Aviso: não foi possível desenhar logo:", e)
+
+    # Título
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(x + pad + 14*mm, y + card_h - 7*mm, "Carteira do Assentado")
+    c.setFont("Helvetica-Oblique", 9)
+    c.drawString(x + pad + 14*mm, y + card_h - 12*mm, "( Banco do Bem Comum )")
+
+    # QR à direita
+    try:
+        qr_size_mm = 20
+        qr_x = x + card_w - pad - qr_size_mm*mm
+        qr_y = y + pad - 1*mm
+        _draw_qr_vector(c, str(id_assent), qr_x, qr_y, qr_size_mm)
+    except Exception as e:
+        print("Falha ao inserir QR vetorial:", e)
+
+    # Coluna de labels/valores
+    labels = ["Matrícula:", "Nome:", "CPF:", "Família:"]
+    values = [str(id_assent), dados["nome"], dados["cpf"], dados["familia"]]
+    base_font = "Helvetica"; base_size = 10.5
+    c.setFont(base_font, base_size)
+
+    label_w = max(c.stringWidth(lbl, base_font, base_size) for lbl in labels) + 3
+    value_x = x + pad + label_w
+    linha_y = y + card_h - 22*mm
+    for lbl, val in zip(labels, values):
+        c.setFont(base_font, base_size)
+        c.drawString(x + pad, linha_y, lbl)
+        c.drawString(value_x, linha_y, val or "-")
+        linha_y -= 7*mm
+
+    # Rodapé
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawCentredString(x + card_w/2, y + 4*mm, "( Carteira Associação -  Atividades / Benefícios )")
+
+    c.showPage()
+    c.save()
+    return pdf_path

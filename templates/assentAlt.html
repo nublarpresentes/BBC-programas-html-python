@@ -6,16 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
-    .form-section { background:#fff; padding:18px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
-    .table-hover tbody tr:hover { background-color: #f0f8f5; }
+    .form-section{background:#fff;padding:18px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .required::after{content:" *"; color:#dc3545; margin-left:4px;}
+    .foto-prev{max-height:110px;border:1px solid #e5e5e5;border-radius:6px}
   </style>
 </head>
 <body class="bg-light">
 
-<header class="bg-primary text-white shadow-sm">
-  <div class="container d-flex align-items-center py-2">
-    <img src="/static/img/logo_bbc.png" alt="BBC Logo" class="me-3" style="height:60px;">
-    <h1 class="h4 mb-0">Alteração de Assentado</h1>
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuEventos"><i class="bi bi-journal-bookmark-fill"></i>  Eventos</a>
+      <a class="nav-link text-white" href="/faleConosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
+    </nav>
   </div>
 </header>
 
@@ -23,63 +34,205 @@
   {% with msgs = get_flashed_messages(with_categories=true) %}
     {% if msgs %}
       {% for cat,msg in msgs %}
-        <div class="alert alert-{{cat}}">{{ msg }}</div>
+        <div class="alert alert-{{cat if cat in ['success','warning','danger','info','primary','secondary'] else 'info'}}">{{ msg|safe }}</div>
       {% endfor %}
     {% endif %}
   {% endwith %}
 
-  <!-- ================== LISTAGEM LATERAL ================== -->
-  <div class="mb-4">
-    <h5>Assentados cadastrados</h5>
-    <div class="table-responsive">
-      <table class="table table-sm table-hover align-middle">
-        <thead>
-          <tr class="table-success">
-            <th>ID</th>
-            <th>Nome</th>
-            <th>CPF</th>
-            <th>Bairro</th>
-            <th>Status</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for item in itens %}
-          <tr>
-            <td>{{ item[0] }}</td>
-            <td>{{ item[1] }}</td>
-            <td>{{ item[2] }}</td>
-            <td>{{ item[3] }}</td>
-            <td>
-              {% if item[4] == 1 %}
-                <span class="badge bg-success">Ativo</span>
-              {% else %}
-                <span class="badge bg-danger">Inativo</span>
-              {% endif %}
-            </td>
-            <td>
-              <a href="{{ url_for('assentAlt') }}?id={{ item[0] }}" class="btn btn-sm btn-outline-primary">
-                Editar
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+  <div class="form-section">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0 text-success">Alterar Assentado</h5>
+      <small class="text-muted">
+        Matrícula:
+        <strong>
+          {{ (registro.idAssent if registro and registro.idAssent is defined else
+              (registro["idAssent"] if registro and "idAssent" in registro else request.args.get("id") )) or "-" }}
+        </strong>
+      </small>
     </div>
+
+    <form action="/assentAlt" method="POST" enctype="multipart/form-data" class="row g-3">
+      <!-- id oculto -->
+      <input type="hidden" name="idAssent"
+             value="{{ (registro.idAssent if registro and registro.idAssent is defined else
+                        (registro['idAssent'] if registro and registro['idAssent'] is defined else request.args.get('id'))) }}"/>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold required">Nome</label>
+        <input type="text" name="nome" class="form-control" maxlength="150" required
+               value="{{ registro.nome if registro and registro.nome is defined else (registro['nome'] if registro and registro['nome'] is defined else '') }}">
+      </div>
+
+      <!-- FOTO (opcional) + pré-visualização se existir -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Foto do Assentado</label>
+        <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp" class="form-control">
+        <small class="text-muted d-block">Formatos: JPG, PNG ou WEBP.</small>
+        {% set foto_atual = (registro.foto if registro and registro.foto is defined else (registro['foto'] if registro and registro['foto'] is defined else '')) %}
+        {% if foto_atual %}
+          <div class="mt-2">
+            <img class="foto-prev" src="{{ url_for('static', filename='img/' ~ foto_atual) }}" alt="Foto atual">
+            <div><small class="text-muted">Atual: {{ foto_atual }}</small></div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold required">Gênero</label>
+        {% set genero_atual = (registro.genero if registro and registro.genero is defined else (registro['genero'] if registro and registro['genero'] is defined else '')) %}
+        <select name="genero" class="form-select" required>
+          <option value="">—</option>
+          <option value="M" {{ 'selected' if genero_atual=='M' else '' }}>M</option>
+          <option value="F" {{ 'selected' if genero_atual=='F' else '' }}>F</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold required">Mãe</label>
+        <input type="text" name="mae" class="form-control" maxlength="80" required
+               value="{{ registro.mae if registro and registro.mae is defined else (registro['mae'] if registro and registro['mae'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Endereço</label>
+        <input type="text" name="endereco" class="form-control" maxlength="250"
+               value="{{ registro.endereco if registro and registro.endereco is defined else (registro['endereco'] if registro and registro['endereco'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Localização</label>
+        <input type="text" name="bairro" class="form-control" maxlength="20"
+               value="{{ registro.bairro if registro and registro.bairro is defined else (registro['bairro'] if registro and registro['bairro'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold required">CPF</label>
+        <input type="text" name="cpf" class="form-control" maxlength="14" placeholder="Somente números" required
+               value="{{ registro.cpf if registro and registro.cpf is defined else (registro['cpf'] if registro and registro['cpf'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">RG</label>
+        <input type="text" name="rg" class="form-control" maxlength="40"
+               value="{{ registro.rg if registro and registro.rg is defined else (registro['rg'] if registro and registro['rg'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Órgão RG</label>
+        <input type="text" name="rgOrgExp" class="form-control" maxlength="20"
+               value="{{ registro.rgOrgExp if registro and registro.rgOrgExp is defined else (registro['rgOrgExp'] if registro and registro['rgOrgExp'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold required">Data Nascimento</label>
+        <input type="date" name="dtNasc" class="form-control" required
+               value="{{ (registro.dtNasc if registro and registro.dtNasc is defined else (registro['dtNasc'] if registro and registro['dtNasc'] is defined else '')) | string }}">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold required">UF Nasc.</label>
+        {% set uf_atual = (registro.ufNasc if registro and registro.ufNasc is defined else (registro['ufNasc'] if registro and registro['ufNasc'] is defined else '')) %}
+        <select name="ufNasc" id="ufNasc" class="form-select" required>
+          <option value="">—</option>
+          {% for u in ufs %}
+            <option value="{{u[0]}}" {{ 'selected' if uf_atual==u[0] else '' }}>{{u[0]}} - {{u[1]}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-7">
+        <label class="form-label fw-bold">Município Nascimento</label>
+        {% set cod_mun_atual = (registro.codMunNas if registro and registro.codMunNas is defined else (registro['codMunNas'] if registro and registro['codMunNas'] is defined else '')) %}
+        <select name="codMunNas" id="codMunNas" class="form-select" data-mun-atual="{{ cod_mun_atual }}">
+          <option value="">— selecione a UF —</option>
+        </select>
+        <div class="form-text">A lista é filtrada pela UF.</div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold required">E-mail</label>
+        <input type="email" name="email" class="form-control" maxlength="100" required
+               value="{{ registro.email if registro and registro.email is defined else (registro['email'] if registro and registro['email'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">WhatsApp</label>
+        <input type="text" name="noWhatsapp" class="form-control" maxlength="20" placeholder="Somente números"
+               value="{{ registro.noWhatsapp if registro and registro.noWhatsapp is defined else (registro['noWhatsapp'] if registro and registro['noWhatsapp'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold required">Celular</label>
+        <input type="text" name="celular" class="form-control" maxlength="13" placeholder="Somente números" required
+               value="{{ registro.celular if registro and registro.celular is defined else (registro['celular'] if registro and registro['celular'] is defined else '') }}">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Família Assentado</label>
+        {% set fam_atual = (registro.idFamilia if registro and registro.idFamilia is defined else (registro['idFamilia'] if registro and registro['idFamilia'] is defined else '')) %}
+        <select name="idFamilia" class="form-select">
+          <option value="">—</option>
+          {% for f in familias %}
+            <option value="{{f[0]}}" {{ 'selected' if fam_atual==f[0] else '' }}>{{f[1]}} ({{f[0]}})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- CATEGORIA DO ASSENTADO (obrigatória) -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold required">Categoria do Assentado</label>
+        {% set ctg_atual = (registro.idCtgAssent if registro and registro.idCtgAssent is defined else (registro['idCtgAssent'] if registro and registro['idCtgAssent'] is defined else '')) %}
+        <select name="idCtgAssent" class="form-select" required>
+          <option value="">-- selecione --</option>
+          {% for c in categorias or [] %}
+            <option value="{{ c[0] }}" {{ 'selected' if ctg_atual==c[0] else '' }}>
+              {{ c[1] }}{% if c[2] %} ({{ c[2] }}){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 text-center mt-2">
+        <button class="btn btn-success">Salvar Alterações</button>
+        <a href="/menuAssent" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
   </div>
+</main>
 
-  <!-- ================== FORMULÁRIO DE ALTERAÇÃO ================== -->
-  {% if registro %}
-  <form action="/altAssent" method="POST" class="form-section row g-3">
-    <input type="hidden" name="idAssent" value="{{ registro[0] }}">
+<footer class="bg-dark text-white text-center py-3 mt-4">
+  <small>SBBC • Assentado</small>
+</footer>
 
-    <div class="col-md-6">
-      <label class="form-label fw-bold">Nome *</label>
-      <input type="text" name="nome" class="form-control" value="{{ registro[1] }}" required>
-    </div>
+<script>
+  // MUNICÍPIOS: recebidos do servidor e filtrados por UF no front
+  const municipiosAll = [
+    {% for m in municipios_all %}
+      {"cod":"{{m[0]}}","nome":"{{m[1]}}","uf":"{{m[2] or ''}}"},
+    {% endfor %}
+  ];
 
-    <div class="col-md-2">
-      <label class="form-label fw-bold">Gênero *</label>
-      <select name="genero" class="form
+  const ufSel   = document.getElementById('ufNasc');
+  const munSel  = document.getElementById('codMunNas');
 
+  function fillMunicipios() {
+    const uf = ufSel.value || '';
+    const munAtual = munSel.getAttribute('data-mun-atual') || '';
+    munSel.innerHTML = '<option value="">— selecione a UF —</option>';
+    if (!uf) return;
+    const lista = municipiosAll.filter(x => (x.uf || '') === uf);
+    for (const m of lista) {
+      const opt = document.createElement('option');
+      opt.value = m.cod;
+      opt.text  = m.nome;
+      if (munAtual && munAtual == m.cod) opt.selected = true;
+      munSel.appendChild(opt);
+    }
+  }
+
+  ufSel?.addEventListener('change', fillMunicipios);
+  // Preenche na carga inicial respeitando UF/Município atuais
+  fillMunicipios();
+</script>
+</body>
+</html>

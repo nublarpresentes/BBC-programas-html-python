@@ -1,10 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<!DOCTYPE html><html lang="pt-br"><head>
+<meta charset="UTF-8"/><title>Evento — Alterar</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head><body class="bg-light">
+<header class="bg-success text-white p-2"><div class="container"><h1 class="h5 m-0">Alterar — Evento</h1></div></header>
+<main class="container my-4">
+  {% with msgs=get_flashed_messages(with_categories=true) %}
+    {% for cat,msg in msgs %}<div class="alert alert-{{cat}}">{{msg}}</div>{% endfor %}
+  {% endwith %}
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card p-3">
+        <h6 class="mb-2">Eventos</h6>
+        <div class="list-group">
+          {% for e in eventos %}
+            <a class="list-group-item list-group-item-action" href="/evtAlt?id={{e.idEvt}}">{{e.nomEvt}} ({{e.idEvt}})</a>
+          {% else %}
+            <div class="text-muted">Sem registros.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <form action="/altEvt" method="POST" class="card p-3 shadow-sm">
+        {% if registro %}
+          <input type="hidden" name="idEvt" value="{{ registro[0] }}">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fw-bold">Nome do Evento</label>
+              <input name="nomEvt" class="form-control" value="{{ registro[1] }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Tipo</label>
+              <select name="idTipEvt" class="form-select" required>
+                {% for t in tipos %}
+                  <option value="{{t[0]}}" {{ 'selected' if t[0]==registro[11] else '' }}>{{t[1]}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Pauta</label>
+              <input name="pauta" class="form-control" value="{{ registro[2] or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Responsável</label>
+              <input name="responsavel" class="form-control" value="{{ registro[3] or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Início</label>
+              <input type="date" name="dtIniPer" class="form-control" value="{{ registro[4] }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Fim</label>
+              <input type="date" name="dtFimPer" class="form-control" value="{{ registro[5] }}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold">Presença</label>
+              <input name="tippresenca" class="form-control" value="{{ registro[6] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Local</label>
+              <input name="local" class="form-control" value="{{ registro[7] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Link</label>
+              <input name="linkplatonline" class="form-control" value="{{ registro[8] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Fones</label>
+              <input name="fones" class="form-control" value="{{ registro[9] or '' }}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold">Turno</label>
+              <input name="turno" class="form-control" value="{{ registro[10] or '' }}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold">Capa (S/N)</label>
+              <input name="capa" class="form-control" value="{{ registro[12] or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Foto Capa</label>
+              <input name="fotoCapa" class="form-control" value="{{ registro[13] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Foto 1</label>
+              <input name="foto1" class="form-control" value="{{ registro[14] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Foto 2</label>
+              <input name="foto2" class="form-control" value="{{ registro[15] or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Foto 3</label>
+              <input name="foto3" class="form-control" value="{{ registro[16] or '' }}">
+            </div>
+            <div class="col-12 text-center mt-2">
+              <button class="btn btn-primary">Salvar</button>
+              <a class="btn btn-secondary" href="/menuEventos">Cancelar</a>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info">Selecione um evento na lista ao lado.</div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</main>
+</body></html>

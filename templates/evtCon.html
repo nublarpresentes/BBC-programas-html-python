@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="pt-br"><head>
+<meta charset="UTF-8"/><title>Eventos — Consulta</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head><body class="bg-light">
+<header class="bg-success text-white p-2"><div class="container"><h1 class="h5 m-0">Consulta — Eventos</h1></div></header>
+<main class="container my-4">
+
+  <form action="/evtCon" method="GET" class="card p-3 shadow-sm mb-3">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Tipo</label>
+        <select name="idTipEvt" class="form-select">
+          <option value="">— Todos —</option>
+          {% for t in tipos %}
+            <option value="{{t[0]}}" {{ 'selected' if (filtros and filtros.idTipEvt==t[0]|string) else '' }}>{{t[1]}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Busca</label>
+        <input name="busca" class="form-control" value="{{ filtros.busca if filtros }}">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100">Filtrar</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card p-3 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+          <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Período</th><th>Turno</th><th class="text-center">Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.idEvt }}</td>
+              <td>{{ r.nomEvt }}</td>
+              <td>{{ r.nomTipEvt }}</td>
+              <td>
+                {% if r.dtIniPer and r.dtFimPer %}{{ r.dtIniPer }} — {{ r.dtFimPer }}{% else %}-{% endif %}
+              </td>
+              <td>{{ r.turno or '-' }}</td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-outline-primary" href="/evtAlt?id={{ r.idEvt }}"><i class="bi bi-pencil"></i></a>
+                <a class="btn btn-sm btn-outline-danger" href="/evtExc?id={{ r.idEvt }}"><i class="bi bi-trash"></i></a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-center text-muted">Sem resultados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body></html>

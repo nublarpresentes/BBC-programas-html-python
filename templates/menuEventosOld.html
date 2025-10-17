@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>SBBC — Menu Eventos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    body{background:#f5f7fb}
+    .shadow-soft{box-shadow:0 8px 20px rgba(0,0,0,.06)}
+    .card-rounded{border-radius:14px}
+    .list-group a.list-group-item{border:none;border-radius:10px;margin-bottom:8px}
+    .list-group a.list-group-item:hover{background:#e9f5ef}
+    .form-section{background:#fff;padding:14px;border-radius:12px}
+    .table thead th{background:#f0f3f7}
+    .menu-section-title{font-weight:bold;color:#198754;margin-top:12px;margin-bottom:4px;font-size:0.9rem}
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    </div>
+
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuBBC" title="Home" data-bs-toggle="tooltip"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent" title="Assentado" data-bs-toggle="tooltip"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuEventos" title="Eventos" data-bs-toggle="tooltip"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco" data-bs-toggle="tooltip"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="row g-4">
+
+      <!-- MENU LATERAL -->
+      <aside class="col-lg-3">
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Eventos</h5>
+
+            <div class="menu-section-title">Tipos de Evento</div>
+            <div class="list-group">
+              <a href="/tipEvtCad" class="list-group-item list-group-item-action" title="Cadastrar tipo de evento"><i class="bi bi-plus-circle me-2"></i>Cadastro</a>
+              <a href="/tipEvtAlt" class="list-group-item list-group-item-action" title="Alterar tipo de evento"><i class="bi bi-pencil-square me-2"></i>Alterar</a>
+              <a href="/tipEvtExc" class="list-group-item list-group-item-action" title="Excluir tipo de evento"><i class="bi bi-x-circle me-2"></i>Excluir</a>
+            </div>
+
+            <div class="menu-section-title mt-3">Eventos</div>
+            <div class="list-group">
+              <a href="/evtCad" class="list-group-item list-group-item-action" title="Cadastrar evento"><i class="bi bi-calendar-plus me-2"></i>Cadastro</a>
+              <a href="/evtAlt" class="list-group-item list-group-item-action" title="Alterar evento"><i class="bi bi-pencil me-2"></i>Alterar</a>
+              <a href="/evtExc" class="list-group-item list-group-item-action" title="Excluir evento"><i class="bi bi-trash me-2"></i>Excluir</a>
+              <a href="/evtCon" class="list-group-item list-group-item-action" title="Consulta geral de eventos"><i class="bi bi-search me-2"></i>Consulta</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CONTEÚDO CENTRAL -->
+      <section class="col-lg-9">
+
+        <!-- Acesso rápido -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <h5 class="mb-0 me-2"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i>Acesso rápido:</h5>
+              <a class="btn btn-outline-primary btn-sm" href="/tipEvtCad"><i class="bi bi-plus-circle me-1"></i>Tipo — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/evtCad"><i class="bi bi-calendar-plus me-1"></i>Evento — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/evtCon"><i class="bi bi-search me-1"></i>Consultar</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros (lista rápida de eventos aqui na home de Eventos) -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body">
+            <form action="/menuEventos" method="GET" class="row g-3 align-items-end">
+              <div class="col-md-5">
+                <label class="form-label fw-bold">Tipo</label>
+                <select name="idTipEvt" class="form-select">
+                  <option value="">— Todos —</option>
+                  {% for t in tipos or [] %}
+                    <option value="{{ t[0] }}" {{ 'selected' if (filtros and filtros.idTipEvt==t[0]|string) else '' }}>{{ t[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label fw-bold">Busca (título)</label>
+                <input name="busca" class="form-control" value="{{ filtros.busca if filtros }}">
+              </div>
+              <div class="col-md-2 d-grid">
+                <button class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tabela de eventos (resumo) -->
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Eventos</h5>
+              <small class="text-muted">Mostrando últimos registros</small>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Tipo</th>
+                    <th>Período</th>
+                    <th>Turno</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if rows and rows|length %}
+                    {% for r in rows %}
+                      <tr>
+                        <td>{{ r.idEvt }}</td>
+                        <td>{{ r.nomEvt }}</td>
+                        <td>{{ r.nomTipEvt }}</td>
+                        <td>{% if r.dtIniPer and r.dtFimPer %}{{ r.dtIniPer }} – {{ r.dtFimPer }}{% else %}-{% endif %}</td>
+                        <td>{{ r.turno or '-' }}</td>
+                        <td class="text-center">
+                          <a class="btn btn-sm btn-outline-primary" href="/evtAlt?id={{ r.idEvt }}" title="Alterar"><i class="bi bi-pencil"></i></a>
+                          <a class="btn btn-sm btn-outline-danger" href="/evtExc?id={{ r.idEvt }}" title="Excluir"><i class="bi bi-trash"></i></a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr><td colspan="6" class="text-center text-muted">Sem registros para exibir.</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <small>Endereço: xxxxxxxxx — Abaetetuba-PA • SBBC</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var triggers = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    triggers.forEach(function (el) { new bootstrap.Tooltip(el); });
+  });
+</script>
+</body>
+</html>

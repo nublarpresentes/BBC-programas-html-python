@@ -1,10 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8"/>
+  <title>Cadastro de Evento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .form-section{background:#fff;padding:16px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .required::after{content:" *";color:#dc3545}
+    .small-hint{font-size:.85rem;color:#6c757d}
+  </style>
 </head>
-<body>
+<body class="bg-light d-flex flex-column min-vh-100">
+<header class="bg-success text-white shadow-sm">
+  <div class="container d-flex align-items-center py-2">
+    <img src="/static/img/logo_bbc.png" style="height:60px" class="me-3" alt="IFPA">
+    <h1 class="h4 mb-0">SBBC — Cadastro de Evento</h1>
+  </div>
+</header>
 
+<main class="flex-grow-1">
+  <div class="container my-4">
+    <div class="form-section">
+      <h5 class="text-success mb-3">Novo Evento</h5>
+
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat, msg in msgs %}
+            <div class="alert alert-{{ cat if cat in ['success','warning','danger','info','primary','secondary'] else 'info' }} text-center mb-3">{{ msg|safe }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- IMPORTANTE: multipart para upload de foto -->
+      <form action="/cadEvento" method="POST" enctype="multipart/form-data" class="row g-3" id="form-evt">
+        <!-- Nome/Título -->
+        <div class="col-md-8">
+          <label class="form-label fw-bold required">Nome / Título do Evento</label>
+          <input type="text" name="nomEvt" id="nomEvt" class="form-control" required>
+        </div>
+
+        <!-- Tipo de Evento -->
+        <div class="col-md-4">
+          <label class="form-label fw-bold required">Tipo de Evento</label>
+          <select name="idTipEvt" id="idTipEvt" class="form-select" required>
+            <option value="">-- selecione --</option>
+            {% for t in tipos %}
+              <option value="{{ t[0] }}">{{ t[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Descrição (texto da notícia / detalhes) -->
+        <div class="col-12">
+          <label class="form-label fw-bold" id="lbl-descricao">Descrição <span class="small-hint">(para notícia, obrigatório)</span></label>
+          <textarea name="descricao" id="descricao" rows="6" class="form-control" placeholder="Digite o texto da notícia ou os detalhes do evento..."></textarea>
+        </div>
+
+        <!-- Campos comuns (opcionais) -->
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Responsável</label>
+          <input type="text" name="responsavel" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Tipo de Presença</label>
+          <input type="text" name="tippresenca" class="form-control" placeholder="P / O ...">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Fones</label>
+          <input type="text" name="fones" class="form-control" placeholder="(xx) xxxxx-xxxx">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Local</label>
+          <input type="text" name="local" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Link/Plataforma (online)</label>
+          <input type="url" name="linkplatonline" class="form-control" placeholder="https://...">
+        </div>
+
+        <!-- BLOCO Notícia (idTipEvt = 1) -->
+        <div id="bloco-noticia" class="row g-3 d-none">
+          <div class="col-12"><hr class="my-2"></div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold required">Capa?</label>
+            <select name="capa" id="capa" class="form-select">
+              <option value="">-- selecione --</option>
+              <option value="S">Sim (Destaque)</option>
+              <option value="N">Não</option>
+            </select>
+          </div>
+          <div class="col-md-9">
+            <label class="form-label fw-bold">Foto da Capa</label>
+            <input type="file" name="foto" id="foto-noticia" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
+            <div class="small-hint">Se enviada, será salva em <code>fotoCapa</code>.</div>
+          </div>
+        </div>
+
+        <!-- BLOCO Reunião (idTipEvt = 2) -->
+        <div id="bloco-reuniao" class="row g-3 d-none">
+          <div class="col-12"><hr class="my-2"></div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-bold required">Turno</label>
+            <select name="turno" id="turno" class="form-select">
+              <option value="">--</option>
+              <option value="M">M</option>
+              <option value="T">T</option>
+              <option value="N">N</option>
+            </select>
+          </div>
+
+          <div class="col-md-10">
+            <label class="form-label fw-bold required">Pauta</label>
+            <input type="text" name="pauta" id="pauta" class="form-control" placeholder="Tema, tópicos a discutir...">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold required">Início</label>
+            <input type="date" name="dtIniPer" id="dtIniPer" class="form-control">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold required">Fim</label>
+            <input type="date" name="dtFimPer" id="dtFimPer" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Foto (opcional)</label>
+            <input type="file" name="foto" id="foto-reuniao" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
+            <div class="small-hint">Se enviada, será salva em <code>foto1</code>.</div>
+          </div>
+        </div>
+
+        <div class="col-12 text-center mt-2">
+          <button class="btn btn-success">Cadastrar</button>
+          <a class="btn btn-secondary" href="/menuEventos">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <p class="mb-0">Endereço: xxxxxxxxx — Abaetetuba-PA</p>
+</footer>
+
+<script>
+  const selTipo = document.getElementById('idTipEvt');
+  const blocoNoticia = document.getElementById('bloco-noticia');
+  const blocoReuniao = document.getElementById('bloco-reuniao');
+
+  // Campos com obrigatoriedade condicional
+  const campoCapa = document.getElementById('capa');
+  const campoTurno = document.getElementById('turno');
+  const campoPauta = document.getElementById('pauta');
+  const campoDtIni = document.getElementById('dtIniPer');
+  const campoDtFim = document.getElementById('dtFimPer');
+  const campoDesc = document.getElementById('descricao');
+  const lblDesc = document.getElementById('lbl-descricao');
+
+  function toggleBlocos() {
+    const tip = selTipo.value;
+
+    // esconde ambos de início
+    blocoNoticia.classList.add('d-none');
+    blocoReuniao.classList.add('d-none');
+
+    // limpa obrigatoriedades
+    [campoCapa, campoTurno, campoPauta, campoDtIni, campoDtFim].forEach(el => {
+      if (el) el.required = false;
+    });
+    campoDesc.required = false;
+    lblDesc.classList.remove('required');
+
+    if (tip === '1') {
+      // Notícia
+      blocoNoticia.classList.remove('d-none');
+      if (campoCapa) campoCapa.required = true;
+      // Descrição passa a ser obrigatória para notícia
+      campoDesc.required = true;
+      lblDesc.classList.add('required');
+    } else if (tip === '2') {
+      // Reunião
+      blocoReuniao.classList.remove('d-none');
+      if (campoTurno) campoTurno.required = true;
+      if (campoPauta) campoPauta.required = true;
+      if (campoDtIni) campoDtIni.required = true;
+      if (campoDtFim) campoDtFim.required = true;
+    }
+  }
+
+  selTipo?.addEventListener('change', toggleBlocos);
+  toggleBlocos();
+</script>
 </body>
 </html>

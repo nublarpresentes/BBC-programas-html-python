@@ -54,20 +54,11 @@
     {% endif %}
   {% endwith %}
 
-  <!--form action="/cadAssent" method="POST" class="form-section row g-3" -->
-  <form action="/assentCad" method="POST" enctype="multipart/form-data" class="row g-3">
+  <form action="/cadAssent" method="POST" class="form-section row g-3">
     <div class="col-md-6">
       <label class="form-label fw-bold required">Nome</label>
       <input type="text" name="nome" class="form-control" maxlength="150" required>
     </div>
-
-     <!-- FOTO (opcional, mas recomendável) -->
-        <div class="col-md-4">
-          <label class="form-label fw-bold">Foto do Assentado</label>
-          <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp" class="form-control">
-          <small class="text-muted">Formatos: JPG, PNG ou WEBP.</small>
-        </div>
-
 
     <div class="col-md-2">
       <label class="form-label fw-bold required">Gênero</label>
@@ -131,23 +122,10 @@
       <div class="form-text">A lista é filtrada pela UF.</div>
     </div>
 
-    <!-- CATEGORIA DO ASSENTADO (obrigatória) -->
-        <div class="col-md-4">
-          <label class="form-label fw-bold">Categoria do Assentado <span class="text-danger">*</span></label>
-          <select name="idCtgAssent" class="form-select" required>
-            <option value="">-- selecione --</option>
-            {% for c in categorias or [] %}
-              <option value="{{ c[0] }}">{{ c[1] }}{% if c[2] %} ({{ c[2] }}){% endif %}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-
     <div class="col-md-4">
       <label class="form-label fw-bold required">E-mail</label>
       <input type="email" name="email" class="form-control" maxlength="100" required>
     </div>
-
 
     <div class="col-md-4">
       <label class="form-label fw-bold">WhatsApp</label>

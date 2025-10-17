@@ -115,7 +115,36 @@ from sitAssent import cadastrar_sitassent, pagina_sitAssentAlt, alterar_sitassen
 from ctgAssent import cadastrar_ctgassent, pagina_ctgAssentAlt, alterar_ctgassent, pagina_ctgAssentExc, excluir_ctgassent
 
 # Tipo Evento
-from tipEvt import pagina_tipEvtAlt, pagina_tipEvtExc, cadastrar_tipevt, alterar_tipevt, excluir_tipevt
+# from tipEvt import pagina_tipEvtAlt, pagina_tipEvtExc, cadastrar_tipevt, alterar_tipevt, excluir_tipevt
+
+from evento import (
+    view_menuEvento,
+    # Tipos
+    view_tipEvtCad, cadastrar_tipevt, pagina_tipEvtAlt, alterar_tipevt, pagina_tipEvtExc, excluir_tipevt,
+    # Eventos
+    view_evtCad, cadastrar_evt,  # <<-- este nome mesmo
+    view_evtAlt, alterar_evento,
+    view_evtExc, excluir_evento,
+    pagina_evtCon
+)
+
+
+#from evento import (
+    # Menu
+#    view_menuEvento as view_menuEventos,
+
+    # Tipos de evento
+ #   view_tipEvtCad, cadastrar_tipevt,
+#    pagina_tipEvtAlt, alterar_tipevt,
+ #   pagina_tipEvtExc, excluir_tipevt,
+
+    # Eventos
+ #   view_evtCad,
+ #   cadastrar_evt as cadastrar_evento,
+
+#)
+
+
 
 # Grupo de Partilha
 from grpPartlh import (
@@ -180,29 +209,80 @@ def altSenha():
 
 # ========== *02 *EVENTO ================================================================
 
-@app.route('/tipEvtCad')
-def tipEvtCad():
-    return render_template('tipEvtCad.html')
+@app.get('/evtCad')
+def evtCad_view():
+    # endpoint = "evtCad_view"
+    return view_evtCad()
 
-@app.route('/cadTipEvt', methods=['POST'])
-def cadTipEvt():
-    return cadastrar_tipevt()
+@app.route('/cadEvento', methods=['POST'])
+def cadEvento_post():
+    # endpoint = "cadEvento_post"
+    return cadastrar_evt()
 
-@app.route('/tipEvtAlt')
-def tipEvtAlt():
-    return pagina_tipEvtAlt()
+# (opcional) Se alguém acessar /cadEvento por GET, redireciona para o form
+@app.get('/cadEvento')
+def cadEvento_get():
+    return redirect(url_for('evtCad_view'))
 
-@app.route('/altTipEvt', methods=['POST'])
-def altTipEvt():
-    return alterar_tipevt()
+@app.get('/evtAlt')
+def evtAlt_view():
+    return view_evtAlt()
 
-@app.route('/tipEvtExc')
-def tipEvtExc():
-    return pagina_tipEvtExc()
+@app.post('/altEvento')
+def altEvento_post():
+    return alterar_evento()
 
-@app.route('/excTipEvt', methods=['POST'])
-def excTipEvt():
-    return excluir_tipevt()
+@app.get('/evtExc')
+def evtExc_view():
+    return view_evtExc()
+
+@app.post('/excEvento')
+def excEvento_post():
+    return excluir_evento()
+
+@app.get('/evtCon')
+def evtCon_view():
+    return pagina_evtCon()
+
+@app.get('/evento/<int:idEvt>')
+def evento_detalhe(idEvt: int):
+    conn = conectar_bd()
+    if not conn:
+        flash("Não foi possível abrir o evento.", "danger")
+        return redirect(url_for('menu'))
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT e."idEvt", e."nomEvt", COALESCE(e.descricao,''), COALESCE(e."fotoCapa",''),
+                   e."dtIniPer", e."dtFimPer", e.turno, t."nomTipEvt"
+              FROM tbevento e
+              LEFT JOIN tbtipevt t ON t."idTipEvt" = e."idTipEvt"
+             WHERE e."idEvt"=%s
+        """, (idEvt,))
+        row = cur.fetchone()
+        if not row:
+            flash("Evento não encontrado.", "warning")
+            return redirect(url_for('menu'))
+        evento = {
+            "idEvt": row[0],
+            "titulo": row[1],
+            "descricao": row[2],
+            "foto": row[3],
+            "dtIniPer": row[4],
+            "dtFimPer": row[5],
+            "turno": row[6],
+            "tipo": row[7],
+        }
+        return render_template('evtDetalhe.html', evento=evento)
+    finally:
+        try: conn.close()
+        except: pass
+
+@app.get('/menuEventos')
+def menuEventos():
+    from evento import view_menuEventos
+    return view_menuEventos()
+
 
 # ============= *03 *POLÍTICA PÚBLICA  ================================================================
 @app.route('/politPubCad')
@@ -522,20 +602,23 @@ def contribAlt():
 def altContrib():
     return alterar_contrib()
 
-
+# --- Consulta Geral de Contribuições (REGISTROS dos assentados) ---
 @app.route('/conContrib')
 def conContrib():
+    # mantém compat de link antigo
     return redirect(url_for('conGeralContrib', **request.args))
 
 @app.route('/conGeralContrib', methods=['GET'])
 def conGeralContrib():
-    from conGeralTipContrib import pagina_conGeralTipContrib
-    return pagina_conGeralTipContrib()
+    from conGeralContrib import pagina_conGeralContrib
+    return pagina_conGeralContrib()
 
 @app.route('/conFiltroContrib', methods=['GET', 'POST'])
 def conFiltroContrib():
-    from conGeralTipContrib import conFiltroTipContrib
-    return conFiltroTipContrib()
+    from conGeralContrib import conFiltroContrib as _conFiltroContrib
+    return _conFiltroContrib()
+
+
 
 
 # ============  *11  *PARTILHA ===============================================================
@@ -796,6 +879,37 @@ def conFiltroSaldo_route():
 
 # =============  *20   *SELECT  - MENU -   UTILITÁRIO - QRCODE - WHATSAPP ===================================
 
+
+@app.get('/menuBBC')
+def menuBBC():
+    conn = conectar_bd()
+    noticia_capa = None
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "nomEvt", "fotoCapa", "idEvt"
+                FROM tbevento
+                WHERE capa = 'S' AND "idTipEvt" = 1
+                ORDER BY "idEvt" DESC
+                LIMIT 1
+            """)
+            row = cur.fetchone()
+            if row:
+                noticia_capa = {
+                    "titulo": row[0],
+                    "foto": row[1],
+                    "idEvt": row[2]
+                }
+        finally:
+            try: conn.close()
+            except: pass
+
+    return render_template('menu.html', usuario='Usuário', noticia_capa=noticia_capa)
+
+
+
+
 def _carrega_selects():
     conn = conectar_bd()
     categorias, politicas, unidades, assentados = [], [], [], []
@@ -815,10 +929,6 @@ def _carrega_selects():
         conn.close()
     return categorias, politicas, unidades, assentados
 
-
-@app.route('/menuBBC')
-def menuBBC():
-    return render_template('menuBBC.html')
 
 @app.route('/menuCaderneta')
 def menuCaderneta():
@@ -843,6 +953,77 @@ def rotina_whatsapp():
 def enviar_msg_whatsapp():
     session['mensagem'] = "  "
     return enviar_whatsapp()
+
+
+# --- Notícia de capa (evento tipo 1 com capa='S')
+def _buscar_noticia_capa():
+    conn = conectar_bd()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT "idEvt", "nomEvt", COALESCE(descricao, ''), COALESCE("fotoCapa", '')
+              FROM tbevento
+             WHERE "idTipEvt" = 1
+               AND UPPER(COALESCE(capa,'N')) = 'S'
+             ORDER BY "idEvt" DESC
+             LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            return None
+        idEvt, nomEvt, descricao, fotoCapa = row
+        # em evento.py, salvamos foto como "img/eventos/arquivo.jpg" (sem /static)
+        return {
+            "idEvt": idEvt,
+            "titulo": nomEvt,
+            "descricao": descricao,
+            "foto": fotoCapa  # o template já prefixa com /static/
+        }
+    finally:
+        try: conn.close()
+        except: pass
+
+
+@app.route('/menu', methods=['GET'])
+def menu():
+    usuario = session.get('usuario', '')
+    noticia = _buscar_noticia_capa()
+    return render_template('menu.html', usuario=usuario, noticia_capa=noticia)
+
+# --- helper interno: pega a notícia de capa (idTipEvt=1 e capa='S')
+def _pegar_noticia_capa():
+    conn = conectar_bd()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT e."idEvt",
+                   e."nomEvt",
+                   COALESCE(e.descricao, ''),
+                   COALESCE(e."fotoCapa", '')   -- ex.: 'img/eventos/evt_123_capa.jpg'
+              FROM tbevento e
+             WHERE e."idTipEvt" = 1           -- 1 = notícia
+               AND e.capa = 'S'
+             ORDER BY e."idEvt" DESC
+             LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {
+            "idEvt": row[0],
+            "titulo": row[1],
+            "descricao": row[2],
+            "foto": row[3],                   # já relativo a /static/
+        }
+    finally:
+        try: conn.close()
+        except: pass
+
+# --- Home/Menu: usar a mesma lógica para /menu e /menuBBC
 
 
 # -------------------- RUN --------------------
