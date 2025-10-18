@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Lançar Presença — Evento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/logo_bbc.png" class="me-3" style="height:60px" alt="BBC">
+      <h1 class="h5 mb-0">SBBC — Lançar Presença</h1>
+    </div>
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuEventos"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container my-4">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      {% for cat,msg in msgs %}
+        <div class="alert alert-{{cat}}">{{ msg|safe }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title"><i class="bi bi-person-check me-2"></i>Registro de Presença</h5>
+      <form action="{{ url_for('evtPres_post') }}" method="POST" class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Reunião</label>
+          <select name="idEvt" class="form-select" required>
+            <option value="">— selecione —</option>
+            {% for e in eventos %}
+              <option value="{{ e.idEvt }}">{{ e.nomEvt }}{% if e.turno %} ({{ e.turno }}){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Assentado</label>
+          <select name="idAssent" class="form-select" required>
+            <option value="">— selecione —</option>
+            {% for a in assentados %}
+              <option value="{{ a.idAssent }}">{{ a.nome }} ({{ a.idAssent }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Presente</label>
+          <select name="presenca" class="form-select">
+            <option value="S" selected>S</option>
+            <option value="N">N</option>
+          </select>
+        </div>
+
+        <div class="col-md-9">
+          <label class="form-label fw-bold">Equivalia configurada (categoria 5)</label>
+          <input type="text" class="form-control" value="{{ valor_eqv is not none and ('%.2f'|format(valor_eqv)) or '—' }}" readonly>
+          <div class="form-text">Se “Presente = S”, o sistema usará este valor em <strong>tbfinanc.valFinanc</strong>.</div>
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-success"><i class="bi bi-check2-circle me-1"></i>Salvar</button>
+          <a href="/menuEventos" class="btn btn-secondary">Voltar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <small>SBBC • Eventos</small>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

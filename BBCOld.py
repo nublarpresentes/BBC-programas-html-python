@@ -1,136 +1,292 @@
-
 import psycopg2
-
-# import requests
-
 from datetime import datetime
-
-from controleBBC import dados_controle, cadastrar_controle, busca_controle, atualizar_matricula, \
-     dados_whatsapp, enviar_whatsapp, cartaoQR, \
-     gerar_pdf_Cartao, dados_cartao, cartaoQR, dados_cartao_turno, cartao_turno, \
-     dados_cartao_curso, cartao_curso
-
-#--------------------- contribuicoes e retribuicoes ------------------------------------
-
-from tipContrib import listar_tipcontrib, pegar_tipcontrib, excluir_tipo_contrib, \
-     cadastrar_tipcontrib , alterar_tipcontrib, view_tipContribAlt, \
-    view_tipContribExc
-
-
-
-from tipRetrib import cadastrar_tipretrib , alterar_tipretrib
-
-from contrib import cadastrar_contrib , alterar_contrib
-from retrib import cadastrar_retrib , alterar_retrib
-
-#------------------------------------------------------------------------------------------
-
-from assent import  consulta_nome_assentado, obter_foto_assentado, incluir_assentado, \
-atualizar_assentado, excluir_assentado, consulta_todos_assentados
-
-
-# depois
-from assent import (
-    consulta_nome_assentado, obter_foto_assentado, incluir_assentado,
-    atualizar_assentado, excluir_assentado, consulta_todos_assentados
-)
-
-from usuario import  acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
-
-
-from consultas import consQTDdia, consQTDsem
-
-from conexao_bd import conectar_bd
-
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 
-import subprocess
+# -------------------- IMPORTS DO PROJETO --------------------
+from conexao_bd import conectar_bd
+
+# Controle/WhatsApp/Cartão
+from controleBBC import (
+    dados_controle, cadastrar_controle, busca_controle, atualizar_matricula,
+    dados_whatsapp, enviar_whatsapp, cartaoQR,
+    gerar_pdf_Cartao, dados_cartao, cartaoQR, dados_cartao_turno, cartao_turno,
+    dados_cartao_curso, cartao_curso
+)
+
+# Assentado (tudo que a UI precisa)
+from assent import (
+    view_menuAssent,
+    obter_foto_assentado,
+    view_assentCad, cadastrar_assent,
+    view_assentAlt, alterar_assent,
+    view_assentExc,
+    ver_carteira_assentado,
+    view_gerarCarteira, post_gerarCarteira,
+    pagina_conGeralAssent, conFiltroAssent
+)
+
+# Retribuição
+from retrib import (
+    view_retribCad, cadastrar_retrib,
+    view_retribAlt, alterar_retrib,
+    view_retribExc, excluir_retrib,
+    pagina_conGeralRetrib, conFiltroRetrib,
+)
+
+from tipRecpsa import (
+    view_tipRecpsaCad, cadastrar_tiprecpsa,
+    view_tipRecpsaAlt, alterar_tiprecpsa,
+    view_tipRecpsaExc, excluir_tiprecpsa,
+    pagina_conGeralTipRecpsa, conFiltroTipRecpsa
+)
+
+from tipUsoInfr import (
+    view_tipUsoInfrCad, cadastrar_tipusoinfr,
+    view_tipUsoInfrAlt, alterar_tipusoinfr,
+    view_tipUsoInfrExc, excluir_tipusoinfr,
+    pagina_conGeralTipUsoInfr, conFiltroTipUsoInfr
+)
+
+from entidade import (
+    view_entidadeCad, cadastrar_entidade,
+    view_entidadeAlt, alterar_entidade,
+    view_entidadeExc, excluir_entidade,
+    pagina_conEntidade, conFiltroEntidade
+)
+
+from recpsa import (
+    view_recpsaCad, cadastrar_recpsa
+    # (demais telas de recpsa podem ser adicionadas quando necessário)
+)
+
+from catgUsoInfr import (
+    view_catgUsoInfrCad, cadastrar_catgUsoInfr,
+    view_catgUsoInfrAlt, alterar_catgUsoInfr,
+    view_catgUsoInfrExc, excluir_catgUsoInfr,
+    view_catgUsoInfrCon
+)
+
+from polPub import (
+    cadastrar_politpub, alterar_politpub, excluir_politpub,
+    listar_politpub, pegar_politpub, _listar_entidades,
+    pagina_conPolitPub, conFiltroPolitPub
+)
+
+from saldo import pagina_conGeralSaldo, conFiltroSaldo
+
+# Usuário / Login
+from usuario import acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
+
+# Consultas
+from consultas import consQTDdia, consQTDsem
+
+# Tipo Contribuição
+from tipContrib import (
+    listar_tipcontrib, pegar_tipcontrib, excluir_tipo_contrib,
+    cadastrar_tipcontrib, alterar_tipcontrib, view_tipContribAlt, view_tipContribExc
+)
+
+# Tipo Retribuição
+from tipRetrib import cadastrar_tipretrib, alterar_tipretrib
+
+# Contribuição
+from contrib import cadastrar_contrib, alterar_contrib, view_contribCad, view_contribAlt
+
+# Partilha (partlh)
+from partlh import (
+    view_partlhCad, cadastrar_partlh,
+    view_partlhAlt, alterar_partlh,
+    view_partlhExc, excluir_partlh
+)
+
+# Unidade de Equivalência
+from unEqv import (
+    cadastrar_uneqv, alterar_uneqv, excluir_uneqv,
+    pagina_unEqvAlt, pagina_unEqvExc
+)
+
+# Família
+from familia import cadastrar_familia, pagina_familiaAlt, alterar_familia, pagina_familiaExc, excluir_familia
+
+# Situação Assentado
+from sitAssent import cadastrar_sitassent, pagina_sitAssentAlt, alterar_sitassent, pagina_sitAssentExc, excluir_sitassent
+
+# Categoria Assentado
+from ctgAssent import cadastrar_ctgassent, pagina_ctgAssentAlt, alterar_ctgassent, pagina_ctgAssentExc, excluir_ctgassent
+
+# Tipo Evento
+# from tipEvt import pagina_tipEvtAlt, pagina_tipEvtExc, cadastrar_tipevt, alterar_tipevt, excluir_tipevt
+
+from evento import (
+    view_menuEvento,
+    # Tipos
+    view_tipEvtCad, cadastrar_tipevt, pagina_tipEvtAlt, alterar_tipevt, pagina_tipEvtExc, excluir_tipevt,
+    # Eventos
+    view_evtCad, cadastrar_evt,  # <<-- este nome mesmo
+    view_evtAlt, alterar_evento,
+    view_evtExc, excluir_evento,
+    pagina_evtCon,  view_evtPresencaSel, gerar_lista_presenca_pdf,  view_evtPresenca, registrar_evtPresenca
+)
 
 
+# Grupo de Partilha
+from grpPartlh import (
+    cadastrar_grpPartlh, alterar_grpPartlh, excluir_grpPartlh,
+    pagina_grpPartlhAlt, pagina_grpPartlhExc, pagina_grpPartlhCon
+)
+
+# Grupo x Assentado
+from grpAssent import (
+    pagina_grpAssentCad, pagina_grpAssentAlt, pagina_grpAssentExc,
+    cadastrar_grpAssent, alterar_grpAssent, excluir_grpAssent
+)
+
+# -------------------- FLASK APP --------------------
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = '@Sigma4321'
-app.secret_key = "um_segredo_bem_dificil"  # pode ser qualquer string
-# Função para estabelecer conexão com o banco de dados
+app.secret_key = "um_segredo_bem_dificil"
 
-# --  ROTINAS BÁSICAS:  CONECTAR - INDEx - MENU - FICAM POSICIONADAS ANTES DE TODAS - PADRÃO MEU------------------
-
-# Função para estabelecer conexão com o banco de dados
-
-# Rota para a página inicial
+#============  *00 *BÁSICO ==================================================================
 @app.route('/')
 def index():
+    # Se não houver index.html, você pode trocar para: return view_menuAssent()
     return render_template('index.html')
 
-
-# Rota para autenticação de usuário
-
+# ========== *01 *USUÁRIO ================================================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     return acessoUsuario()
 
-
-# Rota para a conta usuario
 @app.route('/usuarioCad')
 def usuarioCad():
     return render_template('usuarioCad.html')
 
 @app.route('/cadUsuario', methods=['POST'])
 def cadUsuario():
-    # Redirecionar para a rota
     return cadastrar_usuario()
 
-
-# Rota para a altercao do usuario
 @app.route('/usuarioAlt')
 def usuarioAlt():
     return render_template('usuarioAlt.html')
 
 @app.route('/altUsuario', methods=['POST'])
 def altUsuario():
-    # Redirecionar para a rota
-    print("passou duas vezesu")
     return alterar_usuario()
 
-# Rota para a recuperacao de senha
 @app.route('/senhaRec')
 def senhaRec():
     return render_template('senhaRec.html')
 
 @app.route('/recSenha', methods=['POST'])
 def recSenha():
-    # Redirecionar para a rota
     return recuperar_senha()
 
-#----------------------------------------------
-# Rota para a alterar senha
 @app.route('/senhaAlt')
 def senhaAlt():
     return render_template('senhaAlt.html')
 
 @app.route('/altSenha', methods=['POST'])
 def altSenha():
-    # Redirecionar para a rota
     return alterar_senha()
 
-#---------------------------------------------------
-# Rota para cad  politica publica
+# ========== *02 *EVENTO ================================================================
 
-# BBC.py (trechos)
+@app.get('/evtCad')
+def evtCad_view():
+    return view_evtCad()
 
-from polPub import (
-    cadastrar_politpub, alterar_politpub, excluir_politpub,
-    listar_politpub, pegar_politpub, _listar_entidades
-)
+@app.post('/cadEvento')
+def cadEvento_post():
+    return cadastrar_evt()
 
-# ---------- CADASTRAR ----------
-# BBC.py (trechos)
+# (opcional) Se alguém acessar /cadEvento por GET, redireciona para o form
+@app.get('/cadEvento')
+def cadEvento_get():
+    return redirect(url_for('evtCad_view'))
 
-from polPub import (
-    cadastrar_politpub, alterar_politpub, excluir_politpub,
-    listar_politpub, pegar_politpub, _listar_entidades
-)
+@app.get('/evtAlt')
+def evtAlt_view():
+    return view_evtAlt()
 
-# ---------- CADASTRAR ----------
+@app.post('/altEvento')
+def altEvento_post():
+    return alterar_evento()
+
+@app.get('/evtExc')
+def evtExc_view():
+    return view_evtExc()
+
+@app.post('/excEvento')
+def excEvento_post():
+    return excluir_evento()
+
+@app.get('/evtCon')
+def evtCon_view():
+    return pagina_evtCon()
+
+@app.get('/evento/<int:idEvt>')
+def evento_detalhe(idEvt: int):
+    conn = conectar_bd()
+    if not conn:
+        flash("Não foi possível abrir o evento.", "danger")
+        return redirect(url_for('menu'))
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT e."idEvt", e."nomEvt", COALESCE(e.descricao,''), COALESCE(e."fotoCapa",''),
+                   e."dtIniPer", e."dtFimPer", e.turno, t."nomTipEvt"
+              FROM tbevento e
+              LEFT JOIN tbtipevt t ON t."idTipEvt" = e."idTipEvt"
+             WHERE e."idEvt"=%s
+        """, (idEvt,))
+        row = cur.fetchone()
+        if not row:
+            flash("Evento não encontrado.", "warning")
+            return redirect(url_for('menu'))
+        evento = {
+            "idEvt": row[0],
+            "titulo": row[1],
+            "descricao": row[2],
+            "foto": row[3],
+            "dtIniPer": row[4],
+            "dtFimPer": row[5],
+            "turno": row[6],
+            "tipo": row[7],
+        }
+        return render_template('evtDetalhe.html', evento=evento)
+    finally:
+        try: conn.close()
+        except: pass
+
+@app.get('/menuEventos')
+def menuEventos():
+    from evento import view_menuEventos
+    return view_menuEventos()
+
+# --------- PRESENÇA EM EVENTO (SEM CONFLITOS DE ENDPOINT) ---------
+
+# Tela de LANÇAMENTO DE PRESENÇA (digitando um por vez)
+@app.get('/evtPres')
+def evtPres_view():
+    return view_evtPresenca()
+
+# POST do lançamento de presença
+@app.post('/evtPres')
+def evtPres_post():
+    return registrar_evtPresenca()
+
+# Tela de SELEÇÃO para GERAR LISTA DE PRESENÇA (PDF)
+@app.get('/evtPresenca')
+def evtPresencaSel_view():
+    return view_evtPresencaSel()
+
+# POST que GERA o PDF da lista de presença
+@app.post('/evtPresencaPDF')
+def evtPresencaPDF_post():
+    return gerar_lista_presenca_pdf()
+
+
+# ============= *03 *POLÍTICA PÚBLICA  ================================================================
 @app.route('/politPubCad')
 def politPubCad():
     entidades = _listar_entidades()
@@ -140,7 +296,6 @@ def politPubCad():
 def cadPolitPub():
     return cadastrar_politpub()
 
-# ---------- ALTERAR (lista + form) ----------
 @app.route('/politPubAlt')
 def politPubAlt():
     itens = listar_politpub()
@@ -155,7 +310,6 @@ def politPubAlt():
 def altPolitPub():
     return alterar_politpub()
 
-# ---------- EXCLUIR (lista + confirmar) ----------
 @app.route('/politPubExc')
 def politPubExc():
     itens = listar_politpub()
@@ -169,19 +323,22 @@ def politPubExc():
 def excPolitPub():
     return excluir_politpub()
 
-#---------------------------------------------------
-# Rota para cadastro  unidade Equivalia
-# BBC.py (apenas as rotas relacionadas a UnEqv)
+@app.route('/politPubCon')
+def politPubCon():
+    entidades = _listar_entidades()
+    return render_template('politPubCon.html', entidades=entidades)
 
-from unEqv import (
-    cadastrar_uneqv,
-    alterar_uneqv,
-    excluir_uneqv,
-    pagina_unEqvAlt,
-    pagina_unEqvExc,
-)
 
-# --- Inclusão
+@app.route('/conPolitPub', methods=['GET'])
+def conPolitPub():
+    return pagina_conPolitPub()
+
+@app.route('/conFiltroPolitPub', methods=['GET','POST'])
+def conFiltroPolitPub_route():
+    return conFiltroPolitPub()
+
+
+# ============  *04   *UNIDADE EQUIVALÊNCIA  ==================================================
 @app.route('/unEqvCad')
 def unEqvCad():
     return render_template('unEqvCad.html')
@@ -190,7 +347,6 @@ def unEqvCad():
 def cadUnEqv():
     return cadastrar_uneqv()
 
-# --- Alteração (lista + painel de edição no mesmo HTML)
 @app.route('/unEqvAlt')
 def unEqvAlt():
     return pagina_unEqvAlt()
@@ -199,7 +355,6 @@ def unEqvAlt():
 def altUnEqv():
     return alterar_uneqv()
 
-# --- Exclusão (lista + painel de confirmação)
 @app.route('/unEqvExc')
 def unEqvExc():
     return pagina_unEqvExc()
@@ -208,141 +363,553 @@ def unEqvExc():
 def excUnEqv():
     return excluir_uneqv()
 
-#--------------------   familia ------------------
 
-# --------------------  Família  --------------------
+# =============  *05   *FAMÍLIA =========================================================
+
 @app.route('/familiaCad')
 def familiaCad():
     return render_template('familiaCad.html')
 
 @app.route('/cadFamilia', methods=['POST'])
 def cadFamilia():
-    from familia import cadastrar_familia
     return cadastrar_familia()
 
-# Alteração (lista + painel de edição no mesmo HTML)
 @app.route('/familiaAlt')
 def familiaAlt():
-    from familia import pagina_familiaAlt
     return pagina_familiaAlt()
 
 @app.route('/altFamilia', methods=['POST'])
 def altFamilia():
-    from familia import alterar_familia
     return alterar_familia()
 
-# Exclusão (lista + painel de confirmação)
 @app.route('/familiaExc')
 def familiaExc():
-    from familia import pagina_familiaExc
     return pagina_familiaExc()
 
 @app.route('/excFamilia', methods=['POST'])
 def excFamilia():
-    from familia import excluir_familia
     return excluir_familia()
 
 
-#------------  situacao assentado
-
-# --- Situação do Assentado
+# ============ *06  *SITUAÇÃO ASSENTADO  =========================================================
 @app.route('/sitAssentCad')
 def sitAssentCad():
     return render_template('sitAssentCad.html')
 
 @app.route('/cadSitAssent', methods=['POST'])
 def cadSitAssent():
-    from sitAssent import cadastrar_sitassent
     return cadastrar_sitassent()
 
 @app.route('/sitAssentAlt')
 def sitAssentAlt():
-    from sitAssent import pagina_sitAssentAlt
     return pagina_sitAssentAlt()
 
 @app.route('/altSitAssent', methods=['POST'])
 def altSitAssent():
-    from sitAssent import alterar_sitassent
     return alterar_sitassent()
 
 @app.route('/sitAssentExc')
 def sitAssentExc():
-    from sitAssent import pagina_sitAssentExc
     return pagina_sitAssentExc()
 
 @app.route('/excSitAssent', methods=['POST'])
 def excSitAssent():
-    from sitAssent import excluir_sitassent
     return excluir_sitassent()
 
-# ------------  categoria assentado
+# ============   *07 *CATEGORIA ASSENTADO  =======================================================
 @app.route('/ctgAssentCad')
 def ctgAssentCad():
     return render_template('ctgAssentCad.html')
 
 @app.route('/cadCtgAssent', methods=['POST'])
 def cadCtgAssent():
-    from ctgAssent import cadastrar_ctgassent
     return cadastrar_ctgassent()
 
-# Alteração (lista + painel de edição no mesmo HTML)
 @app.route('/ctgAssentAlt')
 def ctgAssentAlt():
-    from ctgAssent import pagina_ctgAssentAlt
     return pagina_ctgAssentAlt()
 
 @app.route('/altCtgAssent', methods=['POST'])
 def altCtgAssent():
-    from ctgAssent import alterar_ctgassent
     return alterar_ctgassent()
 
-# Exclusão (lista + painel de confirmação)
 @app.route('/ctgAssentExc')
 def ctgAssentExc():
-    from ctgAssent import pagina_ctgAssentExc
     return pagina_ctgAssentExc()
 
 @app.route('/excCtgAssent', methods=['POST'])
 def excCtgAssent():
-    from ctgAssent import excluir_ctgassent
     return excluir_ctgassent()
 
+# =============  *08  *ASSENTADO  ===============================================================
+@app.get('/menuAssent')
+def menuAssent():
+    # Renderiza menu + grade inicial (15 primeiros por ordem alfabética)
+    return view_menuAssent()
 
-#------- cadastro assentado ----------------------
-# Rota para cad   assentado
-@app.route('/assentCad')
+@app.get('/conGeralAssent')
+def conGeralAssent():
+    # Aplica filtros e renderiza na mesma tela (menuAssent.html)
+    return pagina_conGeralAssent()
+
+@app.route('/conFiltroAssent', methods=['GET', 'POST'])
+def conFiltroAssent_route():
+    return conFiltroAssent()
+
+@app.get('/assentCad')
 def assentCad():
-    return render_template('assentCad.html')
+    return view_assentCad()
 
-@app.route('/cadAssent', methods=['POST'])
+@app.post('/assentCad')
 def cadAssent():
-    # Redirecionar para a rota
-    return cadastrar_assentado()
+    # Grava e gera a carteira PDF (QR = matrícula) conforme assent.py
+    return cadastrar_assent()
 
-#------- alterar dados  assentado ----------------------
-# Rota para cad   assentado
-@app.route('/assentAlt')
+@app.get('/assentAlt')
 def assentAlt():
-    return render_template('assentAlt.html')
+    return view_assentAlt()
 
-@app.route('/altAssent', methods=['POST'])
+@app.post('/assentAlt')
 def altAssent():
-    # Redirecionar para a rota
-    return alterar_assentado()
+    return alterar_assent()
 
-
-#------- excluir  assentado ----------------------
-# Rota para cad   assentado
-@app.route('/assentExc')
+@app.get('/assentExc')
 def assentExc():
-    return render_template('assentExc.html')
+    return view_assentExc()
 
-@app.route('/excAssent', methods=['POST'])
-def excAssent():
-    # Redirecionar para a rota
-    return excluir_assentado()
-#---------------------------------------------------
-# Rota para alterar  situacao assentado
+@app.get('/carteira/<int:idAssent>')
+def verCarteiraAssentado(idAssent: int):
+    return ver_carteira_assentado(idAssent)
+
+@app.get('/fotoAssent/<int:idAssent>')
+def fotoAssent(idAssent: int):
+    return obter_foto_assentado(idAssent)
+
+@app.get("/gerarCarteira")
+def gerarCarteira_get():
+    return view_gerarCarteira()
+
+@app.post("/gerarCarteira")
+def gerarCarteira_post():
+    return post_gerarCarteira()
+
+def obter_dados_assent_idassent(matr):
+    conn = conectar_bd()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT nome, foto FROM tbassentado WHERE idAssent = %s", (matr,))
+            assentado = cur.fetchone()
+            if not assentado:
+                return None
+            nome, foto = assentado
+            foto_corrigida = url_for('static', filename='img/' + (foto or ''))
+            conn.close()
+            return [nome, foto_corrigida]
+        except Exception as e:
+            session['mensagem'] = "Erro ao obter dados do assentado por matrícula!"
+            print("Erro obter_dados_assent_matricula:", e)
+            return None
+    return None
+
+def obter_dados_assent_nome(nome):
+    conn = conectar_bd()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT idAssent, nome, foto FROM tbassentado WHERE nome LIKE %s", ('%' + nome + '%',))
+            assentados = cur.fetchall()
+            assentados_corrigidos = []
+            for idAssent, nome, foto in assentados:
+                foto_corrigida = url_for('static', filename='img/' + (foto or ''))
+                assentados_corrigidos.append([idAssent, nome, foto_corrigida])
+            conn.close()
+            return assentados_corrigidos
+        except Exception as e:
+            session['mensagem'] = "Erro ao obter dados dos assentados por nome!"
+            print("Erro obter_dados_assent_nome:", e)
+            return []
+    return []
+
+
+@app.route('/cartaoQR', methods=['GET', 'POST'])
+def cartaoQRassent():
+    session['mensagem'] = "  "
+    return cartaoQR()
+
+@app.route('/gerarQR_PDF', methods=['GET', 'POST'])
+def gerarQRPDF():
+    session['mensagem'] = "  "
+    return gerar_pdf_Cartao()
+
+
+
+# =============   *09 *TIPO CONTRIBUIÇÃO  ==========================================================
+
+@app.route("/tipContribCad")
+def tipContribCad():
+    categorias, politicas, unidades, _ = _carrega_selects()
+    return render_template(
+        "tipContribCad.html",
+        message="✅ Tipo de Contribuição Cadastrada com Sucesso!",
+        categorias=categorias, politicas=politicas, unidades=unidades
+    )
+
+@app.route('/cadTipContrib', methods=['POST'])
+def cadTipContrib():
+    return cadastrar_tipcontrib()
+
+@app.route('/tipContribAlt')
+def tipContribAlt():
+    return view_tipContribAlt()
+
+@app.route('/tipContribExc')
+def tipContribExc():
+    return view_tipContribExc()
+
+@app.route('/altTipContrib', methods=['POST'])
+def altTipContrib():
+    return alterar_tipcontrib()
+
+@app.route('/excTipContrib', methods=['POST'])
+def excTipContrib():
+    return excluir_tipo_contrib()
+
+# --- Consulta Geral de Tipos de Contribuição ---
+@app.route('/conGeralTipContrib', methods=['GET'])
+def conGeralTipContrib():
+    from conGeralTipContrib import pagina_conGeralTipContrib
+    return pagina_conGeralTipContrib()
+
+@app.route('/conFiltroTipContrib', methods=['GET','POST'])
+def conFiltroTipContrib():
+    from conGeralTipContrib import conFiltroTipContrib
+    return conFiltroTipContrib()
+
+
+# =============   *10  *CONTRIBUIÇÃO  ==============================================================
+@app.route('/contribCad')
+def contribCad():
+    return view_contribCad()
+
+@app.route('/cadContrib', methods=['POST'])
+def cadContrib():
+    return cadastrar_contrib()
+
+@app.route('/contribAlt')
+def contribAlt():
+    return view_contribAlt()
+
+@app.route('/altContrib', methods=['POST'])
+def altContrib():
+    return alterar_contrib()
+
+# --- Consulta Geral de Contribuições (REGISTROS dos assentados) ---
+@app.route('/conContrib')
+def conContrib():
+    # mantém compat de link antigo
+    return redirect(url_for('conGeralContrib', **request.args))
+
+@app.route('/conGeralContrib', methods=['GET'])
+def conGeralContrib():
+    from conGeralContrib import pagina_conGeralContrib
+    return pagina_conGeralContrib()
+
+@app.route('/conFiltroContrib', methods=['GET', 'POST'])
+def conFiltroContrib():
+    from conGeralContrib import conFiltroContrib as _conFiltroContrib
+    return _conFiltroContrib()
+
+
+
+
+# ============  *11  *PARTILHA ===============================================================
+@app.get("/partlhCad")
+def partlhCad():
+    return view_partlhCad()
+
+@app.post("/cadPartlh")
+def route_cadPartlh():
+    return cadastrar_partlh()
+
+@app.get("/partlhAlt")
+def partlhAlt():
+    return view_partlhAlt()
+
+@app.post("/altPartlh")
+def altPartlh():
+    return alterar_partlh()
+
+@app.get("/partlhExc")
+def partlhExc():
+    return view_partlhExc()
+
+@app.post("/excPartlh")
+def excPartlh():
+    return excluir_partlh()
+
+# --- Consulta Geral de Tipos de Partilha ---
+@app.route('/conGeralTipPartlh', methods=['GET'])
+def conGeralTipPartlh():
+    from conGeralTipPartlh import pagina_conGeralTipPartlh
+    return pagina_conGeralTipPartlh()
+
+@app.route('/conFiltroTipPartlh', methods=['GET','POST'])
+def conFiltroTipPartlh():
+    from conGeralTipPartlh import conFiltroTipPartlh
+    return conFiltroTipPartlh()
+
+@app.route('/conPartlh')
+def conPartlh():
+    return redirect(url_for('conGeralPartlh', **request.args))
+
+
+# =============  *12  *RETRIBUIÇÃO ===========================================
+
+@app.route('/retribCad', methods=['GET'])
+def retribCad():
+    return view_retribCad()
+
+@app.route('/cadRetrib', methods=['POST'])
+def cadRetrib():
+    return cadastrar_retrib()
+
+@app.route('/retribAlt', methods=['GET'])
+def retribAlt():
+    return view_retribAlt()
+
+@app.route('/altRetrib', methods=['POST'])
+def altRetrib():
+    return alterar_retrib()
+
+@app.route('/retribExc', methods=['GET'])
+def retribExc():
+    return view_retribExc()
+
+@app.route('/excRetrib', methods=['POST'])
+def excRetrib():
+    return excluir_retrib()
+
+# --- Consulta Geral de Retribuições ---
+@app.get('/conGeralRetrib')
+def conGeralRetrib():
+    return pagina_conGeralRetrib()
+
+@app.route('/conFiltroRetrib', methods=['GET', 'POST'])
+def conFiltroRetrib_route():
+    return conFiltroRetrib()
+
+# (Opcional) Alias para compatibilidade com links antigos:
+
+
+#================  *13  *TIPO RECOMPENSA  =====================================================
+
+@app.route('/tipRecpsaCad')
+def tipRecpsaCad():
+    return view_tipRecpsaCad()
+
+@app.route('/cadTipRecpsa', methods=['POST'])
+def cadTipRecpsa():
+    return cadastrar_tiprecpsa()
+
+@app.route('/tipRecpsaAlt')
+def tipRecpsaAlt():
+    return view_tipRecpsaAlt()
+
+@app.route('/altTipRecpsa', methods=['POST'])
+def altTipRecpsa():
+    return alterar_tiprecpsa()
+
+@app.route('/tipRecpsaExc')
+def tipRecpsaExc():
+    return view_tipRecpsaExc()
+
+@app.route('/excTipRecpsa', methods=['POST'])
+def excTipRecpsa():
+    return excluir_tiprecpsa()
+
+# --- Consulta geral (com filtros)
+@app.route('/conGeralTipRecpsa', methods=['GET'])
+def conGeralTipRecpsa():
+    return pagina_conGeralTipRecpsa()
+
+@app.route('/conFiltroTipRecpsa', methods=['GET', 'POST'])
+def conFiltroTipRecpsa_route():
+    return conFiltroTipRecpsa()
+
+
+#================  *14  *USO DA INFRAESTRUTURA     ============================================
+
+@app.route('/tipUsoInfrCad')
+def tipUsoInfrCad():
+    return view_tipUsoInfrCad()
+
+@app.route('/cadTipUsoInfr', methods=['POST'])
+def cadTipUsoInfr():
+    return cadastrar_tipusoinfr()
+
+@app.route('/tipUsoInfrAlt')
+def tipUsoInfrAlt():
+    return view_tipUsoInfrAlt()
+
+@app.route('/altTipUsoInfr', methods=['POST'])
+def altTipUsoInfr():
+    return alterar_tipusoinfr()
+
+@app.route('/tipUsoInfrExc')
+def tipUsoInfrExc():
+    return view_tipUsoInfrExc()
+
+@app.route('/excTipUsoInfr', methods=['POST'])
+def excTipUsoInfr():
+    return excluir_tipusoinfr()
+
+# --- Consulta geral
+@app.route('/conGeralTipUsoInfr', methods=['GET'])
+def conGeralTipUsoInfr():
+    return pagina_conGeralTipUsoInfr()
+
+@app.route('/conFiltroTipUsoInfr', methods=['GET', 'POST'])
+def conFiltroTipUsoInfr_route():
+    return conFiltroTipUsoInfr()
+
+
+
+#===============  *15  *RECOMPENSAS  ====================================================
+
+@app.route('/recpsaCad')
+def recpsaCad():
+    return view_recpsaCad()
+
+@app.route('/cadRecpsa', methods=['POST'])
+def cadRecpsa():
+    return cadastrar_recpsa()
+
+# (Se/Quando implementar as telas de alt/exc de recpsa, adicione rotas aqui)
+
+# --- Consulta geral de recompensas
+
+@app.get('/conGeralRecpsa')
+def conGeralRecpsa_alias():
+    return pagina_conGeralRetrib()
+
+
+
+@app.route('/conGeralRecpsa', methods=['GET'])
+def conGeralRecpsa():
+    from recpsa import pagina_conGeralRecpsa
+    return pagina_conGeralRecpsa()
+
+@app.route('/conFiltroRecpsa', methods=['GET','POST'])
+def conFiltroRecpsa_route():
+    from recpsa import conFiltroRecpsa
+    return conFiltroRecpsa()
+
+
+#==============  *16  *CATEGORIA USO INFRAESTRUTURA  ==========================================
+
+@app.route('/catgUsoInfrCad', methods=['GET'])
+def catgUsoInfrCad():
+    return view_catgUsoInfrCad()
+
+@app.route('/cadCatgUsoInfr', methods=['POST'])
+def cadCatgUsoInfr():
+    return cadastrar_catgUsoInfr()
+
+@app.route('/catgUsoInfrAlt', methods=['GET'])
+def catgUsoInfrAlt():
+    return view_catgUsoInfrAlt()
+
+@app.route('/altCatgUsoInfr', methods=['POST'])
+def altCatgUsoInfr():
+    return alterar_catgUsoInfr()
+
+@app.route('/catgUsoInfrExc', methods=['GET'])
+def catgUsoInfrExc():
+    return view_catgUsoInfrExc()
+
+@app.route('/excCatgUsoInfr', methods=['POST'])
+def excCatgUsoInfr():
+    return excluir_catgUsoInfr()
+
+@app.route('/catgUsoInfrCon', methods=['GET'])
+def catgUsoInfrCon():
+    return view_catgUsoInfrCon()
+
+
+# ============  *18  *ENTIDADES   ==========================================================
+@app.route('/entidadeCad')
+def entidadeCad():
+    return view_entidadeCad()
+
+@app.route('/cadEntidade', methods=['POST'])
+def cadEntidade():
+    return cadastrar_entidade()
+
+@app.route('/entidadeAlt')
+def entidadeAlt():
+    return view_entidadeAlt()
+
+@app.route('/altEntidade', methods=['POST'])
+def altEntidade():
+    return alterar_entidade()
+
+@app.route('/entidadeExc')
+def entidadeExc():
+    return view_entidadeExc()
+
+@app.route('/excEntidade', methods=['POST'])
+def excEntidade():
+    return excluir_entidade()
+
+@app.route('/entidadeCon', methods=['GET', 'POST'])
+def conEntidade():
+    return pagina_conEntidade()
+
+
+#=============   *19   *SALDO  =====================================================================
+
+@app.route('/conGeralSaldo', methods=['GET'])
+def conGeralSaldo():
+    return pagina_conGeralSaldo()
+
+@app.route('/conFiltroSaldo', methods=['GET', 'POST'])
+def conFiltroSaldo_route():
+    return conFiltroSaldo()
+
+
+
+# =============  *20   *SELECT  - MENU -   UTILITÁRIO - QRCODE - WHATSAPP ===================================
+
+
+@app.get('/menuBBC')
+def menuBBC():
+    conn = conectar_bd()
+    noticia_capa = None
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "nomEvt", "fotoCapa", "idEvt"
+                FROM tbevento
+                WHERE capa = 'S' AND "idTipEvt" = 1
+                ORDER BY "idEvt" DESC
+                LIMIT 1
+            """)
+            row = cur.fetchone()
+            if row:
+                noticia_capa = {
+                    "titulo": row[0],
+                    "foto": row[1],
+                    "idEvt": row[2]
+                }
+        finally:
+            try: conn.close()
+            except: pass
+
+    return render_template('menu.html', usuario='Usuário', noticia_capa=noticia_capa)
+
+
 
 
 def _carrega_selects():
@@ -350,7 +917,7 @@ def _carrega_selects():
     categorias, politicas, unidades, assentados = [], [], [], []
     if conn:
         cur = conn.cursor()
-        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc", "catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
+        cur.execute('SELECT "idCatgFinanc","nomCatgFinanc","catgParcdoSN" FROM "tbcatgfinanc" ORDER BY "nomCatgFinanc"')
         categorias = cur.fetchall()
 
         cur.execute('SELECT "idPolPub","nomPolPub","valor","perct" FROM "tbpolitpub" ORDER BY "nomPolPub"')
@@ -359,536 +926,109 @@ def _carrega_selects():
         cur.execute('SELECT "idTipUnEqv","nomUnEqv" FROM "tbtipuneqv" ORDER BY "nomUnEqv"')
         unidades = cur.fetchall()
 
-        cur.execute(
-            'SELECT "matricula","nome", "idFamilia" FROM "tbassentado" ORDER BY "nome"')
+        cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome"')
         assentados = cur.fetchall()
-
         conn.close()
-
     return categorias, politicas, unidades, assentados
 
-#------- cadastro tipo de contribuicao ----------------------
-# Rota para cad tipo de contribuicao
-@app.route("/tipContribCad")
-def tipContribCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "tipContribCad.html", message="✅ Tipo de Contribuição Cadastrada com Sucesso!",
-        categorias=categorias,
-        politicas=politicas,
-        unidades=unidades
-    )
-
-
-@app.route('/cadTipContrib', methods=['POST'])
-def cadTipContrib():
-    # Redirecionar para a rota
-    return cadastrar_tipcontrib()
-
-
-# ALTERAR – lista + formulário (GET) e salvar (POST separado)
-@app.route('/tipContribAlt')
-def tipContribAlt():
-    return view_tipContribAlt()
-
-
-# EXCLUIR – lista + cartão de confirmação (GET) e exclusão (POST separado)
-@app.route('/tipContribExc')
-def tipContribExc():
-    return view_tipContribExc()
-
-
-@app.route('/altTipContrib', methods=['POST'])
-def altTipContrib():
-    return alterar_tipcontrib()
-
-
-# -------CONSULTAS CONTRIBUICAO -----------------------
-
-# --- Consulta Geral de Contribuições ---
-@app.route('/conGeralContrib', methods=['GET'])
-def conGeralContrib():
-    from conGeralContrib import pagina_conGeralContrib
-    return pagina_conGeralContrib()
-
-@app.route('/conFiltroContrib', methods=['GET', 'POST'])
-def conFiltroContrib():
-    from conGeralContrib import conFiltroContrib
-    return conFiltroContrib()
-
-# Compat: se o menu ainda aponta para /conContrib, redireciona:
-@app.route('/conContrib')
-def conContrib():
-    from flask import redirect, url_for, request
-    return redirect(url_for('conGeralContrib', **request.args))
-
-
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-#------- excluir tipo de contribuicao ----------------------
-
-# Rota para cad tipo de retribuicao
-@app.route("/tipRetribCad")
-def tipRetribCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "tipRetribCad.html", message="✅ Tipo de Retribuição Cadastrada com Sucesso!",
-        categorias=categorias,
-        politicas=politicas,
-        unidades=unidades
-    )
-
-
-@app.route('/cadTipRetrib', methods=['POST'])
-def cadTipRetrib():
-    # Redirecionar para a rota
-    return cadastrar_tipretrib()
-
-#------- alterar tipo de retrib ----------------------
-# Rota para cad tipo de retr
-@app.route('/tipRetribAlt')
-def tipRetribAlt():
-    return render_template('tipRetribAlt.html')
-
-@app.route('/altTipRetrib', methods=['POST'])
-def altTipRetrib():
-    # Redirecionar para a rota
-    return alterar_tip_retrib()
-
-@app.route('/excTipContrib', methods=['POST'])
-def excTipContrib():
-    return excluir_tipo_contrib()
-
-
-#------- excluir tipo de financas ----------------------
-# Rota para exc tipo de financas
-@app.route('/tipRetribExc')
-def tipRetribExc():
-    return render_template('tipRetribExc.html')
-
-@app.route('/excTipRetrib', methods=['POST'])
-def excTipRetrib():
-    # Redirecionar para a rota
-    return excluir_tipo_retrib()
-
-
-# Rota para a cadastro de contribuicao
-@app.route('/contribCad')
-def contribCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "contribCad.html", message="✅  Contribuição Cadastrada com Sucesso!",
-        categorias=categorias,
-        assentados=assentados
-    )
-
-    return render_template('contribCad.html')
-
-@app.route('/cadContrib', methods=['POST'])
-def cadContrib():
-    # Redirecionar para a rota
-    return cadastrar_contrib()
-
-# Rota para a cadastro retribuicao
-@app.route('/retribCad')
-def retribCad():
-    categorias, politicas, unidades, assentados = _carrega_selects()
-    return render_template(
-        "retribCad.html", message="✅  Retribuição Cadastrada com Sucesso!",
-        categorias=categorias,
-        assentados=assentados
-    )
-
-
-    return render_template('retribCad.html')
-
-@app.route('/cadRetrib', methods=['POST'])
-def cadRetrib():
-    # Redirecionar para a rota
-    return cadastrar_retrib()
-
-
-#------- cadastro e rotas  ----------------------
-# Rota para menu BBC
-@app.route('/menuBBC')
-def menuBBC():
-    return render_template('menuBBC.html')
-
-@app.route('/menuAssent')
-def menuAssent():
-    return render_template('menuAssent.html')
 
 @app.route('/menuCaderneta')
 def menuCaderneta():
     return render_template('menuCaderneta.html')
-
-#------- cadastro tipo de painel contribuicao ----------------------
-# Rota para cad tipo de contribuicao
-@app.route('/panlFinanCad ')
-def panlFinanCad ():
-    return render_template('panlFinanCad .html')
-
-@app.route('/cadPanlFinanc ', methods=['POST'])
-def cadPanlFinanc ():
-    # Redirecionar para a rota
-    return cadastrar_painel_contrib()
 
 @app.route('/mensagem')
 def mensagem():
     return render_template('mensagem.html')
 
 
-@app.route('/cadPainelFinanc ', methods=['GET', 'POST'])
-def cadPainelFinanc ():
-    session['mensagem'] = "  "
-    print("BBCQC..PY ==l 111 ===> /cadPainelFinanc  ")
-    turno = " "
-    if request.method == 'GET':
-         matricula = request.args.get('matricula', '999')
-    elif request.method == 'POST':
-         matricula = request.form.get('matricula')
-         turno = request.form.get('turno')
-
-    if matricula == '999':
-        matricula = '001'  # Valor padrão caso 'matricula' não seja fornecido
-
-    # Renderiza o template merendaQC.html passando o parâmetro 'termo'
-    session['mensagem'] = "  "
-    return dados_merenda(matricula)
-
-
-@app.route('/cadStaAssent', methods=['GET', 'POST'])
-def cad_sta_assentado():
-    print("BBCQC..PY ==# -------------/////// hoooje CAD cadPainelFinanc  #######################")
-    if request.method == 'POST':
-        matricula = request.form.get('matricula')
-        idStaAsent = request.form.get('idStaAsent')
-
-
-  #  contrDiario = request.form.get('contrDiario')
-
-    print("BBCQC..PY ==BBCQC..PY ===========> 22222 ####### CAD MEREDNA => ", contrDiario)
-
-    # Renderiza o template merendaQC.html
-    return cadastro_sta_asentado()
-
-@app.route('/obter_dados_assent', methods=['GET', 'POST'])
-def obter_dados_assent():
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT matricula, nome, foto FROM tbassentado ORDER BY nome")
-            assentados = cur.fetchall()
-            assentados_corrigidos = []
-            for assentado in assentados:
-                matricula, nome, foto = assentado  # Desempacotando os dados do assentado
-                # Corrigindo o caminho da foto
-                foto_corrigida = url_for('static', filename=f'img/{foto}')
-                assentados_corrigidos.append((matricula, nome, foto_corrigida))
-            conn.close()
-            return assentados_corrigidos
-        except Exception as e:
-            session['mensagem'] = " Erro @@@ 111  oter_dados_aluno() !"
-            print("BBCQC..PY ==Erro ao obter dados dos alunos:", e)
-            return []
-    else:
-        return []
-
-
-def obter_dados_painel_contrib():
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            # Selecionar os registros da tabela de controle de alimentos ativos
-            cur.execute("SELECT mc.codCtrl, mc.codAlim, a.nome, mc.qtdTotal - mc.qtdEntregue AS disponivel "
-                        "FROM tbmerctrl mc "
-                        "INNER JOIN tbalimento a ON mc.codAlim = a.codAlim "
-                        "WHERE mc.situacao = 1 "
-                        "ORDER BY a.nome")
-            contrMerendas = cur.fetchall()
-            conn.close()
-
-
-        except Exception as e:
-            session['mensagem'] = " Erro ao obter dados de controle de cadPainelFinanc  !"
-            print("BBCQC..PY ==Erro ao obter dados de controle de cadPainelFinanc :", e)
-            return []
-    else:
-        return []
-
-
-def obter_dados_assent_matricula(matr):
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT nome, foto FROM tbassentado WHERE matricula = %s", (matr,))
-            assentado = cur.fetchone()
-            if assentado is not None:
-                print("BBCQC..PY ==44444  alunos ===>  ", assentado)
-            if assentado:
-                assent_corrigido = list(assentado)
-                assent_corrigido[2] = url_for('static', filename='img/' + assentado[2])  # Corrigir o caminho da imagem
-                print("BBCQC..PY ==55555  assentado corrigido ===>  ", assent_corrigido)
-                conn.close()
-                return assent_corrigido
-            else:
-                if assentado is not None:
-                   print("BBCQC..PY ==assentado não encontrado")
-                return None
-        except Exception as e:
-            session['mensagem'] = " Erro ao obter dados do assentado por matrícula !"
-            print("BBCQC..PY ==Erro ao obter dados do assentado por matrícula:", e)
-            return None
-    else:
-        return None
-
-
-def obter_dados_assent_nome(nome):
-    conn = conectar_bd()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT matricula, nome, foto FROM tbassentado WHERE nome LIKE %s", ('%' + nome + '%',))
-            assentados = cur.fetchall()
-            print("BBCQC..PY ==91919191  alunos ===>  ", alunos)
-            assentados_corrigidos = []
-            for assentado in alunos:
-                assent_corrigido = list(assentado)
-                assent_corrigido[2] = url_for('static', filename='img/' + assentado[2])  # Corrigir o caminho da imagem
-                assentados_corrigidos.append(assent_corrigido)
-            conn.close()
-            return assentados_corrigidos
-        except Exception as e:
-            session['mensagem'] = " Erro ao obter dados dos assentados por nome: !"
-            print("BBCQC..PY ==Erro ao obter dados dos assentados por nome:", e)
-            return []
-    else:
-        return []
-
-
-# Rota para a página de usuario
-@app.route('/usuario')
-def obter_todos_usuario():
-    conn = conectar()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT usuario, senha,  nome, nivel, email  FROM tbusuario ORDER BY nome")
-            usuario = cur.fetchall()
-            conn.close()
-            return usuario
-        except Exception as e:
-            print("BBCQC..PY ==Erro ao obter dados dos usuarios:", e)
-            return []
-    else:
-        return []
-
-
-@app.route('/pesquisar_assent', methods=['POST'])
-def pesquisar_assent():
-    data_atual = datetime.now()
-    tipo_consulta = request.form.get('tipo_consulta')
-    assentado = None  # Defina a variável assentado como None no início
-    matricula = request.form.get('matricula')
-    idSitAssent = request.form.get('idSitAssent')
-    idStaAssent = request.form.get('idStaAssent')
-
-    print("BBCQC..PY ==@@ 111 PESQUISAR-assentado  (BBCQC.py) - pesquisar_assent()  turno=> ", turno)
-    print("BBCQC..PY ==@@ 222  PESQUISAR-assentado (BBCQC.py) - pesquisar_assent()  matricula=> ", matricula)
-    chave_pesquisa = idStaAssent + matricula.zfill(3)
-    print("BBCQC..PY ==@@ 333  PESQUISAR-assentado (BBCQC.py) - pesquisar_assent()  chave=> ", chave_pesquisa)
-
-    assentado = obter_dados_assentado(chave_pesquisa)
-    print("BBCQC..PY ==@@ 444  PESQUISAR-assentado (BBCQC.py) - pesquisar_assent()  termo=>  ", assentado, " matricula => ", matricula)
-    if assentado:
-       print("BBCQC..PY == @@ 555  PESQUISAR-assentado (BBCQC.py) - pesquisar_assent()  assentado ===>  ", assentado[0])
-    else:
-       session['mensagem'] = " Não foram Encontrados assentados Com Esse Nome !"
-
-    if assentado is not None:
-        print("BBCQC..PY == @@ 666  PESQUISAR-assentado (BBCQC.py) ==>  ", assentado[0])
-        session['mensagem'] = "  "
-        return render_template('merendaQC.html', chave_pesquisa=chave_pesquisa, assentado=assentado,
-                               contrabertos=contrabertos, ano=ano, mes=mes, data_atual=data_atual, qtddisp=qtddisp)
-    else:
-        print("BBCQC..PY == @@ 777  PESQUISAR-assentado (BBCQC.py) ==>  ", assentado[0])
-        session['mensagem'] = f"Não foi encontrado assentado com o código {chave_pesquisa}!"
-        return dados_merenda()
-
-
-
-@app.route('/ver_assent', methods=['POST'])
-def ver_assent():
-    assent_selecionado_id = request.form.get('matricula')
-    assent_selecionado = obter_dados_assent-matricula(aluno_selecionado_id)  # Substitua por sua função para obter dados do assentado por ID
-    return render_template('merendaQC.html', assentado=assent_selecionado)
-
-
-# Função para verificar as credenciais do usuário
-def verificar_credenciais(usuario, senha):
-    print("BBC2 ..PY == sigma- dados")
-    conn = conectar_bd()
-    if conn:
-        try:
-            print("BBC3 ..PY == sigma- dados")
-            cur = conn.cursor()
-            cur.execute("SELECT senha, nivel FROM tbusuario WHERE usuario = %s", (usuario,))
-            resultado = cur.fetchone()
-            conn.close()
-            print("BBC4 ..PY == sigma- dados", resultado)
-            if resultado:
-                if senha == resultado[0]:
-                    return True
-                else:
-                    return False
-               #  senha com funcao hash - criptografada - colocar depois
-               #  senha_hash = resultado[0].encode('utf-8')
-               #  if bcrypt.checkpw(senha.encode('utf-8'), senha_hash):
-               #      return True
-               # else:
-               #      return False  # Senha incorreta
-            else:
-                session['mensagem'] = " Usuário Não Cadastrado !"
-                return False  # Usuário não cadastrado
-        except psycopg2.Error as e:
-            return False
-    else:
-        return False
+@app.route('/menuRetrib')
+def menuRetrib():
+    return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
 
 
 @app.route('/whatsapp', methods=['GET', 'POST'])
 def rotina_whatsapp():
-    print("BBCQC..PY ==*************** ENVIAR WHATSAPP ")
-
-    # Renderiza o template enviarWhatsapp.html
     session['mensagem'] = "  "
     return dados_whatsapp()
 
-
 @app.route('/enviarWhatsapp', methods=['POST'])
 def enviar_msg_whatsapp():
-
-  session['mensagem'] = "  "
-  return enviar_whatsapp()
-
-
-@app.route('/qrMatricula', methods=['POST'])
-def qr_matricula():
-
-  session['mensagem'] = "  "
-  return atualizar_matricula()
-
-
-@app.route('/cartaoQR', methods=['GET', 'POST'])
-def cartaoQRassent():
-
-  session['mensagem'] = "  "
-  return cartaoQR()
-
-
-@app.route('/gerarQR_PDF', methods=['GET', 'POST'])
-def gerarQRPDF():
-   session['mensagem'] = "  "
-   return gerar_pdf_Cartao()
-
-
-
-@app.route('/emitirCartao', methods=['GET', 'POST'])
-def emitirCartao():
-    if request.method == 'POST':
-        matricula = request.form.get('matricula')
-        if matricula:
-            return dados_cartao(matricula)
-        else:
-            return "Matrícula não fornecida."
-    else:
-        return render_template('emitirCartao.html')
-
-
-@app.route('/emitirCartaoTurno', methods=['GET', 'POST'])
-def emitirCartaoTurno():
-    if request.method == 'POST':
-        turno = request.form.get('turno')
-        if turno:
-            print("BBCQC..PY ==$$$$$$$$$$$$$$$   turno", turno)
-            return dados_cartao_turno(turno)
-        else:
-            return "Turno não fornecida."
-    else:
-        return render_template('emitirCartaoTurno.html')
-
-
-@app.route('/emitirCartaoCurso', methods=['GET', 'POST'])
-def emitirCartaoCurso():
-    if request.method == 'POST':
-        curso = request.form.get('curso')
-        if curso:
-            print("BBCQC..PY ==$$$$$$$$$$$$$$$ curso curso   curso", curso)
-            return dados_cartao_curso(curso)
-        else:
-            return "Curso não fornecido."
-    else:
-        return render_template('emitirCartaoCurso.html')
-
-
-@app.route('/cartaoAssent', methods=['GET', 'POST'])
-def cartaoAssent():
-   session['mensagem'] = "  "
-   return cartao_assentado()
-
-
-@app.route('/cartaoTurno', methods=['GET', 'POST'])
-def cartaoTurno():
-   session['mensagem'] = "  "
-   return cartao_turno()
-
-
-@app.route('/cartaoCurso', methods=['GET', 'POST'])
-def cartaoCurso():
-   session['mensagem'] = "  "
-
-   return cartao_curso()
-
-
-@app.route('/sigQTDdia', methods=['GET', 'POST'])
-def sigQTDdia():
-    data_atual = datetime.now().date()
-    ano_sistema = datetime.now().year
     session['mensagem'] = "  "
-    return render_template('consQTDdia.html', data_atual=data_atual, ano_sistema=ano_sistema)
+    return enviar_whatsapp()
 
 
-@app.route('/sigQTDsem', methods=['GET', 'POST'])
-def sigQTDsem():
-    data_atual = datetime.now().date()
-    ano_sistema = datetime.now().year
-    session['mensagem'] = "  "
-    return render_template('consQTDsem.html', data_atual=data_atual, ano_sistema=ano_sistema)
+# --- Notícia de capa (evento tipo 1 com capa='S')
+def _buscar_noticia_capa():
+    conn = conectar_bd()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT "idEvt", "nomEvt", COALESCE(descricao, ''), COALESCE("fotoCapa", '')
+              FROM tbevento
+             WHERE "idTipEvt" = 1
+               AND UPPER(COALESCE(capa,'N')) = 'S'
+             ORDER BY "idEvt" DESC
+             LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            return None
+        idEvt, nomEvt, descricao, fotoCapa = row
+        # em evento.py, salvamos foto como "img/eventos/arquivo.jpg" (sem /static)
+        return {
+            "idEvt": idEvt,
+            "titulo": nomEvt,
+            "descricao": descricao,
+            "foto": fotoCapa  # o template já prefixa com /static/
+        }
+    finally:
+        try: conn.close()
+        except: pass
 
 
-@app.route('/sigConsQTDdia', methods=['POST'])
-def sigConsQTDdia():
+@app.route('/menu', methods=['GET'])
+def menu():
+    usuario = session.get('usuario', '')
+    noticia = _buscar_noticia_capa()
+    return render_template('menu.html', usuario=usuario, noticia_capa=noticia)
 
-    return consQTDdia()
+# --- helper interno: pega a notícia de capa (idTipEvt=1 e capa='S')
+def _pegar_noticia_capa():
+    conn = conectar_bd()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT e."idEvt",
+                   e."nomEvt",
+                   COALESCE(e.descricao, ''),
+                   COALESCE(e."fotoCapa", '')   -- ex.: 'img/eventos/evt_123_capa.jpg'
+              FROM tbevento e
+             WHERE e."idTipEvt" = 1           -- 1 = notícia
+               AND e.capa = 'S'
+             ORDER BY e."idEvt" DESC
+             LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {
+            "idEvt": row[0],
+            "titulo": row[1],
+            "descricao": row[2],
+            "foto": row[3],                   # já relativo a /static/
+        }
+    finally:
+        try: conn.close()
+        except: pass
+
+# --- Home/Menu: usar a mesma lógica para /menu e /menuBBC
 
 
-@app.route('/sigConsQTDsem', methods=['POST'])
-def sigConsQTDsem():
-
-    return consQTDsem()
-
-#@app.route('/merenda3', methods=['POST'])
-#def sigConsQTDsem():
-
-#    return lerQRcode10()
-
-
-#  aplicação Flask será acessível a partir de outros dispositivos na mesma rede, como o seu celular.
+# -------------------- RUN --------------------
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True )
-
-
+    # Se abrir direto e aparecer "Not Found", acesse: http://127.0.0.1:5000/menuAssent
+    app.run(host='0.0.0.0', port=5000, debug=True)

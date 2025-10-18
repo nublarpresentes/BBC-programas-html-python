@@ -1,10 +1,8 @@
 # evento.py
 import os
-from datetime import datetime
+from datetime import datetime, date
+from flask import request, render_template, redirect, url_for, flash, current_app, send_file
 from werkzeug.utils import secure_filename
-from flask import (
-    request, render_template, redirect, url_for, flash, current_app
-)
 import psycopg2
 
 # ---- PDF
@@ -12,8 +10,6 @@ import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
-from flask import send_file
-
 
 from conexao_bd import conectar_bd
 
@@ -21,15 +17,12 @@ from conexao_bd import conectar_bd
 # Helpers de caminho
 # ==========================
 def _pasta_static(*parts) -> str:
-    """<app>/static/..."""
     return os.path.join(current_app.root_path, "static", *parts)
 
 def _pasta_img_eventos() -> str:
-    """<app>/static/img/eventos"""
     path = _pasta_static("img", "eventos")
     os.makedirs(path, exist_ok=True)
     return path
-
 
 # ==========================
 # ====== TIPO DE EVENTO =====
@@ -47,14 +40,11 @@ def _listar_tipos_evento():
     return itens
 
 def view_tipEvtCad():
-    """Tela simples de cadastro de Tipo de Evento."""
     return render_template("tipEvtCad.html")
 
 def cadastrar_tipevt():
-    """POST: insere um novo tipo de evento em tbtipevt."""
     if request.method != "POST":
         return redirect(url_for("tipEvtCad"))
-
     nomTipEvt = (request.form.get("nomTipEvt") or "").strip()
     if not nomTipEvt:
         flash("❌ Informe o nome do Tipo de Evento.", "danger")
@@ -70,18 +60,16 @@ def cadastrar_tipevt():
         cur.execute('INSERT INTO "tbtipevt"("nomTipEvt") VALUES (%s)', (nomTipEvt,))
         conn.commit()
         flash("✅ Tipo de Evento cadastrado!", "success")
-        return redirect(url_for("tipEvtCad"))
     except psycopg2.Error as e:
         try: conn.rollback()
         except: pass
         flash(f"❌ Erro ao gravar: {e.pgerror}", "danger")
-        return redirect(url_for("tipEvtCad"))
     finally:
         try: conn.close()
         except: pass
+    return redirect(url_for("tipEvtCad"))
 
 def pagina_tipEvtAlt():
-    """Lista + edição (carrega 1 registro se ?id=)."""
     itens = _listar_tipos_evento()
     registro = None
     sel_id = request.args.get("id")
@@ -120,18 +108,16 @@ def alterar_tipevt():
                     (nomTipEvt, int(idTipEvt)))
         conn.commit()
         flash("✅ Tipo de Evento alterado!", "success")
-        return redirect(url_for("tipEvtAlt", id=idTipEvt))
-    except Exception as e:
+    except Exception:
         try: conn.rollback()
         except: pass
         flash("❌ Não foi possível alterar.", "danger")
-        return redirect(url_for("tipEvtAlt", id=idTipEvt))
     finally:
         try: conn.close()
         except: pass
+    return redirect(url_for("tipEvtAlt", id=idTipEvt))
 
 def pagina_tipEvtExc():
-    """Lista + confirmação de exclusão (carrega 1 registro se ?id=)."""
     itens = _listar_tipos_evento()
     registro = None
     sel_id = request.args.get("id")
@@ -152,7 +138,6 @@ def pagina_tipEvtExc():
 def excluir_tipevt():
     if request.method != "POST":
         return redirect(url_for("tipEvtExc"))
-
     idTipEvt = request.form.get("idTipEvt")
     if not idTipEvt:
         flash("❌ Registro não informado.", "danger")
@@ -168,23 +153,20 @@ def excluir_tipevt():
         cur.execute('DELETE FROM "tbtipevt" WHERE "idTipEvt"=%s', (int(idTipEvt),))
         conn.commit()
         flash("✅ Tipo de Evento excluído!", "success")
-        return redirect(url_for("tipEvtExc"))
-    except psycopg2.Error as e:
+    except psycopg2.Error:
         try: conn.rollback()
         except: pass
-        # Em caso de FK em tbevento:
         flash("❌ Não foi possível excluir (possível uso em eventos).", "danger")
         return redirect(url_for("tipEvtExc", id=idTipEvt))
     finally:
         try: conn.close()
         except: pass
-
+    return redirect(url_for("tipEvtExc"))
 
 # ==========================
 # ======= EVENTO ===========
 # ==========================
 def view_evtCad():
-    """Tela de cadastro do Evento (notícia, reunião, etc.)."""
     tipos = _listar_tipos_evento()
     return render_template("evtCad.html", tipos=tipos)
 
@@ -197,22 +179,12 @@ def _parse_date(s: str):
         return None
 
 def cadastrar_evento():
-    """
-    POST: Cadastra um evento em tbevento.
-      Campos sempre obrigatórios:
-        - nomEvt
-        - idTipEvt
-      Regras:
-        - idTipEvt == 1 (Notícia): capa 'S' ou 'N' + foto opcional (fotoCapa)
-        - idTipEvt == 2 (Reunião): turno {M,T,N}, pauta, dtIniPer e dtFimPer + foto opcional (foto1)
-    """
     if request.method != "POST":
         return redirect(url_for("evtCad_view"))
 
-    # Básico
     nomEvt   = (request.form.get("nomEvt") or "").strip()
     idTipEvt = (request.form.get("idTipEvt") or "").strip()
-    descricao = (request.form.get("descricao") or "").strip()  # <<< NOVO
+    descricao = (request.form.get("descricao") or "").strip()
 
     if not nomEvt:
         flash("❌ Informe o nome/título do evento.", "danger")
@@ -227,14 +199,12 @@ def cadastrar_evento():
         flash("❌ Tipo de Evento inválido.", "danger")
         return redirect(url_for("evtCad_view"))
 
-    # Campos gerais (opcionais)
     responsavel     = (request.form.get("responsavel") or "").strip()
     tippresenca     = (request.form.get("tippresenca") or "").strip()[:1] or None
     local           = (request.form.get("local") or "").strip()
     linkplatonline  = (request.form.get("linkplatonline") or "").strip()
     fones           = (request.form.get("fones") or "").strip()
 
-    # Controle por tipo
     capa   = None
     turno  = None
     pauta  = None
@@ -242,14 +212,12 @@ def cadastrar_evento():
     dtFimPer = None
 
     if idTipEvt == 1:
-        # Notícia
         capa = (request.form.get("capa") or "").strip().upper()
         if capa not in ("S", "N"):
             flash("❌ Para Notícia, informe se é capa: 'S' ou 'N'.", "danger")
             return redirect(url_for("evtCad_view"))
 
     elif idTipEvt == 2:
-        # Reunião
         turno = (request.form.get("turno") or "").strip().upper()
         if turno not in ("M", "T", "N"):
             flash("❌ Para Reunião, selecione Turno (M/T/N).", "danger")
@@ -260,19 +228,12 @@ def cadastrar_evento():
             flash("❌ Para Reunião, informe a Pauta.", "danger")
             return redirect(url_for("evtCad_view"))
 
-        # datas
-        def _parse_date(s):
-            from datetime import datetime
-            try: return datetime.strptime(s, "%Y-%m-%d").date() if s else None
-            except: return None
-
         dtIniPer = _parse_date(request.form.get("dtIniPer"))
         dtFimPer = _parse_date(request.form.get("dtFimPer"))
         if not dtIniPer or not dtFimPer:
             flash("❌ Para Reunião, informe as datas de Início e Fim.", "danger")
             return redirect(url_for("evtCad_view"))
 
-    # Inserção inicial
     conn = conectar_bd()
     if not conn:
         flash("❌ Erro de conexão com o banco.", "danger")
@@ -292,7 +253,7 @@ def cadastrar_evento():
             RETURNING "idEvt"
         """, (nomEvt, pauta, responsavel, dtIniPer, dtFimPer,
               tippresenca, local, linkplatonline, fones, turno,
-              idTipEvt, capa, descricao))  # <<< NOVO
+              idTipEvt, capa, descricao))
         new_id = cur.fetchone()[0]
         conn.commit()
     except Exception:
@@ -301,9 +262,7 @@ def cadastrar_evento():
         flash("❌ Não foi possível cadastrar o evento.", "danger")
         return redirect(url_for("evtCad_view"))
 
-    # Upload de foto (opcional)
     try:
-        from werkzeug.utils import secure_filename
         foto = request.files.get("foto")
         if foto and foto.filename:
             folder = _pasta_img_eventos()
@@ -329,7 +288,6 @@ def cadastrar_evento():
     return redirect(url_for("evtCad_view"))
 
 def _evt_atualizar_foto(idEvt: int, col: str, valor: str):
-    """Atualiza fotoCapa/foto1/... do evento recém-criado."""
     if col not in ("fotoCapa", "foto1", "foto2", "foto3"):
         return
     conn = conectar_bd()
@@ -345,15 +303,13 @@ def _evt_atualizar_foto(idEvt: int, col: str, valor: str):
     finally:
         try: conn.close()
         except: pass
-# --- Menu de Eventos (necessário para o import no BBC.py) ---
+
 def view_menuEvento():
-    # se quiser passar dados depois, adicione aqui (ex: tipos=_listar_tipos_evento())
     return render_template("menuEvento.html")
 
 def view_evtAlt():
-    """Lista + carrega 1 registro se ?id= para edição (inclui descricao)."""
     tipos = _listar_tipos_evento()
-    itens = []     # lista para a tabela/lateral
+    itens = []
     registro = None
 
     conn = conectar_bd()
@@ -390,14 +346,13 @@ def view_evtAlt():
                         "responsavel": r[8], "tippresenca": r[9],
                         "local": r[10], "linkplatonline": r[11], "fones": r[12],
                         "fotoCapa": r[13], "foto1": r[14], "foto2": r[15], "foto3": r[16],
-                        "descricao": r[17],  # <<< NOVO
+                        "descricao": r[17],
                     }
         finally:
             try: conn.close()
             except: pass
 
     return render_template("evtAlt.html", tipos=tipos, itens=itens, registro=registro)
-
 
 def alterar_evento():
     if request.method != "POST":
@@ -408,10 +363,9 @@ def alterar_evento():
         flash("❌ Registro não informado.", "danger")
         return redirect(url_for("evtAlt"))
 
-    # Básico
     nomEvt   = (request.form.get("nomEvt") or "").strip()
     idTipEvt = (request.form.get("idTipEvt") or "").strip()
-    descricao = (request.form.get("descricao") or "").strip()  # <<< NOVO
+    descricao = (request.form.get("descricao") or "").strip()
 
     if not nomEvt or not idTipEvt:
         flash("❌ Informe nome e tipo.", "danger")
@@ -423,14 +377,12 @@ def alterar_evento():
         flash("❌ Tipo de Evento inválido.", "danger")
         return redirect(url_for("evtAlt", id=idEvt))
 
-    # Campos gerais
     responsavel     = (request.form.get("responsavel") or "").strip()
     tippresenca     = (request.form.get("tippresenca") or "").strip()[:1] or None
     local           = (request.form.get("local") or "").strip()
     linkplatonline  = (request.form.get("linkplatonline") or "").strip()
     fones           = (request.form.get("fones") or "").strip()
 
-    # Por tipo
     capa   = None
     turno  = None
     pauta  = None
@@ -452,18 +404,15 @@ def alterar_evento():
             flash("❌ Para Reunião, informe a Pauta.", "danger")
             return redirect(url_for("evtAlt", id=idEvt))
 
-        def _parse_date(s):
-            from datetime import datetime
+        def _p(s):
             try: return datetime.strptime(s, "%Y-%m-%d").date() if s else None
             except: return None
-
-        dtIniPer = _parse_date(request.form.get("dtIniPer"))
-        dtFimPer = _parse_date(request.form.get("dtFimPer"))
+        dtIniPer = _p(request.form.get("dtIniPer"))
+        dtFimPer = _p(request.form.get("dtFimPer"))
         if not dtIniPer or not dtFimPer:
             flash("❌ Para Reunião, informe Início e Fim.", "danger")
             return redirect(url_for("evtAlt", id=idEvt))
 
-    # Update
     conn = conectar_bd()
     if not conn:
         flash("❌ Erro de conexão com o banco.", "danger")
@@ -479,21 +428,20 @@ def alterar_evento():
              WHERE "idEvt"=%s
         """, (nomEvt, idTipEvt, capa, turno, pauta,
               dtIniPer, dtFimPer, responsavel, tippresenca,
-              local, linkplatonline, fones, descricao, int(idEvt)))  # <<< NOVO
+              local, linkplatonline, fones, descricao, int(idEvt)))
         conn.commit()
         flash("✅ Evento alterado com sucesso!", "success")
-        return redirect(url_for("evtAlt", id=idEvt))
     except Exception:
         try: conn.rollback()
         except: pass
         flash("❌ Não foi possível alterar.", "danger")
-        return redirect(url_for("evtAlt", id=idEvt))
     finally:
         try: conn.close()
         except: pass
 
+    return redirect(url_for("evtAlt", id=idEvt))
+
 def view_evtExc():
-    """Lista + carrega 1 registro se ?id= para confirmação (inclui descricao)."""
     itens = []
     registro = None
 
@@ -526,14 +474,13 @@ def view_evtExc():
                         "responsavel": r[8], "tippresenca": r[9],
                         "local": r[10], "linkplatonline": r[11], "fones": r[12],
                         "fotoCapa": r[13], "foto1": r[14], "foto2": r[15], "foto3": r[16],
-                        "descricao": r[17],  # <<< NOVO
+                        "descricao": r[17],
                     }
         finally:
             try: conn.close()
             except: pass
 
     return render_template("evtExc.html", itens=itens, registro=registro)
-
 
 def excluir_evento():
     if request.method != "POST":
@@ -554,7 +501,6 @@ def excluir_evento():
         cur.execute('DELETE FROM tbevento WHERE "idEvt"=%s', (int(idEvt),))
         conn.commit()
         flash("✅ Evento excluído!", "success")
-        return redirect(url_for("evtExc"))
     except psycopg2.Error:
         try: conn.rollback()
         except: pass
@@ -564,8 +510,9 @@ def excluir_evento():
         try: conn.close()
         except: pass
 
+    return redirect(url_for("evtExc"))
+
 def pagina_evtCon():
-    """Consulta simples/listagem com descricao disponível no template."""
     tipos = _listar_tipos_evento()
     rows = []
 
@@ -591,19 +538,11 @@ def pagina_evtCon():
 
     return render_template("evtCon.html", tipos=tipos, rows=rows)
 
-# --- ALIASES DE COMPATIBILIDADE (deixe no final do evento.py) ---
-
-# Alguns arquivos importam esses nomes antigos:
-
-
+# --- ALIASES ANTIGOS ---
 def cadastrar_evt():
     return cadastrar_evento()
 
 def view_menuEventos():
-    """
-    Lista últimos eventos (qualquer tipo) para o menu de eventos.
-    Renderiza 'menuEvento.html' com a variável 'eventos'.
-    """
     conn = conectar_bd()
     eventos = []
     if conn:
@@ -615,7 +554,7 @@ def view_menuEventos():
                        COALESCE(e.descricao, ''),
                        e."idTipEvt",
                        COALESCE(t."nomTipEvt",''),
-                       COALESCE(e."fotoCapa", COALESCE(e.foto1,'')) AS foto,  -- usa capa se notícia, senão foto1
+                       COALESCE(e."fotoCapa", COALESCE(e.foto1,'')) AS foto,
                        e."dtIniPer",
                        e."dtFimPer",
                        e.turno
@@ -631,7 +570,7 @@ def view_menuEventos():
                     "descricao": r[2],
                     "idTipEvt": r[3],
                     "tipo": r[4],
-                    "foto": r[5],  # relativo a /static/
+                    "foto": r[5],
                     "dtIniPer": r[6],
                     "dtFimPer": r[7],
                     "turno": r[8],
@@ -644,9 +583,7 @@ def view_menuEventos():
 # ================
 # LISTA DE PRESENÇA (Reuniões)
 # ================
-
 def _listar_reunioes():
-    """Retorna [(idEvt, nomEvt, dtIniPer, turno, local)] apenas de reuniões (idTipEvt=2)."""
     conn = conectar_bd(); itens = []
     if conn:
         try:
@@ -664,12 +601,10 @@ def _listar_reunioes():
     return itens
 
 def view_evtPresencaSel():
-    """Tela para escolher a reunião e gerar o PDF."""
     reunioes = _listar_reunioes()
     return render_template("evtPresencaSel.html", reunioes=reunioes)
 
 def _pegar_evento(idEvt:int):
-    """Dados do evento para o cabeçalho."""
     conn = conectar_bd(); reg=None
     if conn:
         try:
@@ -695,7 +630,6 @@ def _pegar_evento(idEvt:int):
     return reg
 
 def _listar_assentados_ativos_alfabetico():
-    """[(idAssent, nome)] — somente ATIVOS, ordenado por nome."""
     conn = conectar_bd(); itens=[]
     if conn:
         try:
@@ -713,29 +647,27 @@ def _listar_assentados_ativos_alfabetico():
     return itens
 
 def gerar_lista_presenca_pdf():
-    """POST: recebe idEvt, gera PDF em memória e retorna."""
     if request.method != "POST":
-        return redirect(url_for("evtPresenca"))
+        return redirect(url_for("evtPresencaSel_view"))
 
     idEvt = request.form.get("idEvt")
     if not idEvt:
         flash("Selecione uma reunião.", "warning")
-        return redirect(url_for("evtPresenca"))
+        return redirect(url_for("evtPresencaSel_view"))
 
     try:
         idEvt = int(idEvt)
     except:
         flash("Reunião inválida.", "danger")
-        return redirect(url_for("evtPresenca"))
+        return redirect(url_for("evtPresencaSel_view"))
 
     evt = _pegar_evento(idEvt)
     if not evt:
         flash("Evento não encontrado.", "danger")
-        return redirect(url_for("evtPresenca"))
+        return redirect(url_for("evtPresencaSel_view"))
 
     assentados = _listar_assentados_ativos_alfabetico()
 
-    # ---- Gera PDF em memória
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
     W, H = A4
@@ -749,36 +681,31 @@ def gerar_lista_presenca_pdf():
 
     def _fmt_data(d):
         if not d: return ""
-        try:
-            return d.strftime("%d/%m/%Y")
+        try: return d.strftime("%d/%m/%Y")
         except: return str(d)
 
     data_str = _fmt_data(evt["dtIniPer"])
     turno_map = {"M":"Matutino","T":"Vespertino","N":"Noturno"}
     turno_str = turno_map.get((evt["turno"] or "").upper(), evt["turno"] or "-")
 
-    # Config linhas
     linha_h = 9.5*mm
-    y_start = H - top - 45*mm   # espaço para cabeçalho do evento
+    y_start = H - top - 45*mm
     rows_per_page = int((y_start - bottom) // linha_h) - 1
     if rows_per_page < 8:
         rows_per_page = 8
 
-    # Colunas (larguras)
     col_nome = 70*mm
     col_matr = 32*mm
-    col_ass  = largura_util - col_nome - col_matr - 18*mm  # assinatura ocupa o resto
+    col_ass  = largura_util - col_nome - col_matr - 18*mm
     col_pres = 18*mm
 
     def cabecalho(pag_atual:int):
-        # Linha 1
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left, H - top, "BBC - Banco do Bem Comum")
         c.setFont("Helvetica", 10)
         c.drawRightString(W - right, H - top, f"Data: {data_str or '-'}    Pág: {pag_atual:03d}")
         c.line(left, H - top - 3*mm, W - right, H - top - 3*mm)
 
-        # Evento
         y = H - top - 10*mm
         c.setFont("Helvetica", 10)
         c.drawString(left, y, f"Evento:  {evt['nomEvt']}")
@@ -790,13 +717,11 @@ def gerar_lista_presenca_pdf():
         y -= 3*mm
         c.line(left, y, W - right, y)
 
-        # Título da lista
         y -= 8*mm
         c.setFont("Helvetica-Bold", 12)
         c.drawCentredString(W/2, y, "Lista de Presença")
         y -= 5*mm
 
-        # Cabeçalho da tabela
         c.setFont("Helvetica-Bold", 10)
         c.drawString(left, y, "Nome")
         c.drawString(left + col_nome, y, "( matrícula )")
@@ -804,7 +729,7 @@ def gerar_lista_presenca_pdf():
         c.drawRightString(W - right, y, "Presente (S/N)")
         y -= 2*mm
         c.line(left, y, W - right, y)
-        return y - 4*mm  # primeira linha útil
+        return y - 4*mm
 
     y = cabecalho(1)
     c.setFont("Helvetica", 10)
@@ -812,7 +737,6 @@ def gerar_lista_presenca_pdf():
     i_na_pagina = 0
 
     for idx, (idAssent, nome) in enumerate(assentados, start=1):
-        # quebra de página
         if i_na_pagina >= rows_per_page:
             c.showPage()
             pag += 1
@@ -820,13 +744,10 @@ def gerar_lista_presenca_pdf():
             c.setFont("Helvetica", 10)
             i_na_pagina = 0
 
-        # desenha a linha
         c.drawString(left, y, nome or "-")
         c.drawString(left + col_nome + 2*mm, y, f"({idAssent})")
-        # linha de assinatura
         x_ass = left + col_nome + col_matr + 2*mm
         c.line(x_ass, y - 1*mm, x_ass + col_ass - 6*mm, y - 1*mm)
-        # coluna presente
         c.rect(W - right - col_pres + 2*mm, y - 4*mm, 6*mm, 6*mm, stroke=1, fill=0)
 
         y -= linha_h
@@ -839,3 +760,161 @@ def gerar_lista_presenca_pdf():
     filename = f"lista_presenca_evt_{idEvt}.pdf"
     return send_file(buf, mimetype="application/pdf",
                      as_attachment=True, download_name=filename)
+
+# ---------- Auxiliares para Lançar Presença ----------
+def _listar_eventos_select():
+    conn = conectar_bd(); out=[]
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT e."idEvt", e."nomEvt", COALESCE(e.turno,'')
+                  FROM tbevento e
+                 WHERE e."idTipEvt" = 2
+                 ORDER BY e."dtIniPer" DESC NULLS LAST, e."nomEvt" ASC
+                 LIMIT 200
+            """)
+            for idEvt, nomEvt, turno in cur.fetchall():
+                out.append({"idEvt": idEvt, "nomEvt": nomEvt, "turno": (turno or '').strip()})
+        finally:
+            try: conn.close()
+            except: pass
+    return out
+
+def _listar_assentados_ativos_alfabetico_dict():
+    conn = conectar_bd(); out=[]
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "idAssent", nome
+                  FROM tbassentado
+                 WHERE COALESCE("idSitAssent",1)=1
+                 ORDER BY lower(nome) ASC
+            """)
+            for i,n in cur.fetchall():
+                out.append({"idAssent": i, "nome": n})
+        finally:
+            try: conn.close()
+            except: pass
+    return out
+
+def _valor_presenca_eqv():
+    conn = conectar_bd()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT "valEqv"
+              FROM "tbtipfinanc"
+             WHERE "idCatgFinanc" = 5 AND COALESCE("staFinanc",1) = 1
+             ORDER BY "idTipFinanc" DESC
+             LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            cur.execute("""
+                SELECT "valEqv"
+                  FROM "tbtipfinanc"
+                 WHERE "idCatgFinanc" = 5
+                 ORDER BY "idTipFinanc" DESC
+                 LIMIT 1
+            """)
+            row = cur.fetchone()
+        return float(row[0]) if row and row[0] is not None else None
+    finally:
+        try: conn.close()
+        except: pass
+
+# ---------- View GET (Lançar presença) ----------
+def view_evtPresenca():
+    eventos = _listar_eventos_select()
+    assentados = _listar_assentados_ativos_alfabetico_dict()
+    valor_eqv = _valor_presenca_eqv()
+    return render_template("evtPresenca.html",
+                           eventos=eventos,
+                           assentados=assentados,
+                           valor_eqv=valor_eqv)
+
+# ---------- POST (Gravar presença + gerar tbfinanc quando S) ----------
+def registrar_evtPresenca():
+    if request.method != "POST":
+        return redirect(url_for("evtPres_view"))
+
+    idEvt = (request.form.get("idEvt") or "").strip()
+    idAssent = (request.form.get("idAssent") or "").strip()
+    presenca = (request.form.get("presenca") or "S").strip().upper()[:1]
+
+    if not idEvt or not idAssent:
+        flash("Selecione o evento e o assentado.", "warning")
+        return redirect(url_for("evtPres_view"))
+
+    try:
+        idEvt = int(idEvt)
+        idAssent = int(idAssent)
+    except:
+        flash("Evento ou Assentado inválido.", "danger")
+        return redirect(url_for("evtPres_view"))
+
+    if presenca not in ("S", "N"):
+        presenca = "N"
+
+    val_eqv = _valor_presenca_eqv()
+    if presenca == "S" and val_eqv is None:
+        flash("Não há valEqv configurado para presença (categoria 5).", "danger")
+        return redirect(url_for("evtPres_view"))
+
+    hoje = date.today()
+
+    conn = conectar_bd()
+    if not conn:
+        flash("Erro de conexão com o banco.", "danger")
+        return redirect(url_for("evtPres_view"))
+
+    try:
+        cur = conn.cursor()
+
+        # 1) tbevtpres (upsert simples)
+        cur.execute("""
+            SELECT 1 FROM tbevtpres WHERE "idEvt"=%s AND "idAssent"=%s
+        """, (idEvt, idAssent))
+        if cur.fetchone():
+            cur.execute("""
+                UPDATE tbevtpres SET presenca=%s
+                 WHERE "idEvt"=%s AND "idAssent"=%s
+            """, (presenca, idEvt, idAssent))
+        else:
+            cur.execute("""
+                INSERT INTO tbevtpres("idEvt","idAssent",presenca)
+                VALUES (%s,%s,%s)
+            """, (idEvt, idAssent, presenca))
+
+        # 2) tbfinanc — só quando presente = S
+        if presenca == "S":
+            cur.execute("""
+                INSERT INTO tbfinanc
+                  ("idAssent","anoFinanc","mesFinanc","valFinanc",
+                   "idCatgFinanc","dtPagto","tipFinancCP",
+                   "numParcela","catgParcdoSN","qtdContr")
+                VALUES (%s,%s,%s,%s,
+                        %s,%s,%s,
+                        %s,%s,%s)
+            """, (
+                idAssent, hoje.year, hoje.month, val_eqv,
+                5, hoje, 1,
+                0, 'N', 1
+            ))
+
+        conn.commit()
+        flash("Presença registrada com sucesso.", "success")
+    except Exception as e:
+        try: conn.rollback()
+        except: pass
+        print("ERRO registrar_evtPresenca:", e)
+        flash("Não foi possível registrar a presença.", "danger")
+    finally:
+        try: conn.close()
+        except: pass
+
+    return redirect(url_for("evtPres_view"))

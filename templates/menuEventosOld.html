@@ -61,6 +61,8 @@
               <a href="/evtAlt" class="list-group-item list-group-item-action" title="Alterar evento"><i class="bi bi-pencil me-2"></i>Alterar</a>
               <a href="/evtExc" class="list-group-item list-group-item-action" title="Excluir evento"><i class="bi bi-trash me-2"></i>Excluir</a>
               <a href="/evtCon" class="list-group-item list-group-item-action" title="Consulta geral de eventos"><i class="bi bi-search me-2"></i>Consulta</a>
+              <a href="/evtPresenca" class="list-group-item list-group-item-action" title="Lista de Presença"><i class="bi bi-people-check me-2"></i>Lista de Presença (PDF)</a>
+               <a href="{{ url_for('evtPres_view') }}" class="list-group-item list-group-item-action"> <i class="bi bi-person-check me-2"></i> Lançar Presença</a>
             </div>
           </div>
         </div>
@@ -81,72 +83,38 @@
           </div>
         </div>
 
-        <!-- Filtros (lista rápida de eventos aqui na home de Eventos) -->
-        <div class="card card-rounded shadow-soft mb-3">
-          <div class="card-body">
-            <form action="/menuEventos" method="GET" class="row g-3 align-items-end">
-              <div class="col-md-5">
-                <label class="form-label fw-bold">Tipo</label>
-                <select name="idTipEvt" class="form-select">
-                  <option value="">— Todos —</option>
-                  {% for t in tipos or [] %}
-                    <option value="{{ t[0] }}" {{ 'selected' if (filtros and filtros.idTipEvt==t[0]|string) else '' }}>{{ t[1] }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-5">
-                <label class="form-label fw-bold">Busca (título)</label>
-                <input name="busca" class="form-control" value="{{ filtros.busca if filtros }}">
-              </div>
-              <div class="col-md-2 d-grid">
-                <button class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <!-- === LISTA DE EVENTOS EM CARDS (com a alteração pedida) === -->
+        <h4 class="mb-3 text-success">Eventos</h4>
 
-        <!-- Tabela de eventos (resumo) -->
-        <div class="card card-rounded shadow-soft">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Eventos</h5>
-              <small class="text-muted">Mostrando últimos registros</small>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-sm align-middle">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Título</th>
-                    <th>Tipo</th>
-                    <th>Período</th>
-                    <th>Turno</th>
-                    <th class="text-center">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% if rows and rows|length %}
-                    {% for r in rows %}
-                      <tr>
-                        <td>{{ r.idEvt }}</td>
-                        <td>{{ r.nomEvt }}</td>
-                        <td>{{ r.nomTipEvt }}</td>
-                        <td>{% if r.dtIniPer and r.dtFimPer %}{{ r.dtIniPer }} – {{ r.dtFimPer }}{% else %}-{% endif %}</td>
-                        <td>{{ r.turno or '-' }}</td>
-                        <td class="text-center">
-                          <a class="btn btn-sm btn-outline-primary" href="/evtAlt?id={{ r.idEvt }}" title="Alterar"><i class="bi bi-pencil"></i></a>
-                          <a class="btn btn-sm btn-outline-danger" href="/evtExc?id={{ r.idEvt }}" title="Excluir"><i class="bi bi-trash"></i></a>
-                        </td>
-                      </tr>
-                    {% endfor %}
-                  {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">Sem registros para exibir.</td></tr>
+        {% if eventos and eventos|length %}
+          <div class="row g-3">
+            {% for e in eventos %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                  {% if e.foto %}
+                    <img src="/static/{{ e.foto }}" class="card-img-top" alt="Imagem do evento">
                   {% endif %}
-                </tbody>
-              </table>
-            </div>
+                  <div class="card-body">
+                    <span class="badge bg-secondary">{{ e.tipo }}</span>
+                    <h6 class="mt-2">{{ e.titulo }}</h6>
+                    {% if e.dtIniPer %}
+                      <small class="text-muted d-block mb-1">
+                        {{ e.dtIniPer }}{% if e.dtFimPer %} — {{ e.dtFimPer }}{% endif %}
+                        {% if e.turno %} • Turno: {{ e.turno }}{% endif %}
+                      </small>
+                    {% endif %}
+                    <p class="mb-2" style="white-space:pre-wrap">
+                      {{ e.descricao[:140] }}{% if e.descricao|length > 140 %}…{% endif %}
+                    </p>
+                    <a class="btn btn-sm btn-outline-success" href="/evento/{{ e.idEvt }}">ver</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
           </div>
-        </div>
+        {% else %}
+          <div class="alert alert-info">Nenhum evento cadastrado.</div>
+        {% endif %}
 
       </section>
 

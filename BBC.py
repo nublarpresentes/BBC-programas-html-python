@@ -114,37 +114,17 @@ from sitAssent import cadastrar_sitassent, pagina_sitAssentAlt, alterar_sitassen
 # Categoria Assentado
 from ctgAssent import cadastrar_ctgassent, pagina_ctgAssentAlt, alterar_ctgassent, pagina_ctgAssentExc, excluir_ctgassent
 
-# Tipo Evento
-# from tipEvt import pagina_tipEvtAlt, pagina_tipEvtExc, cadastrar_tipevt, alterar_tipevt, excluir_tipevt
-
 from evento import (
     view_menuEvento,
     # Tipos
     view_tipEvtCad, cadastrar_tipevt, pagina_tipEvtAlt, alterar_tipevt, pagina_tipEvtExc, excluir_tipevt,
     # Eventos
-    view_evtCad, cadastrar_evt,  # <<-- este nome mesmo
+    view_evtCad, cadastrar_evt,
     view_evtAlt, alterar_evento,
     view_evtExc, excluir_evento,
-    pagina_evtCon
+    pagina_evtCon, view_evtPresencaSel, gerar_lista_presenca_pdf,
+    view_evtPresenca, registrar_evtPresenca
 )
-
-
-#from evento import (
-    # Menu
-#    view_menuEvento as view_menuEventos,
-
-    # Tipos de evento
- #   view_tipEvtCad, cadastrar_tipevt,
-#    pagina_tipEvtAlt, alterar_tipevt,
- #   pagina_tipEvtExc, excluir_tipevt,
-
-    # Eventos
- #   view_evtCad,
- #   cadastrar_evt as cadastrar_evento,
-
-#)
-
-
 
 # Grupo de Partilha
 from grpPartlh import (
@@ -166,7 +146,6 @@ app.secret_key = "um_segredo_bem_dificil"
 #============  *00 *BÁSICO ==================================================================
 @app.route('/')
 def index():
-    # Se não houver index.html, você pode trocar para: return view_menuAssent()
     return render_template('index.html')
 
 # ========== *01 *USUÁRIO ================================================================
@@ -206,20 +185,15 @@ def senhaAlt():
 def altSenha():
     return alterar_senha()
 
-
 # ========== *02 *EVENTO ================================================================
-
 @app.get('/evtCad')
 def evtCad_view():
-    # endpoint = "evtCad_view"
     return view_evtCad()
 
-@app.route('/cadEvento', methods=['POST'])
+@app.post('/cadEvento')
 def cadEvento_post():
-    # endpoint = "cadEvento_post"
     return cadastrar_evt()
 
-# (opcional) Se alguém acessar /cadEvento por GET, redireciona para o form
 @app.get('/cadEvento')
 def cadEvento_get():
     return redirect(url_for('evtCad_view'))
@@ -283,16 +257,24 @@ def menuEventos():
     from evento import view_menuEventos
     return view_menuEventos()
 
-from evento import (
-    # ... seus outros imports ...
-    view_evtPresencaSel, gerar_lista_presenca_pdf,
-)
+# --------- PRESENÇA EM EVENTO ---------
+@app.get('/evtPres')
+def evtPres_view():
+    return view_evtPresenca()
 
-app.add_url_rule("/evtPresenca",    "evtPresenca",    view_evtPresencaSel, methods=["GET"])
-app.add_url_rule("/evtPresencaPDF", "evtPresencaPDF", gerar_lista_presenca_pdf, methods=["POST"])
+@app.post('/evtPres')
+def evtPres_post():
+    return registrar_evtPresenca()
 
+@app.get('/evtPresenca')
+def evtPresencaSel_view():
+    return view_evtPresencaSel()
 
-# ============= *03 *POLÍTICA PÚBLICA  ================================================================
+@app.post('/evtPresencaPDF')
+def evtPresencaPDF_post():
+    return gerar_lista_presenca_pdf()
+
+# ============= *03 *POLÍTICA PÚBLICA  ==================================================
 @app.route('/politPubCad')
 def politPubCad():
     entidades = _listar_entidades()
@@ -334,7 +316,6 @@ def politPubCon():
     entidades = _listar_entidades()
     return render_template('politPubCon.html', entidades=entidades)
 
-
 @app.route('/conPolitPub', methods=['GET'])
 def conPolitPub():
     return pagina_conPolitPub()
@@ -343,8 +324,7 @@ def conPolitPub():
 def conFiltroPolitPub_route():
     return conFiltroPolitPub()
 
-
-# ============  *04   *UNIDADE EQUIVALÊNCIA  ==================================================
+# ============  *04   *UNIDADE EQUIVALÊNCIA  ============================================
 @app.route('/unEqvCad')
 def unEqvCad():
     return render_template('unEqvCad.html')
@@ -369,9 +349,7 @@ def unEqvExc():
 def excUnEqv():
     return excluir_uneqv()
 
-
 # =============  *05   *FAMÍLIA =========================================================
-
 @app.route('/familiaCad')
 def familiaCad():
     return render_template('familiaCad.html')
@@ -396,8 +374,7 @@ def familiaExc():
 def excFamilia():
     return excluir_familia()
 
-
-# ============ *06  *SITUAÇÃO ASSENTADO  =========================================================
+# ============ *06  *SITUAÇÃO ASSENTADO  ================================================
 @app.route('/sitAssentCad')
 def sitAssentCad():
     return render_template('sitAssentCad.html')
@@ -422,7 +399,7 @@ def sitAssentExc():
 def excSitAssent():
     return excluir_sitassent()
 
-# ============   *07 *CATEGORIA ASSENTADO  =======================================================
+# ============   *07 *CATEGORIA ASSENTADO  ==============================================
 @app.route('/ctgAssentCad')
 def ctgAssentCad():
     return render_template('ctgAssentCad.html')
@@ -447,15 +424,13 @@ def ctgAssentExc():
 def excCtgAssent():
     return excluir_ctgassent()
 
-# =============  *08  *ASSENTADO  ===============================================================
+# =============  *08  *ASSENTADO  =======================================================
 @app.get('/menuAssent')
 def menuAssent():
-    # Renderiza menu + grade inicial (15 primeiros por ordem alfabética)
     return view_menuAssent()
 
 @app.get('/conGeralAssent')
 def conGeralAssent():
-    # Aplica filtros e renderiza na mesma tela (menuAssent.html)
     return pagina_conGeralAssent()
 
 @app.route('/conFiltroAssent', methods=['GET', 'POST'])
@@ -468,7 +443,6 @@ def assentCad():
 
 @app.post('/assentCad')
 def cadAssent():
-    # Grava e gera a carteira PDF (QR = matrícula) conforme assent.py
     return cadastrar_assent()
 
 @app.get('/assentAlt')
@@ -537,7 +511,6 @@ def obter_dados_assent_nome(nome):
             return []
     return []
 
-
 @app.route('/cartaoQR', methods=['GET', 'POST'])
 def cartaoQRassent():
     session['mensagem'] = "  "
@@ -548,10 +521,7 @@ def gerarQRPDF():
     session['mensagem'] = "  "
     return gerar_pdf_Cartao()
 
-
-
-# =============   *09 *TIPO CONTRIBUIÇÃO  ==========================================================
-
+# =============   *09 *TIPO CONTRIBUIÇÃO  ===============================================
 @app.route("/tipContribCad")
 def tipContribCad():
     categorias, politicas, unidades, _ = _carrega_selects()
@@ -581,7 +551,6 @@ def altTipContrib():
 def excTipContrib():
     return excluir_tipo_contrib()
 
-# --- Consulta Geral de Tipos de Contribuição ---
 @app.route('/conGeralTipContrib', methods=['GET'])
 def conGeralTipContrib():
     from conGeralTipContrib import pagina_conGeralTipContrib
@@ -592,8 +561,7 @@ def conFiltroTipContrib():
     from conGeralTipContrib import conFiltroTipContrib
     return conFiltroTipContrib()
 
-
-# =============   *10  *CONTRIBUIÇÃO  ==============================================================
+# =============   *10  *CONTRIBUIÇÃO  ====================================================
 @app.route('/contribCad')
 def contribCad():
     return view_contribCad()
@@ -610,10 +578,8 @@ def contribAlt():
 def altContrib():
     return alterar_contrib()
 
-# --- Consulta Geral de Contribuições (REGISTROS dos assentados) ---
 @app.route('/conContrib')
 def conContrib():
-    # mantém compat de link antigo
     return redirect(url_for('conGeralContrib', **request.args))
 
 @app.route('/conGeralContrib', methods=['GET'])
@@ -626,10 +592,7 @@ def conFiltroContrib():
     from conGeralContrib import conFiltroContrib as _conFiltroContrib
     return _conFiltroContrib()
 
-
-
-
-# ============  *11  *PARTILHA ===============================================================
+# ============  *11  *PARTILHA ===========================================================
 @app.get("/partlhCad")
 def partlhCad():
     return view_partlhCad()
@@ -654,7 +617,6 @@ def partlhExc():
 def excPartlh():
     return excluir_partlh()
 
-# --- Consulta Geral de Tipos de Partilha ---
 @app.route('/conGeralTipPartlh', methods=['GET'])
 def conGeralTipPartlh():
     from conGeralTipPartlh import pagina_conGeralTipPartlh
@@ -669,9 +631,7 @@ def conFiltroTipPartlh():
 def conPartlh():
     return redirect(url_for('conGeralPartlh', **request.args))
 
-
-# =============  *12  *RETRIBUIÇÃO ===========================================
-
+# =============  *12  *RETRIBUIÇÃO =======================================================
 @app.route('/retribCad', methods=['GET'])
 def retribCad():
     return view_retribCad()
@@ -696,7 +656,6 @@ def retribExc():
 def excRetrib():
     return excluir_retrib()
 
-# --- Consulta Geral de Retribuições ---
 @app.get('/conGeralRetrib')
 def conGeralRetrib():
     return pagina_conGeralRetrib()
@@ -705,11 +664,7 @@ def conGeralRetrib():
 def conFiltroRetrib_route():
     return conFiltroRetrib()
 
-# (Opcional) Alias para compatibilidade com links antigos:
-
-
-#================  *13  *TIPO RECOMPENSA  =====================================================
-
+#================  *13  *TIPO RECOMPENSA  ===============================================
 @app.route('/tipRecpsaCad')
 def tipRecpsaCad():
     return view_tipRecpsaCad()
@@ -734,7 +689,6 @@ def tipRecpsaExc():
 def excTipRecpsa():
     return excluir_tiprecpsa()
 
-# --- Consulta geral (com filtros)
 @app.route('/conGeralTipRecpsa', methods=['GET'])
 def conGeralTipRecpsa():
     return pagina_conGeralTipRecpsa()
@@ -743,9 +697,7 @@ def conGeralTipRecpsa():
 def conFiltroTipRecpsa_route():
     return conFiltroTipRecpsa()
 
-
-#================  *14  *USO DA INFRAESTRUTURA     ============================================
-
+#================  *14  *USO DA INFRAESTRUTURA ==========================================
 @app.route('/tipUsoInfrCad')
 def tipUsoInfrCad():
     return view_tipUsoInfrCad()
@@ -770,7 +722,6 @@ def tipUsoInfrExc():
 def excTipUsoInfr():
     return excluir_tipusoinfr()
 
-# --- Consulta geral
 @app.route('/conGeralTipUsoInfr', methods=['GET'])
 def conGeralTipUsoInfr():
     return pagina_conGeralTipUsoInfr()
@@ -779,10 +730,7 @@ def conGeralTipUsoInfr():
 def conFiltroTipUsoInfr_route():
     return conFiltroTipUsoInfr()
 
-
-
-#===============  *15  *RECOMPENSAS  ====================================================
-
+#===============  *15  *RECOMPENSAS  =====================================================
 @app.route('/recpsaCad')
 def recpsaCad():
     return view_recpsaCad()
@@ -791,15 +739,9 @@ def recpsaCad():
 def cadRecpsa():
     return cadastrar_recpsa()
 
-# (Se/Quando implementar as telas de alt/exc de recpsa, adicione rotas aqui)
-
-# --- Consulta geral de recompensas
-
 @app.get('/conGeralRecpsa')
 def conGeralRecpsa_alias():
     return pagina_conGeralRetrib()
-
-
 
 @app.route('/conGeralRecpsa', methods=['GET'])
 def conGeralRecpsa():
@@ -811,9 +753,7 @@ def conFiltroRecpsa_route():
     from recpsa import conFiltroRecpsa
     return conFiltroRecpsa()
 
-
-#==============  *16  *CATEGORIA USO INFRAESTRUTURA  ==========================================
-
+#==============  *16  *CATEGORIA USO INFRAESTRUTURA  ====================================
 @app.route('/catgUsoInfrCad', methods=['GET'])
 def catgUsoInfrCad():
     return view_catgUsoInfrCad()
@@ -842,8 +782,7 @@ def excCatgUsoInfr():
 def catgUsoInfrCon():
     return view_catgUsoInfrCon()
 
-
-# ============  *18  *ENTIDADES   ==========================================================
+# ============  *18  *ENTIDADES   =======================================================
 @app.route('/entidadeCad')
 def entidadeCad():
     return view_entidadeCad()
@@ -872,9 +811,7 @@ def excEntidade():
 def conEntidade():
     return pagina_conEntidade()
 
-
-#=============   *19   *SALDO  =====================================================================
-
+#=============   *19   *SALDO  ===========================================================
 @app.route('/conGeralSaldo', methods=['GET'])
 def conGeralSaldo():
     return pagina_conGeralSaldo()
@@ -883,11 +820,7 @@ def conGeralSaldo():
 def conFiltroSaldo_route():
     return conFiltroSaldo()
 
-
-
-# =============  *20   *SELECT  - MENU -   UTILITÁRIO - QRCODE - WHATSAPP ===================================
-
-
+# =============  *20   *SELECT / MENUS / UTILITÁRIOS =====================================
 @app.get('/menuBBC')
 def menuBBC():
     conn = conectar_bd()
@@ -915,9 +848,6 @@ def menuBBC():
 
     return render_template('menu.html', usuario='Usuário', noticia_capa=noticia_capa)
 
-
-
-
 def _carrega_selects():
     conn = conectar_bd()
     categorias, politicas, unidades, assentados = [], [], [], []
@@ -937,7 +867,6 @@ def _carrega_selects():
         conn.close()
     return categorias, politicas, unidades, assentados
 
-
 @app.route('/menuCaderneta')
 def menuCaderneta():
     return render_template('menuCaderneta.html')
@@ -946,11 +875,9 @@ def menuCaderneta():
 def mensagem():
     return render_template('mensagem.html')
 
-
 @app.route('/menuRetrib')
 def menuRetrib():
     return render_template('menuRetrib.html', usuario=session.get('usuario') if 'session' in globals() else None)
-
 
 @app.route('/whatsapp', methods=['GET', 'POST'])
 def rotina_whatsapp():
@@ -962,8 +889,6 @@ def enviar_msg_whatsapp():
     session['mensagem'] = "  "
     return enviar_whatsapp()
 
-
-# --- Notícia de capa (evento tipo 1 com capa='S')
 def _buscar_noticia_capa():
     conn = conectar_bd()
     if not conn:
@@ -982,17 +907,15 @@ def _buscar_noticia_capa():
         if not row:
             return None
         idEvt, nomEvt, descricao, fotoCapa = row
-        # em evento.py, salvamos foto como "img/eventos/arquivo.jpg" (sem /static)
         return {
             "idEvt": idEvt,
             "titulo": nomEvt,
             "descricao": descricao,
-            "foto": fotoCapa  # o template já prefixa com /static/
+            "foto": fotoCapa
         }
     finally:
         try: conn.close()
         except: pass
-
 
 @app.route('/menu', methods=['GET'])
 def menu():
@@ -1000,7 +923,6 @@ def menu():
     noticia = _buscar_noticia_capa()
     return render_template('menu.html', usuario=usuario, noticia_capa=noticia)
 
-# --- helper interno: pega a notícia de capa (idTipEvt=1 e capa='S')
 def _pegar_noticia_capa():
     conn = conectar_bd()
     if not conn:
@@ -1011,9 +933,9 @@ def _pegar_noticia_capa():
             SELECT e."idEvt",
                    e."nomEvt",
                    COALESCE(e.descricao, ''),
-                   COALESCE(e."fotoCapa", '')   -- ex.: 'img/eventos/evt_123_capa.jpg'
+                   COALESCE(e."fotoCapa", '')
               FROM tbevento e
-             WHERE e."idTipEvt" = 1           -- 1 = notícia
+             WHERE e."idTipEvt" = 1
                AND e.capa = 'S'
              ORDER BY e."idEvt" DESC
              LIMIT 1
@@ -1025,16 +947,12 @@ def _pegar_noticia_capa():
             "idEvt": row[0],
             "titulo": row[1],
             "descricao": row[2],
-            "foto": row[3],                   # já relativo a /static/
+            "foto": row[3],
         }
     finally:
         try: conn.close()
         except: pass
 
-# --- Home/Menu: usar a mesma lógica para /menu e /menuBBC
-
-
 # -------------------- RUN --------------------
 if __name__ == '__main__':
-    # Se abrir direto e aparecer "Not Found", acesse: http://127.0.0.1:5000/menuAssent
     app.run(host='0.0.0.0', port=5000, debug=True)

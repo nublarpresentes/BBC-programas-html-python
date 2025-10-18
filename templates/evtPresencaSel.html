@@ -30,24 +30,25 @@
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="card-title">Gerar Lista de Presença (Reuniões)</h5>
-      <form action="/evtPresencaPDF" method="POST" class="row g-3">
-        <div class="col-md-10">
-          <label class="form-label fw-bold">Reunião</label>
-          <select name="idEvt" class="form-select" required>
-            <option value="">— selecione —</option>
-            {% for e in reunioes %}
-              <option value="{{ e[0] }}">
-                {{ e[2] and e[2].strftime('%d/%m/%Y') or 's/ data' }} — {{ e[1] }} ({{ e[3] or '-' }}) {{ e[4] and ' • ' ~ e[4] }}
-              </option>
-            {% endfor %}
-          </select>
-          <div class="form-text">Só aparecem eventos do tipo <strong>Reunião</strong>.</div>
-        </div>
-        <div class="col-md-2 d-grid">
-          <label class="form-label">&nbsp;</label>
-          <button class="btn btn-success">Gerar PDF</button>
-        </div>
-      </form>
+    <form action="{{ url_for('evtPresencaPDF_post') }}" method="POST" class="row g-3">
+      <div class="col-md-10">
+        <label class="form-label fw-bold">Reunião</label>
+        <select name="idEvt" class="form-select" required>
+          <option value="">— selecione —</option>
+          {% for e in reunioes %}
+            <option value="{{ e[0] }}">
+              {{ e[2] and e[2].strftime('%d/%m/%Y') or 's/ data' }} — {{ e[1] }} ({{ e[3] or '-' }}) {{ e[4] and ' • ' ~ e[4] }}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Só aparecem eventos do tipo <strong>Reunião</strong>.</div>
+      </div>
+      <div class="col-md-2 d-grid">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-success">Gerar PDF</button>
+      </div>
+    </form>
+
     </div>
   </div>
 </main>
