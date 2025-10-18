@@ -1,181 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>SBBC - Menu Principal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <title>SBBC — Menu Principal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<style>
-.list-heading { font-weight: 700; color: #dc3545; text-align: center; background: #f8f9fa; }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
 
-/* Submenu no hover */
-.dropdown-submenu {
-  position: relative;
-  cursor: pointer;
-}
-.dropdown-submenu .dropdown-menu {
-  display: none;
-  margin-left: 15px;
-  border-left: 2px solid #ccc;
-}
-.dropdown-submenu:hover .dropdown-menu {
-  display: block;
-}
-
-/* Setinha vermelha */
-.dropdown-submenu .arrow {
-  float: right;
-  color: #dc3545;
-  font-size: 0.9rem;
-}
-</style>
+  <style>
+    body{background:#f5f7fb}
+    .shadow-soft{box-shadow:0 8px 20px rgba(0,0,0,.06)}
+    .card-rounded{border-radius:14px}
+    .list-group a.list-group-item{border:none;border-radius:10px;margin-bottom:8px}
+    .list-group a.list-group-item:hover{background:#e9f5ef}
+    .menu-section-title{font-weight:bold;color:#198754;margin-top:12px;margin-bottom:4px;font-size:0.9rem}
+    .hero-img{max-height:220px;object-fit:cover}
+  </style>
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100">
 
-<!-- Cabeçalho -->
-<!-- Cabeçalho -->
 <header class="bg-success text-white shadow-sm">
   <div class="container">
-    <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
-      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <img src="/static/img/logo_bbc.png" alt="SBBC Logo" class="me-3" style="height:60px;">
       <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
     </div>
 
-    <!-- Linha com o menu principal -->
     <nav class="nav justify-content-center border-top border-light pt-2">
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-house-door-fill"></i> Home
-      </a>
-      <a class="nav-link text-white" href="/menuAssent">
-        <i class="bi bi-people-fill"></i> Assentado
-      </a>
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-bank"></i> Banco do Bem Comum
-      </a>
-      <a class="nav-link text-white" href="/menuEventos">
-      <i class="bi bi-journal-bookmark-fill"></i>  Eventos
-      <!--/a>
-      <a class="nav-link text-white" href="/menuCaderneta">
-        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
-      </a -->
-      <a class="nav-link text-white" href="/faleConosco">
-        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
-      </a>
+      <a class="nav-link text-white" href="/menu" title="Home"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent" title="Assentado"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuEventos" title="Eventos"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
   </div>
 </header>
 
-<!-- Mensagem de boas-vindas -->
-<div class="container mt-3">
-  <div class="alert alert-success text-center" role="alert">
-    Bem-vindo, {{ usuario }}! Selecione uma das opções abaixo:
-  </div>
-</div>
-
-<!-- Layout principal -->
 <main class="flex-grow-1">
   <div class="container my-4">
+
+    <div class="alert alert-success text-center shadow-soft card-rounded" role="alert">
+      Bem-vindo, <strong>{{ usuario }}</strong>!
+    </div>
+
     <div class="row g-4">
+      <!-- MENU LATERAL -->
+      <aside class="col-lg-3">
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Principal</h5>
 
-      <!-- Menu lateral com submenus -->
-      <div class="col-md-3">
-        <div class="list-group shadow-sm">
-
-          <div class="list-group-item list-heading">MÓDULOS</div>
-          <a href="/menuBBC" class="list-group-item list-group-item-action">BANCO DO BEM COMUM</a>
-          <a href="/menuCaderneta" class="list-group-item list-group-item-action">CADERNETA DA PARTILHA</a>
-          <a href="/menuAssent" class="list-group-item list-group-item-action">ASSENTADO</a>
-
-
-          <a href="/menuEventos" class="list-group-item list-group-item-action">EVENTOS</a>
-          <!-- TABELAS DO SISTEMA -->
-         <div class="list-group-item list-heading mt-2">TABELAS DO SISTEMA</div>
-           <div class="list-group-item dropdown-submenu">
-             <span class="fw-bold">Entidades <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/entidadeCad" class="dropdown-item">Incluir</a>
-              <a href="/entidadeAlt" class="dropdown-item">Alterar</a>
-              <a href="/entidadeExc" class="dropdown-item">Excluir </a>
+            <div class="menu-section-title">Módulos</div>
+            <div class="list-group">
+              <a href="/menuAssent" class="list-group-item list-group-item-action">
+                <i class="bi bi-people-fill me-2"></i>Assentados
+              </a>
+              <a href="/menuBBC" class="list-group-item list-group-item-action">
+                <i class="bi bi-bank me-2"></i>Banco do Bem Comum
+              </a>
+              <a href="/menuEventos" class="list-group-item list-group-item-action">
+                <i class="bi bi-journal-bookmark-fill me-2"></i>Eventos
+              </a>
+              <a href="/faleConosco" class="list-group-item list-group-item-action">
+                <i class="bi bi-chat-dots-fill me-2"></i>Fale Conosco
+              </a>
             </div>
           </div>
-
-            <div class="list-group-item dropdown-submenu">
-             <span class="fw-bold">Tipo de Eventos <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/tipEvtCad" class="dropdown-item">Incluir</a>
-              <a href="/tipEvtAlt" class="dropdown-item">Alterar</a>
-              <a href="/tipEvtExc" class="dropdown-item">Excluir </a>
-            </div>
-          </div>
-
-          <a href="/menuMerenda" class="list-group-item list-group-item-action">Trabalho Interno</a>
-          <a href="/menuMerenda" class="list-group-item list-group-item-action">Tipo de Evento</a>
-          <a href="/menuCatraca" class="list-group-item list-group-item-action">Tipo de Grupo de Trabalho</a>
-          <a href="/menuCatraca" class="list-group-item list-group-item-action">Grupo de Trabalho</a>
-
-          <!-- CONTA USUÁRIO -->
-          <div class="list-group-item list-heading mt-2">CONTA USUÁRIO</div>
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Usuários <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/usuarioCad" class="dropdown-item">Cadastrar Usuário</a>
-              <a href="/usuarioAlt" class="dropdown-item">Alterar Usuário</a>
-            </div>
-          </div>
-          <div class="list-group-item dropdown-submenu">
-            <span class="fw-bold">Senha <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/senhaAlt" class="dropdown-item">Alterar Senha</a>
-              <a href="/senhaRec" class="dropdown-item">Recuperar Senha</a>
-            </div>
-          </div>
-
-          <!-- LINKS ÚTEIS -->
-          <div class="list-group-item list-heading mt-2">LINKS ÚTEIS</div>
-          <a href="https://sigaa.abaetetuba.edu.br" target="_blank" class="list-group-item list-group-item-action">CUIDA PET</a>
-          <a href="https://sigaa.abaetetuba.edu.br" target="_blank" class="list-group-item list-group-item-action">SIGAA</a>
-          <a href="https://www.mec.gov.br/" target="_blank" class="list-group-item list-group-item-action">MEC</a>
         </div>
-      </div>
+      </aside>
 
-      <!-- Conteúdo principal -->
+      <!-- CONTEÚDO CENTRAL -->
+      <section class="col-lg-9">
+        <!-- Notícia de capa -->
+        {% if noticia_capa %}
+        <div class="card card-rounded shadow-soft mb-3">
+          {% if noticia_capa.foto %}
+            <img src="/static/{{ noticia_capa.foto }}" class="card-img-top hero-img" alt="Notícia de capa">
+          {% endif %}
+          <div class="card-body">
+            <span class="badge bg-secondary"><i class="bi bi-megaphone-fill me-1"></i>Notícia</span>
+            <h5 class="mt-2 mb-2">{{ noticia_capa.titulo }}</h5>
+            <a class="btn btn-sm btn-success" href="/evento/{{ noticia_capa.idEvt }}">
+              <i class="bi bi-eye-fill me-1"></i>Ver notícia
+            </a>
+          </div>
+        </div>
+        {% endif %}
 
-            <div class="col-md-9">
-              {% if noticia_capa %}
-                <div class="card shadow-sm mb-4">
-                  {% if noticia_capa.foto %}
-                    <img src="/static/{{ noticia_capa.foto }}" class="card-img-top" alt="Capa da Notícia">
-                  {% endif %}
-                  <div class="card-body">
-                    <h5 class="card-title text-success">{{ noticia_capa.titulo }}</h5>
-                    <p class="card-text">Clique abaixo para ver a notícia completa.</p>
-                    <a href="/evento/{{ noticia_capa.idEvt }}" class="btn btn-success">Ler notícia</a>
-                  </div>
-                </div>
-              {% else %}
-                <h4 class="text-center text-primary">Bem-vindo ao Sistema Banco do Bem Comum</h4>
-                <p class="text-center text-muted">Use o menu lateral para navegar pelas opções do sistema.</p>
-              {% endif %}
+        <!-- Atalhos -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+            <h5 class="mb-0 me-2"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i>Acesso rápido:</h5>
+            <a class="btn btn-outline-primary btn-sm" href="/menuAssent"><i class="bi bi-people-fill me-1"></i>Assentados</a>
+            <a class="btn btn-outline-primary btn-sm" href="/menuBBC"><i class="bi bi-bank me-1"></i>Banco</a>
+            <a class="btn btn-outline-primary btn-sm" href="/menuEventos"><i class="bi bi-journal-bookmark-fill me-1"></i>Eventos</a>
+          </div>
+        </div>
+
+        <!-- Cards de navegação -->
+        <h4 class="mb-3 text-success">Navegação Rápida</h4>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-people-fill fs-4 text-success"></i>
+                <h6 class="mt-2">Assentados</h6>
+                <p class="text-muted mb-3">Acesse o cadastro e consultas de assentados.</p>
+                <a class="btn btn-sm btn-outline-success" href="/menuAssent">Entrar</a>
+              </div>
             </div>
+          </div>
 
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-bank fs-4 text-success"></i>
+                <h6 class="mt-2">Banco do Bem Comum</h6>
+                <p class="text-muted mb-3">Operações e tabelas do banco comunitário.</p>
+                <a class="btn btn-sm btn-outline-success" href="/menuBBC">Entrar</a>
+              </div>
+            </div>
+          </div>
 
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-journal-bookmark-fill fs-4 text-success"></i>
+                <h6 class="mt-2">Eventos</h6>
+                <p class="text-muted mb-3">Cadastros, presenças e notícias de eventos.</p>
+                <a class="btn btn-sm btn-outline-success" href="/menuEventos">Entrar</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </main>
 
-<!-- Rodapé -->
 <footer class="bg-dark text-white text-center py-3 mt-auto">
-  <p class="mb-0">
-    Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA
-  </p>
+  <small>Endereço: xxxxxxxxx — Abaetetuba-PA • SBBC</small>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

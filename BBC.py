@@ -823,6 +823,8 @@ def conFiltroSaldo_route():
 # =============  *20   *SELECT / MENUS / UTILITÁRIOS =====================================
 @app.get('/menuBBC')
 def menuBBC():
+    from flask import session  # (garante acesso ao session aqui)
+
     conn = conectar_bd()
     noticia_capa = None
     if conn:
@@ -846,7 +848,9 @@ def menuBBC():
             try: conn.close()
             except: pass
 
-    return render_template('menu.html', usuario='Usuário', noticia_capa=noticia_capa)
+    # >>>>>> AQUI está a mudança: usar menuBBC.html em vez de menu.html
+    usuario = session.get('usuario', 'Usuário')
+    return render_template('menuBBC.html', usuario=usuario, noticia_capa=noticia_capa)
 
 def _carrega_selects():
     conn = conectar_bd()
@@ -917,11 +921,32 @@ def _buscar_noticia_capa():
         try: conn.close()
         except: pass
 
-@app.route('/menu', methods=['GET'])
+
+@app.get('/menu')
 def menu():
-    usuario = session.get('usuario', '')
-    noticia = _buscar_noticia_capa()
-    return render_template('menu.html', usuario=usuario, noticia_capa=noticia)
+    usuario = session.get('usuario', 'Visitante')
+    conn = conectar_bd()
+    noticia_capa = None
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "nomEvt", "fotoCapa", "idEvt"
+                FROM tbevento
+                WHERE capa = 'S' AND "idTipEvt" = 1
+                ORDER BY "idEvt" DESC
+                LIMIT 1
+            """)
+            row = cur.fetchone()
+            if row:
+                noticia_capa = {"titulo": row[0], "foto": row[1], "idEvt": row[2]}
+        finally:
+            try: conn.close()
+            except: pass
+    return render_template('menu.html', usuario=session.get('usuario', 'Usuário'), noticia_capa=noticia_capa)
+
+
+
 
 def _pegar_noticia_capa():
     conn = conectar_bd()

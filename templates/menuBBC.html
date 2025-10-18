@@ -1,251 +1,251 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>SBBC - Menu Principal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <title>SBBC — Banco do Bem Comum</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<style>
-.list-heading { font-weight: 700; color: #dc3545; text-align: center; background: #f8f9fa; }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
 
-/* Estilo submenu no hover */
-.dropdown-submenu {
-  position: relative;
-  cursor: pointer;
-}
-.dropdown-submenu .dropdown-menu {
-  display: none;
-  margin-left: 15px;
-  border-left: 2px solid #ccc;
-}
-.dropdown-submenu:hover .dropdown-menu {
-  display: block;
-}
-
-/* Ícone setinha vermelha */
-.dropdown-submenu .arrow {
-  float: right;
-  color: #dc3545;
-  font-size: 0.9rem;
-}
-</style>
+  <style>
+    body{background:#f5f7fb}
+    .shadow-soft{box-shadow:0 8px 20px rgba(0,0,0,.06)}
+    .card-rounded{border-radius:14px}
+    .list-group a.list-group-item{border:none;border-radius:10px;margin-bottom:8px}
+    .list-group a.list-group-item:hover{background:#e9f5ef}
+    .menu-section-title{font-weight:bold;color:#198754;margin-top:12px;margin-bottom:4px;font-size:0.9rem}
+    .hero-img{max-height:220px;object-fit:cover}
+  </style>
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100">
 
-<!-- Cabeçalho -->
-<!-- Cabeçalho -->
 <header class="bg-success text-white shadow-sm">
   <div class="container">
-    <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
-      <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
+      <img src="/static/img/logo_bbc.png" alt="SBBC Logo" class="me-3" style="height:60px;">
       <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
     </div>
 
-    <!-- Linha com o menu principal -->
     <nav class="nav justify-content-center border-top border-light pt-2">
-      <a class="nav-link text-white" href="/menu">
-        <i class="bi bi-house-door-fill"></i> Home
-      </a>
-      <a class="nav-link text-white" href="/menuAssent">
-        <i class="bi bi-people-fill"></i> Assentado
-      </a>
-      <a class="nav-link text-white" href="/menuBBC">
-        <i class="bi bi-bank"></i> Banco do Bem Comum
-      </a>
-      <a class="nav-link text-white" href="/menuEventos">
-      <i class="bi bi-journal-bookmark-fill"></i>  Eventos
-      <!--/a>
-      <a class="nav-link text-white" href="/menuCaderneta">
-        <i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha
-      </a -->
-      <a class="nav-link text-white" href="/faleConosco">
-        <i class="bi bi-chat-dots-fill"></i> Fale Conosco
-      </a>
+      <a class="nav-link text-white" href="/menu" title="Home" data-bs-toggle="tooltip"><i class="bi bi-house-door-fill"></i> Home</a>
+      <a class="nav-link text-white" href="/menuAssent" title="Assentado" data-bs-toggle="tooltip"><i class="bi bi-people-fill"></i> Assentado</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuEventos" title="Eventos" data-bs-toggle="tooltip"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco" data-bs-toggle="tooltip"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
   </div>
 </header>
 
-
-<!-- Mensagem de boas-vindas -->
-<div class="container mt-3">
-  <div class="alert alert-success text-center" role="alert">
-    Bem-vindo, {{ usuario }}! Selecione uma das opções abaixo:
-  </div>
-</div>
-
-<!-- Layout principal -->
 <main class="flex-grow-1">
   <div class="container my-4">
+
+    <!-- Boas-vindas -->
+    <div class="alert alert-success text-center shadow-soft card-rounded" role="alert">
+      Bem-vindo, <strong>{{ usuario }}</strong>! Escolha uma opção.
+    </div>
+
     <div class="row g-4">
+      <!-- MENU LATERAL -->
+      <aside class="col-lg-3">
+        <div class="card card-rounded shadow-soft">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Banco</h5>
 
-      <!-- Menu lateral com setinhas -->
-      <div class="col-md-3">
-        <div class="list-group shadow-sm">
-           <div class="list-group-item list-heading">MÓDULOS</div>
+            <div class="menu-section-title">Módulos</div>
+            <div class="list-group">
+              <a href="/contribCad" class="list-group-item list-group-item-action" title="Cadastrar contribuição">
+                <i class="bi bi-cash-coin me-2"></i>Contribuição — Cadastro
+              </a>
+              <a href="/contribAlt" class="list-group-item list-group-item-action" title="Alterar contribuição">
+                <i class="bi bi-pencil me-2"></i>Contribuição — Alterar
+              </a>
+              <a href="/conGeralContrib" class="list-group-item list-group-item-action" title="Consultar contribuições">
+                <i class="bi bi-search me-2"></i>Contribuição — Consultas
+              </a>
 
-           <div class="list-group-item dropdown-submenu">
-            <span>CADASTRO CONTRIBUIÇÃO <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-               <a href="/contribCad" class="dropdown-item">Incluir</a>
-               <a href="/contribAlt" class="dropdown-item">Alteração</a>
-               <a href="/contribExc" class="dropdown-item">Exclusão</a>
-               <a href="/conGeralContrib" class="dropdown-item">Consultas</a>
+              <a href="/retribCad" class="list-group-item list-group-item-action mt-2" title="Cadastrar retribuição">
+                <i class="bi bi-gift-fill me-2"></i>Retribuição — Cadastro
+              </a>
+              <a href="/retribAlt" class="list-group-item list-group-item-action" title="Alterar retribuição">
+                <i class="bi bi-pencil-square me-2"></i>Retribuição — Alterar
+              </a>
+              <a href="/conGeralRetrib" class="list-group-item list-group-item-action" title="Consultar retribuições">
+                <i class="bi bi-search me-2"></i>Retribuição — Consultas
+              </a>
+
+              <a href="/recpsaCad" class="list-group-item list-group-item-action mt-2" title="Cadastrar recompensa">
+                <i class="bi bi-trophy-fill me-2"></i>Recompensa — Cadastro
+              </a>
+              <a href="/conGeralRecpsa" class="list-group-item list-group-item-action" title="Consultar recompensas">
+                <i class="bi bi-search me-2"></i>Recompensa — Consultas
+              </a>
+
+              <a href="/conGeralSaldo" class="list-group-item list-group-item-action mt-2" title="Consulta de saldos">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>Consulta de Saldos
+              </a>
+            </div>
+
+            <div class="menu-section-title mt-3">Tabelas</div>
+            <div class="list-group">
+              <a href="/tipContribCad" class="list-group-item list-group-item-action" title="Tipo de Contribuição">
+                <i class="bi bi-sliders2-vertical me-2"></i>Tipo de Contribuição
+              </a>
+              <a href="/tipContribAlt" class="list-group-item list-group-item-action" title="Alterar Tipo de Contribuição">
+                <i class="bi bi-pencil me-2"></i>Tipo de Contribuição — Alterar
+              </a>
+              <a href="/conGeralTipContrib" class="list-group-item list-group-item-action" title="Consultar Tipo de Contribuição">
+                <i class="bi bi-search me-2"></i>Tipo de Contribuição — Consultas
+              </a>
+
+              <a href="/tipRecpsaCad" class="list-group-item list-group-item-action mt-2" title="Tipo de Recompensa">
+                <i class="bi bi-collection-fill me-2"></i>Tipo de Recompensa
+              </a>
+              <a href="/conGeralTipRecpsa" class="list-group-item list-group-item-action" title="Consultar Tipo de Recompensa">
+                <i class="bi bi-search me-2"></i>Tipo de Recompensa — Consultas
+              </a>
+
+              <a href="/tipUsoInfrCad" class="list-group-item list-group-item-action mt-2" title="Tipo de Infraestrutura">
+                <i class="bi bi-building-gear me-2"></i>Tipo de Infraestrutura
+              </a>
+              <a href="/conGeralTipUsoInfr" class="list-group-item list-group-item-action" title="Consultar Tipo de Infraestrutura">
+                <i class="bi bi-search me-2"></i>Tipo de Infraestrutura — Consultas
+              </a>
+
+              <a href="/catgUsoInfrCad" class="list-group-item list-group-item-action mt-2" title="Categoria Uso Infraestrutura">
+                <i class="bi bi-diagram-3-fill me-2"></i>Categoria Uso Infraestrutura
+              </a>
+              <a href="/catgUsoInfrCon" class="list-group-item list-group-item-action" title="Consultar Categoria Uso Infra">
+                <i class="bi bi-search me-2"></i>Categoria Uso Infra — Consulta
+              </a>
+
+              <a href="/politPubCad" class="list-group-item list-group-item-action mt-2" title="Política Pública">
+                <i class="bi bi-bank2 me-2"></i>Política Pública
+              </a>
+              <a href="/politPubCon" class="list-group-item list-group-item-action" title="Consultar Política Pública">
+                <i class="bi bi-search me-2"></i>Política Pública — Consulta
+              </a>
+
+              <a href="/unEqvCad" class="list-group-item list-group-item-action mt-2" title="Unidade de Equivalia">
+                <i class="bi bi-upc-scan me-2"></i>Unidade de Equivalia
+              </a>
+              <a href="/unEqvAlt" class="list-group-item list-group-item-action" title="Alterar Unidade de Equivalia">
+                <i class="bi bi-pencil me-2"></i>Unidade de Equivalia — Alterar
+              </a>
             </div>
           </div>
+        </div>
+      </aside>
 
-           <div class="list-group-item dropdown-submenu">
-            <span>CADASTRO RETRIBUIÇÃO <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-               <a href="/retribCad" class="dropdown-item">Incluir</a>
-               <a href="/retribAlt" class="dropdown-item">Alteração</a>
-               <a href="/retribExc" class="dropdown-item">Exclusão</a>
-               <a href="/conGeralRetrib" class="dropdown-item">Consultas</a>
+      <!-- CONTEÚDO CENTRAL -->
+      <section class="col-lg-9">
+
+        <!-- Acesso rápido -->
+        <div class="card card-rounded shadow-soft mb-3">
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <h5 class="mb-0 me-2"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i>Acesso rápido:</h5>
+              <a class="btn btn-outline-primary btn-sm" href="/contribCad"><i class="bi bi-cash-coin me-1"></i>Contribuição — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/retribCad"><i class="bi bi-gift-fill me-1"></i>Retribuição — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/recpsaCad"><i class="bi bi-trophy-fill me-1"></i>Recompensa — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/conGeralSaldo"><i class="bi bi-bar-chart-line me-1"></i>Saldos</a>
             </div>
           </div>
-
-          <div class="list-group-item dropdown-submenu">
-            <span>CADASTRO RECOMPENSA <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-               <a href="/recpsaCad" class="dropdown-item">Incluir</a>
-               <a href="/recpsaAlt" class="dropdown-item">Alteração</a>
-               <a href="/recpsaExc" class="dropdown-item">Exclusão</a>
-               <a href="/conGeralRecpsa" class="dropdown-item">Consultas</a>
-            </div>
-          </div>
-
-          <div class="list-group-item dropdown-submenu">
-            <span>CONSULTA SALDOS <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-               <a href="/conGeralSaldo" class="dropdown-item">Saldo Geral</a>
-               <a href="/saldoAssent" class="dropdown-item">Saldo Assentado</a>
-             </div>
-          </div>
-
-
-          <div class="list-group-item list-heading">TABELAS</div>
-
-          <!-- Tipo de Contribuição -->
-          <div class="list-group-item dropdown-submenu">
-            <span>Tipo de Contribuição <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/tipContribCad" class="dropdown-item">Incluir</a>
-              <a href="/tipContribAlt" class="dropdown-item">Alteração</a>
-              <a href="/tipContribExc" class="dropdown-item">Exclusao</a>
-              <a href="/conGeralTipContrib" class="dropdown-item">Consultas</a>
-            </div>
-          </div>
-
-          <div class="list-group-item dropdown-submenu">
-           <div class="dropdown-menu">
-
-          <!-- Acesso direto às operações (se preferir manter no menu principal também) -->
-          <div class="dropdown-item fw-semibold text-danger">Tipo de Recompensa</div>
-          <a href="/tipRecpsaCad" class="dropdown-item">Incluir</a>
-          <a href="/tipRecpsaAlt" class="dropdown-item">Alteração</a>
-          <a href="/tipRecpsaExc" class="dropdown-item">Exclusão</a>
-          <a href="/conGeralTipRecpsa" class="dropdown-item">Consultas</a>
-
-          <div class="dropdown-item fw-semibold text-danger mt-2">Tipo de Infraestrutura</div>
-          <a href="/tipUsoInfrCad" class="dropdown-item">Incluir</a>
-          <a href="/tipUsoInfrAlt" class="dropdown-item">Alteração</a>
-          <a href="/tipUsoInfrExc" class="dropdown-item">Exclusão</a>
-          <a href="/conGeralTipUsoInfr" class="dropdown-item">Consultas</a>
-
-          </div>
-      </div>
-
-
-       <div class="list-group-item dropdown-submenu">
-            <span>Tipo de Recompensa <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/tipRecpsaCad" class="dropdown-item">Incluir</a>
-              <a href="/tipRecpsaAlt" class="dropdown-item">Alteração</a>
-              <a href="/tipRecpsaExc" class="dropdown-item">Exclusão</a>
-              <a href="/conGeralTipRecpsa" class="dropdown-item">Consultas</a>
-            </div>
         </div>
 
-        <div class="list-group-item dropdown-submenu">
-            <span>Tipo de Infraestrutura <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-               <a href="/tipUsoInfrCad" class="dropdown-item">Incluir</a>
-               <a href="/tipUsoInfrAlt" class="dropdown-item">Alteração</a>
-               <a href="/tipUsoInfrExc" class="dropdown-item">Exclusão</a>
-               <a href="/conGeralTipUsoInfr" class="dropdown-item">Consultas</a>
-            </div>
+        <!-- Notícia de capa (se houver) -->
+        {% if noticia_capa %}
+        <div class="card card-rounded shadow-soft mb-3">
+          {% if noticia_capa.foto %}
+            <img src="/static/{{ noticia_capa.foto }}" class="card-img-top hero-img" alt="Notícia de capa">
+          {% endif %}
+          <div class="card-body">
+            <span class="badge bg-secondary"><i class="bi bi-megaphone-fill me-1"></i>Notícia</span>
+            <h5 class="mt-2 mb-2">{{ noticia_capa.titulo }}</h5>
+            <a class="btn btn-sm btn-success" href="/evento/{{ noticia_capa.idEvt }}">
+              <i class="bi bi-eye-fill me-1"></i>ver notícia
+            </a>
+          </div>
         </div>
+        {% endif %}
 
-             <!-- categoria uso da infra  -->
-          <div class="list-group-item dropdown-submenu">
-            <span>Categoria Uso Infraestrutura <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/catgUsoInfrCad" class="dropdown-item">Incluir</a>
-              <a href="/catgUsoInfrAlt" class="dropdown-item">Alterar</a>
-              <a href="/catgUsoInfrExc" class="dropdown-item">Excluir</a>
-              <a href="/catgUsoInfrCon" class="dropdown-item">Consulta</a>
+        <!-- Atalhos em cards -->
+        <h4 class="mb-3 text-success">Operações do Banco</h4>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-cash-coin fs-4 text-success"></i>
+                <h6 class="mt-2">Contribuições</h6>
+                <p class="text-muted mb-3">Cadastrar, alterar e consultar contribuições.</p>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-success" href="/contribCad">Cadastrar</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/contribAlt">Alterar</a>
+                  <a class="btn btn-sm btn-outline-primary" href="/conGeralContrib">Consultar</a>
+                </div>
+              </div>
             </div>
           </div>
 
-
-
-         <div class="list-group-item dropdown-submenu">
-            <span>Política Pública <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/politPubCad" class="dropdown-item">Incluir</a>
-              <a href="/politPubAlt" class="dropdown-item">Alterar</a>
-              <a href="/politPubExc" class="dropdown-item">Excluir</a>
-              <a href="/politPubCon" class="dropdown-item">Consulta</a>
-
-            </div>
-        </div>
-
-
-           <!-- Unidade Equivalente -->
-          <div class="list-group-item dropdown-submenu">
-            <span>Unidade de Equivalia <i class="bi bi-caret-right-fill arrow"></i></span>
-            <div class="dropdown-menu">
-              <a href="/unEqvCad" class="dropdown-item">Incluir</a>
-              <a href="/unEqvAlt" class="dropdown-item">Alterar</a>
-              <a href="/unEqvExc" class="dropdown-item">Excluir</a>
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-gift-fill fs-4 text-success"></i>
+                <h6 class="mt-2">Retribuições</h6>
+                <p class="text-muted mb-3">Gerencie as retribuições.</p>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-success" href="/retribCad">Cadastrar</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/retribAlt">Alterar</a>
+                  <a class="btn btn-sm btn-outline-primary" href="/conGeralRetrib">Consultar</a>
+                </div>
+              </div>
             </div>
           </div>
 
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-trophy-fill fs-4 text-success"></i>
+                <h6 class="mt-2">Recompensas</h6>
+                <p class="text-muted mb-3">Cadastro e consultas de recompensas.</p>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-success" href="/recpsaCad">Cadastrar</a>
+                  <a class="btn btn-sm btn-outline-primary" href="/conGeralRecpsa">Consultar</a>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <i class="bi bi-bar-chart-line-fill fs-4 text-success"></i>
+                <h6 class="mt-2">Saldos</h6>
+                <p class="text-muted mb-3">Acompanhe os saldos do sistema e por assentado.</p>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-primary" href="/conGeralSaldo">Saldo Geral</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/saldoAssent">Saldo Assentado</a>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
-      </div>
-
-      <!-- Conteúdo principal com botões -->
-      <div class="col-md-9 text-center">
-        <h4 class="mb-4">Escolha o que deseja acessar</h4>
-        <div class="d-grid gap-3">
-          <a href="/contribCad" class="btn btn-outline-success btn-lg">CADASTRO CONTRIBUIÇÕES</a>
-           <a href="/retribCad" class="btn btn-outline-success btn-lg">CADASTRO RETRIBUIÇÕES</a>
-          <a href="/recpsaCad" class="btn btn-outline-success btn-lg">CADASTRO RECOMPENSAS</a>
-          <a href="/conGeralContrib" class="btn btn-outline-primary btn-lg">CONSULTA CONTRIBUIÇÕES</a>
-           <a href="/conGeralRetrib" class="btn btn-outline-primary btn-lg">CONSULTA RETRIBUIÇÕES</a>
-          <a href="/conGeralRecpsa" class="btn btn-outline-warning btn-lg">CONSULTA RECOMPENSAS</a>
-           <a href="/conGeralSaldo" class="btn btn-outline-primary btn-lg">CONSULTA SALDOS</a>
-         </div>
-      </div>
-
+      </section>
     </div>
   </div>
 </main>
 
-<!-- Rodapé -->
 <footer class="bg-dark text-white text-center py-3 mt-auto">
-  <p class="mb-0">
-    Endereço: xxxxxxxxxxxxxxxxxxx - Bairro: xxxxxxxxxxxx - Abaetetuba-PA
-  </p>
+  <small>Endereço: xxxxxxxxx — Abaetetuba-PA • SBBC</small>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var triggers = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    triggers.forEach(function (el) { new bootstrap.Tooltip(el); });
+  });
+</script>
 </body>
 </html>
