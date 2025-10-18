@@ -92,7 +92,8 @@
     <div class="form-section">
       <div class="table-responsive">
         <table class="table table-striped table-sm align-middle">
-          <thead class="table-light">
+
+          <!--thead class="table-light">
             <tr>
               <th>Assentado</th>
               <th class="text-end">Contribuições (R$)</th>
@@ -101,16 +102,27 @@
               <th class="text-end">Não Pagas — Total (R$)</th>
               <th class="text-end">Saldo (R$)</th>
             </tr>
+          </thead -->
+          <thead class="table-light">
+            <tr>
+              <th>Assentado</th>
+              <th class="text-end">| Contribuições | </th>
+              <th class="text-end">Pol.Pública em aberto | </th>
+              <th class="text-end">Mensalidade em aberto | </th>
+              <th class="text-end">Total em aberto |</th>
+              <th class="text-end">Saldo (Pagas − Em aberto) |</th>
+            </tr>
           </thead>
+
           <tbody>
             {% for r in rows %}
               <tr>
                 <td>{{ r.nome or '-' }} ({{ r.idAssent }})</td>
-                <td class="text-end">{{ '%.2f'|format(r.contrib) }}</td>
-                <td class="text-end">{{ '%.2f'|format(r.nao_pagas_pp) }}</td>
-                <td class="text-end">{{ '%.2f'|format(r.nao_pagas_mens) }}</td>
-                <td class="text-end">{{ '%.2f'|format(r.nao_pagas_total) }}</td>
-                <td class="text-end fw-bold">{{ '%.2f'|format(r.saldo) }}</td>
+                <td class="text-center">{{ '%.2f'|format(r.contrib) }}</td>
+                <td class="text-center">{{ '%.2f'|format(r.nao_pagas_pp) }}</td>
+                <td class="text-center">{{ '%.2f'|format(r.nao_pagas_mens) }}</td>
+                <td class="text-center">{{ '%.2f'|format(r.nao_pagas_total) }}</td>
+                <td class="text-center fw-bold">{{ '%.2f'|format(r.saldo) }}</td>
               </tr>
             {% else %}
               <tr><td colspan="6" class="text-center text-muted">Sem resultados.</td></tr>

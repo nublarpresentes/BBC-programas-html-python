@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Assentado x Política Pública — Alterar Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<header class="bg-success text-white shadow-sm">
+  <div class="container py-2 d-flex align-items-center">
+    <img src="/static/img/logo_bbc.png" style="height:60px" class="me-3" alt="">
+    <h1 class="h5 mb-0">Vincular Assentado à Política Pública — Alteração de Status</h1>
+  </div>
+</header>
+
+<main class="container my-4">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      {% for cat,msg in msgs %}<div class="alert alert-{{cat}}">{{ msg }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <form action="/assentPolPubAlt" method="GET" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Filtrar por Assentado</label>
+          <select name="idAssent" class="form-select">
+            <option value="">— Todos —</option>
+            {% for a in assentados %}
+              <option value="{{ a[0] }}" {{ 'selected' if request.args.get('idAssent')==a[0]|string else '' }}>
+                {{ a[1] }} ({{ a[0] }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 align-self-end">
+          <button class="btn btn-primary">Filtrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body table-responsive">
+      <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Assentado</th>
+            <th>Política</th>
+            <th>dtCad</th>
+            <th>Status</th>
+            <th>dtAtivo</th>
+            <th>dtInativo</th>
+            <th style="width:240px">Mudar para</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vinculos %}
+            <tr>
+              <td>{{ v.idAssentPolPub }}</td>
+              <td>{{ v.nome }} ({{ v.idAssent }})</td>
+              <td>{{ v.nomPolPub }} ({{ v.idPolPub }})</td>
+              <td>{{ v.dtCad and v.dtCad.strftime('%d/%m/%Y') }}</td>
+              <td>{{ v.status }}</td>
+              <td>{{ v.dtAtvPolPub and v.dtAtvPolPub.strftime('%d/%m/%Y') }}</td>
+              <td>{{ v.dtInatvPolPub and v.dtInatvPolPub.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <form action="/altAssentPolPub" method="POST" class="d-flex gap-2">
+                  <input type="hidden" name="idAssentPolPub" value="{{ v.idAssentPolPub }}">
+                  <select name="novo_status" class="form-select form-select-sm" required>
+                    <option value="">— selecione —</option>
+                    <option value="1">1 — ATIVO</option>
+                    <option value="2">2 — AGUARDANDO</option>
+                    <option value="3">3 — INATIVO</option>
+                  </select>
+                  <button class="btn btn-sm btn-success">Aplicar</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8" class="text-center text-muted">Sem registros.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <small>SBBC</small>
+</footer>
+</body>
+</html>

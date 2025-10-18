@@ -205,17 +205,22 @@ def cadastrar_assent():
         idSitAssent = 1  # ATIVO
 
         # >>> ATENÇÃO: esta INSERT agora inclui "idCtgAssent" e "foto"
+        # dentro da função que cadastra o assentado (onde está seu INSERT):
         cur.execute('''
-          INSERT INTO tbassentado
-            ("idAssent", nome, genero, mae, endereco, cpf, rg, "rgOrgExp",
-             "dtNasc", "ufNasc", "codMunNas", email, "noWhatsapp", celular,
-             "idFamilia", "idSitAssent", "idCtgAssent", foto)
-          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        ''', (novo_id, nome, genero, mae, endereco, cpf, rg, rgOrgExp,
-              dtNasc, ufNasc,
-              int(codMunNas) if codMunNas else None,
-              email, int(noWhatsapp) if noWhatsapp else None,
-              celular, idFamilia, idSitAssent, idCtgAssent, None))
+            INSERT INTO tbassentado
+              ("idAssent", nome, genero, mae, endereco, cpf, rg, "rgOrgExp",
+               "dtNasc", "ufNasc", "codMunNas", email, "noWhatsapp", celular,
+               "idFamilia", "idSitAssent", "idCtgAssent", "dtCad", foto)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+          ''', (
+            novo_id, nome, genero, mae, endereco, cpf, rg, rgOrgExp,
+            dtNasc, ufNasc,
+            int(codMunNas) if codMunNas else None,
+            email, int(noWhatsapp) if noWhatsapp else None,
+            celular, idFamilia, idSitAssent, idCtgAssent,
+            date.today(),  # <-- dtCad = hoje
+            'sem_foto.png'  # <-- foto padrão do template (arquivo em static/img/)
+        ))
         conn.commit()
 
         # >>> NOVO: upload da foto (opcional)

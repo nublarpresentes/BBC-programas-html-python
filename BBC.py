@@ -56,7 +56,6 @@ from entidade import (
 
 from recpsa import (
     view_recpsaCad, cadastrar_recpsa
-    # (demais telas de recpsa podem ser adicionadas quando necessário)
 )
 
 from catgUsoInfr import (
@@ -72,7 +71,7 @@ from polPub import (
     pagina_conPolitPub, conFiltroPolitPub
 )
 
-from saldo import pagina_conGeralSaldo, conFiltroSaldo
+from saldo import pagina_conGeralSaldo, conFiltroSaldo, pagina_saldoAssent
 
 # Usuário / Login
 from usuario import acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
@@ -136,6 +135,13 @@ from grpPartlh import (
 from grpAssent import (
     pagina_grpAssentCad, pagina_grpAssentAlt, pagina_grpAssentExc,
     cadastrar_grpAssent, alterar_grpAssent, excluir_grpAssent
+)
+
+# Assentado x Política Pública
+from assentPolPub import (
+    view_assentPolPubCad, cadastrar_assentPolPub,
+    view_assentPolPubAlt, alterar_status_assentPolPub,
+    view_assentPolPubExc, excluir_assentPolPub
 )
 
 # -------------------- FLASK APP --------------------
@@ -323,6 +329,31 @@ def conPolitPub():
 @app.route('/conFiltroPolitPub', methods=['GET','POST'])
 def conFiltroPolitPub_route():
     return conFiltroPolitPub()
+
+# ===== Assentado x Política Pública =====
+@app.get('/assentPolPubCad', endpoint='assentPolPubCad')
+def assentPolPubCad_view():
+    return view_assentPolPubCad()
+
+@app.post('/cadAssentPolPub', endpoint='cadAssentPolPub')
+def cadAssentPolPub_view():
+    return cadastrar_assentPolPub()
+
+@app.get('/assentPolPubAlt', endpoint='assentPolPubAlt')
+def assentPolPubAlt_view():
+    return view_assentPolPubAlt()
+
+@app.post('/altAssentPolPub', endpoint='altAssentPolPub')
+def altAssentPolPub_view():
+    return alterar_status_assentPolPub()
+
+@app.get('/assentPolPubExc', endpoint='assentPolPubExc')
+def assentPolPubExc_view():
+    return view_assentPolPubExc()
+
+@app.post('/excAssentPolPub', endpoint='excAssentPolPub')
+def excAssentPolPub_view():
+    return excluir_assentPolPub()
 
 # ============  *04   *UNIDADE EQUIVALÊNCIA  ============================================
 @app.route('/unEqvCad')
@@ -820,11 +851,16 @@ def conGeralSaldo():
 def conFiltroSaldo_route():
     return conFiltroSaldo()
 
+@app.get('/saldoAssent')
+def saldoAssent():
+    return pagina_saldoAssent()
+
+
+
 # =============  *20   *SELECT / MENUS / UTILITÁRIOS =====================================
 @app.get('/menuBBC')
 def menuBBC():
-    from flask import session  # (garante acesso ao session aqui)
-
+    from flask import session
     conn = conectar_bd()
     noticia_capa = None
     if conn:
@@ -848,7 +884,6 @@ def menuBBC():
             try: conn.close()
             except: pass
 
-    # >>>>>> AQUI está a mudança: usar menuBBC.html em vez de menu.html
     usuario = session.get('usuario', 'Usuário')
     return render_template('menuBBC.html', usuario=usuario, noticia_capa=noticia_capa)
 
@@ -921,7 +956,6 @@ def _buscar_noticia_capa():
         try: conn.close()
         except: pass
 
-
 @app.get('/menu')
 def menu():
     usuario = session.get('usuario', 'Visitante')
@@ -944,9 +978,6 @@ def menu():
             try: conn.close()
             except: pass
     return render_template('menu.html', usuario=session.get('usuario', 'Usuário'), noticia_capa=noticia_capa)
-
-
-
 
 def _pegar_noticia_capa():
     conn = conectar_bd()
