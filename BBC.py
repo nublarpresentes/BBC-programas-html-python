@@ -283,6 +283,14 @@ def menuEventos():
     from evento import view_menuEventos
     return view_menuEventos()
 
+from evento import (
+    # ... seus outros imports ...
+    view_evtPresencaSel, gerar_lista_presenca_pdf,
+)
+
+app.add_url_rule("/evtPresenca",    "evtPresenca",    view_evtPresencaSel, methods=["GET"])
+app.add_url_rule("/evtPresencaPDF", "evtPresencaPDF", gerar_lista_presenca_pdf, methods=["POST"])
+
 
 # ============= *03 *POLÍTICA PÚBLICA  ================================================================
 @app.route('/politPubCad')

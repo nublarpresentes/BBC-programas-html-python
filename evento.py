@@ -7,6 +7,14 @@ from flask import (
 )
 import psycopg2
 
+# ---- PDF
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from flask import send_file
+
+
 from conexao_bd import conectar_bd
 
 # ==========================
@@ -632,3 +640,202 @@ def view_menuEventos():
             try: conn.close()
             except: pass
     return render_template('menuEvento.html', eventos=eventos)
+
+# ================
+# LISTA DE PRESENÇA (Reuniões)
+# ================
+
+def _listar_reunioes():
+    """Retorna [(idEvt, nomEvt, dtIniPer, turno, local)] apenas de reuniões (idTipEvt=2)."""
+    conn = conectar_bd(); itens = []
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT e."idEvt", e."nomEvt", e."dtIniPer", COALESCE(e.turno,''), COALESCE(e.local,'')
+                  FROM tbevento e
+                 WHERE e."idTipEvt" = 2
+                 ORDER BY e."dtIniPer" DESC NULLS LAST, e."nomEvt" ASC
+            """)
+            itens = cur.fetchall()
+        finally:
+            try: conn.close()
+            except: pass
+    return itens
+
+def view_evtPresencaSel():
+    """Tela para escolher a reunião e gerar o PDF."""
+    reunioes = _listar_reunioes()
+    return render_template("evtPresencaSel.html", reunioes=reunioes)
+
+def _pegar_evento(idEvt:int):
+    """Dados do evento para o cabeçalho."""
+    conn = conectar_bd(); reg=None
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "nomEvt","dtIniPer","dtFimPer",COALESCE(turno,''),COALESCE(local,''),COALESCE(pauta,'')
+                  FROM tbevento
+                 WHERE "idEvt"=%s
+            """, (int(idEvt),))
+            row = cur.fetchone()
+            if row:
+                reg = {
+                    "nomEvt": row[0],
+                    "dtIniPer": row[1],
+                    "dtFimPer": row[2],
+                    "turno": (row[3] or '').strip(),
+                    "local": row[4] or '',
+                    "pauta": row[5] or '',
+                }
+        finally:
+            try: conn.close()
+            except: pass
+    return reg
+
+def _listar_assentados_ativos_alfabetico():
+    """[(idAssent, nome)] — somente ATIVOS, ordenado por nome."""
+    conn = conectar_bd(); itens=[]
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT "idAssent", nome
+                  FROM tbassentado
+                 WHERE COALESCE("idSitAssent",1)=1
+                 ORDER BY lower(nome) ASC
+            """)
+            itens = cur.fetchall()
+        finally:
+            try: conn.close()
+            except: pass
+    return itens
+
+def gerar_lista_presenca_pdf():
+    """POST: recebe idEvt, gera PDF em memória e retorna."""
+    if request.method != "POST":
+        return redirect(url_for("evtPresenca"))
+
+    idEvt = request.form.get("idEvt")
+    if not idEvt:
+        flash("Selecione uma reunião.", "warning")
+        return redirect(url_for("evtPresenca"))
+
+    try:
+        idEvt = int(idEvt)
+    except:
+        flash("Reunião inválida.", "danger")
+        return redirect(url_for("evtPresenca"))
+
+    evt = _pegar_evento(idEvt)
+    if not evt:
+        flash("Evento não encontrado.", "danger")
+        return redirect(url_for("evtPresenca"))
+
+    assentados = _listar_assentados_ativos_alfabetico()
+
+    # ---- Gera PDF em memória
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    W, H = A4
+
+    left   = 15*mm
+    right  = 15*mm
+    top    = 15*mm
+    bottom = 15*mm
+
+    largura_util = W - left - right
+
+    def _fmt_data(d):
+        if not d: return ""
+        try:
+            return d.strftime("%d/%m/%Y")
+        except: return str(d)
+
+    data_str = _fmt_data(evt["dtIniPer"])
+    turno_map = {"M":"Matutino","T":"Vespertino","N":"Noturno"}
+    turno_str = turno_map.get((evt["turno"] or "").upper(), evt["turno"] or "-")
+
+    # Config linhas
+    linha_h = 9.5*mm
+    y_start = H - top - 45*mm   # espaço para cabeçalho do evento
+    rows_per_page = int((y_start - bottom) // linha_h) - 1
+    if rows_per_page < 8:
+        rows_per_page = 8
+
+    # Colunas (larguras)
+    col_nome = 70*mm
+    col_matr = 32*mm
+    col_ass  = largura_util - col_nome - col_matr - 18*mm  # assinatura ocupa o resto
+    col_pres = 18*mm
+
+    def cabecalho(pag_atual:int):
+        # Linha 1
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(left, H - top, "BBC - Banco do Bem Comum")
+        c.setFont("Helvetica", 10)
+        c.drawRightString(W - right, H - top, f"Data: {data_str or '-'}    Pág: {pag_atual:03d}")
+        c.line(left, H - top - 3*mm, W - right, H - top - 3*mm)
+
+        # Evento
+        y = H - top - 10*mm
+        c.setFont("Helvetica", 10)
+        c.drawString(left, y, f"Evento:  {evt['nomEvt']}")
+        c.drawRightString(W - right, y, f"Turno: {turno_str}")
+        y -= 6*mm
+        c.drawString(left, y, f"Local:   {evt['local']}")
+        y -= 6*mm
+        c.drawString(left, y, f"Pauta:   {evt['pauta']}")
+        y -= 3*mm
+        c.line(left, y, W - right, y)
+
+        # Título da lista
+        y -= 8*mm
+        c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(W/2, y, "Lista de Presença")
+        y -= 5*mm
+
+        # Cabeçalho da tabela
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(left, y, "Nome")
+        c.drawString(left + col_nome, y, "( matrícula )")
+        c.drawString(left + col_nome + col_matr, y, "Assinatura")
+        c.drawRightString(W - right, y, "Presente (S/N)")
+        y -= 2*mm
+        c.line(left, y, W - right, y)
+        return y - 4*mm  # primeira linha útil
+
+    y = cabecalho(1)
+    c.setFont("Helvetica", 10)
+    pag = 1
+    i_na_pagina = 0
+
+    for idx, (idAssent, nome) in enumerate(assentados, start=1):
+        # quebra de página
+        if i_na_pagina >= rows_per_page:
+            c.showPage()
+            pag += 1
+            y = cabecalho(pag)
+            c.setFont("Helvetica", 10)
+            i_na_pagina = 0
+
+        # desenha a linha
+        c.drawString(left, y, nome or "-")
+        c.drawString(left + col_nome + 2*mm, y, f"({idAssent})")
+        # linha de assinatura
+        x_ass = left + col_nome + col_matr + 2*mm
+        c.line(x_ass, y - 1*mm, x_ass + col_ass - 6*mm, y - 1*mm)
+        # coluna presente
+        c.rect(W - right - col_pres + 2*mm, y - 4*mm, 6*mm, 6*mm, stroke=1, fill=0)
+
+        y -= linha_h
+        i_na_pagina += 1
+
+    c.showPage()
+    c.save()
+    buf.seek(0)
+
+    filename = f"lista_presenca_evt_{idEvt}.pdf"
+    return send_file(buf, mimetype="application/pdf",
+                     as_attachment=True, download_name=filename)

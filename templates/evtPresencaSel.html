@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Presença — Selecionar Reunião</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<header class="bg-success text-white shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center py-2">
+      <img src="/static/img/logo_bbc.png" class="me-3" style="height:60px" alt="BBC">
+      <h1 class="h5 mb-0">SBBC - Lista de Presença</h1>
+    </div>
+    <nav class="nav justify-content-center border-top border-light pt-2">
+      <a class="nav-link text-white" href="/menuEventos"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container my-4">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      {% for cat,msg in msgs %}<div class="alert alert-{{cat}}">{{ msg|safe }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Gerar Lista de Presença (Reuniões)</h5>
+      <form action="/evtPresencaPDF" method="POST" class="row g-3">
+        <div class="col-md-10">
+          <label class="form-label fw-bold">Reunião</label>
+          <select name="idEvt" class="form-select" required>
+            <option value="">— selecione —</option>
+            {% for e in reunioes %}
+              <option value="{{ e[0] }}">
+                {{ e[2] and e[2].strftime('%d/%m/%Y') or 's/ data' }} — {{ e[1] }} ({{ e[3] or '-' }}) {{ e[4] and ' • ' ~ e[4] }}
+              </option>
+            {% endfor %}
+          </select>
+          <div class="form-text">Só aparecem eventos do tipo <strong>Reunião</strong>.</div>
+        </div>
+        <div class="col-md-2 d-grid">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-success">Gerar PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+  <small>SBBC • Eventos</small>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+</html>
