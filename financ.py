@@ -63,7 +63,7 @@ def cadastrar_financ():
     except Exception as e:
         conn.rollback()
         conn.close()
-        print("Erro ao cadastrar contribuição:", e)
+        print("Erro ao cadastrar retribuição:", e)
         return redirect(url_for('financCad'))
 
 
@@ -129,5 +129,5 @@ def alterar_financ():
     except Exception as e:
         conn.rollback()
         conn.close()
-        print("Erro ao alterar contribuição:", e)
+        print("Erro ao alterar retribuição:", e)
         return redirect(url_for('financCad'))

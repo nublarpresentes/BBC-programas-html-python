@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8"/>
-  <title>SBBC — Menu Assentado</title>
+  <title>TPP — Menu Assentado</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <!-- Bootstrap + Icons -->
@@ -26,13 +26,13 @@
   <div class="container">
     <div class="d-flex align-items-center py-2">
       <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
-      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+      <h1 class="h4 mb-0">TPP - Tecnologia dos Painéis da Partilha</h1>
     </div>
 
     <nav class="nav justify-content-center border-top border-light pt-2">
       <a class="nav-link text-white" href="/menuBBC" title="Ir para a Home" aria-label="Ir para a Home" data-bs-toggle="tooltip"><i class="bi bi-house-door-fill"></i> Home</a>
       <a class="nav-link text-white" href="/menuAssent" title="Área de Assentados" aria-label="Área de Assentados" data-bs-toggle="tooltip"><i class="bi bi-people-fill"></i> Assentado</a>
-      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" aria-label="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Painel da Partilha" aria-label="Painel da Partilha" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Painel da Partilha</a>
       <a class="nav-link text-white" href="/menuEventos" title="Eventos" aria-label="Eventos" data-bs-toggle="tooltip"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
       <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco" aria-label="Fale Conosco" data-bs-toggle="tooltip"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
@@ -116,12 +116,12 @@
                 <i class="bi bi-person-lines-fill me-1"></i>Assentados
               </a>
 
-              <a class="btn btn-outline-primary btn-sm" href="/conGeralContrib" title="Consultar contribuições" aria-label="Consultar contribuições" data-bs-toggle="tooltip">
-                <i class="bi bi-cash-coin me-1"></i>Contribuições
+              <a class="btn btn-outline-primary btn-sm" href="/conGeralContrib" title="Consultar retribuições" aria-label="Consultar retribuições" data-bs-toggle="tooltip">
+                <i class="bi bi-cash-coin me-1"></i>Reribuições
               </a>
 
-              <a class="btn btn-outline-primary btn-sm" href="/conGeralRetrib" title="Consultar retribuições" aria-label="Consultar retribuições" data-bs-toggle="tooltip">
-                <i class="bi bi-gift-fill me-1"></i>Retribuições
+              <a class="btn btn-outline-primary btn-sm" href="/conGeralRetrib" title="Consultar contribuições" aria-label="Consultar contribuições" data-bs-toggle="tooltip">
+                <i class="bi bi-gift-fill me-1"></i>Contribuições
               </a>
 
               <a class="btn btn-outline-primary btn-sm" href="/conGeralSaldo" title="Consulta geral de saldos" aria-label="Consulta geral de saldos" data-bs-toggle="tooltip">
@@ -165,8 +165,8 @@
 
                 {% if filtros and filtros.idAssent %}
                   <a class="btn btn-outline-success ms-auto" href="/saldoAssent?idAssent={{ filtros.idAssent }}" title="Ver saldo do assentado selecionado" data-bs-toggle="tooltip"><i class="bi bi-clipboard-data me-1"></i> Ver Saldo</a>
-                  <a class="btn btn-outline-success" href="/conGeralContrib?idAssent={{ filtros.idAssent }}" title="Ver contribuições do assentado selecionado" data-bs-toggle="tooltip"><i class="bi bi-cash-coin me-1"></i> Contribuições</a>
-                  <a class="btn btn-outline-success" href="/conGeralRetrib?idAssent={{ filtros.idAssent }}" title="Ver retribuições do assentado selecionado" data-bs-toggle="tooltip"><i class="bi bi-gift me-1"></i> Retribuições</a>
+                  <a class="btn btn-outline-success" href="/conGeralContrib?idAssent={{ filtros.idAssent }}" title="Ver contribuições do assentado selecionado" data-bs-toggle="tooltip"><i class="bi bi-cash-coin me-1"></i> Retribuições</a>
+                  <a class="btn btn-outline-success" href="/conGeralRetrib?idAssent={{ filtros.idAssent }}" title="Ver retribuições do assentado selecionado" data-bs-toggle="tooltip"><i class="bi bi-gift me-1"></i> Contribuições</a>
                 {% endif %}
               </div>
             </form>
@@ -207,8 +207,8 @@
                         <td class="text-center">
                           <a class="btn btn-sm btn-outline-primary" href="/assentAlt?id={{ r.idAssent or r.idassent }}" title="Alterar cadastro" data-bs-toggle="tooltip"><i class="bi bi-pencil"></i></a>
                           <a class="btn btn-sm btn-outline-secondary" href="/saldoAssent?idAssent={{ r.idAssent or r.idassent }}" title="Saldo do assentado" data-bs-toggle="tooltip"><i class="bi bi-clipboard-data"></i></a>
-                          <a class="btn btn-sm btn-outline-success" href="/conGeralContrib?idAssent={{ r.idAssent or r.idassent }}" title="Contribuições" data-bs-toggle="tooltip"><i class="bi bi-cash-coin"></i></a>
-                          <a class="btn btn-sm btn-outline-success" href="/conGeralRetrib?idAssent={{ r.idAssent or r.idassent }}" title="Retribuições" data-bs-toggle="tooltip"><i class="bi bi-gift"></i></a>
+                          <a class="btn btn-sm btn-outline-success" href="/conGeralContrib?idAssent={{ r.idAssent or r.idassent }}" title="Retribuições" data-bs-toggle="tooltip"><i class="bi bi-cash-coin"></i></a>
+                          <a class="btn btn-sm btn-outline-success" href="/conGeralRetrib?idAssent={{ r.idAssent or r.idassent }}" title="Contribuições" data-bs-toggle="tooltip"><i class="bi bi-gift"></i></a>
                         </td>
                       </tr>
                     {% endfor %}

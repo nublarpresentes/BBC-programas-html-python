@@ -77,7 +77,7 @@ from saldo import pagina_conGeralSaldo, conFiltroSaldo, pagina_saldoAssent
 from usuario import acessoUsuario, cadastrar_usuario, recuperar_senha, alterar_senha, alterar_usuario
 
 # Consultas
-from consultas import consQTDdia, consQTDsem
+# from consultas import consQTDdia, consQTDsem
 
 # Tipo Contribuição
 from tipContrib import (
@@ -867,25 +867,34 @@ def menuBBC():
         try:
             cur = conn.cursor()
             cur.execute("""
-                SELECT "nomEvt", "fotoCapa", "idEvt"
-                FROM tbevento
-                WHERE capa = 'S' AND "idTipEvt" = 1
-                ORDER BY "idEvt" DESC
-                LIMIT 1
+                SELECT "nomEvt", COALESCE("fotoCapa", ''), "idEvt"
+                  FROM tbevento
+                 WHERE capa = 'S' AND "idTipEvt" = 1
+                 ORDER BY "idEvt" DESC
+                 LIMIT 1
             """)
             row = cur.fetchone()
             if row:
                 noticia_capa = {
                     "titulo": row[0],
-                    "foto": row[1],
+                    "foto": row[1] or "",
                     "idEvt": row[2]
                 }
         finally:
             try: conn.close()
             except: pass
 
-    usuario = session.get('usuario', 'Usuário')
-    return render_template('menuBBC.html', usuario=usuario, noticia_capa=noticia_capa)
+    # Pode ser string ("Usuário") OU dict {"nome": "..."} dependendo do seu login
+    u = session.get('usuario') or "Usuário"
+    # Normaliza para sempre termos uma string com o nome
+    if isinstance(u, dict):
+        usuario_nome = u.get('nome') or u.get('login') or 'Usuário'
+    else:
+        usuario_nome = str(u) if u.strip() else 'Usuário'
+
+    return render_template('menuBBC.html',
+                           usuario_nome=usuario_nome,
+                           noticia_capa=noticia_capa)
 
 def _carrega_selects():
     conn = conectar_bd()

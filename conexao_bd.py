@@ -12,7 +12,7 @@ def conectar_bd():
         conn.autocommit = True
         return conn
     except psycopg2.Error as e:
-        print("** Erro ao conectar ao banco de dados:", str(e))
+        print("** Erro ao conectar ao banco de dados...:", str(e))
 #        print("** Erro ao conectar ao banco de dados:", e.pgerror)
         print("Detalhe:", e)
         return None

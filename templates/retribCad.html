@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Cadastro de Retribuição</title>
+  <title>Cadastro de Contribuição</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -18,12 +18,12 @@
   <div class="container">
     <div class="d-flex align-items-center py-2">
       <img src="/static/img/logo_bbc.png" class="me-3" style="height:60px;" alt="IFPA">
-      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+      <h1 class="h4 mb-0">TPP - Tecnologia dos Painéis da Partilha</h1>
     </div>
     <nav class="nav justify-content-center border-top border-light pt-2">
       <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-house-door-fill"></i> Home</a>
       <a class="nav-link text-white" href="/menuAssent"><i class="bi bi-people-fill"></i> Assentado</a>
-      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuBBC"><i class="bi bi-bank"></i> Painel da Partilha</a>
       <a class="nav-link text-white" href="/menuCaderneta"><i class="bi bi-journal-bookmark-fill"></i> Caderneta da Partilha</a>
       <a class="nav-link text-white" href="/faleConosco"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
@@ -34,8 +34,8 @@
   <div class="container my-4">
     <div class="form-section">
       <div class="d-flex justify-content-between align-items-center flex-wrap">
-        <h3 class="text-success mb-3">Cadastro de Retribuição</h3>
-        <span class="badge text-bg-success badge-big">RETRIBUIÇÃO</span>
+        <h3 class="text-success mb-3">Cadastro de Contribuição</h3>
+        <span class="badge text-bg-success badge-big">CONTRIBUIÇÃO</span>
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -78,7 +78,7 @@
 
         <!-- Tipo (apenas Política Pública) -->
         <div class="col-md-4">
-          <label class="form-label fw-bold required">Tipo de Retribuição (Política Pública)</label>
+          <label class="form-label fw-bold required">Tipo de Contribuição (Política Pública)</label>
           <select id="idTipFinanc" name="idTipFinanc" class="form-select" required>
             <option value="">-- Selecione --</option>
             {% for t in tipos %}

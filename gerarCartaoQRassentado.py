@@ -16,7 +16,7 @@ def obter_dados_assentQR():
                 for assentado in assentados:
                     idAssent, nome = assentado  # Desempacotando os dados do aluno
                     linha1 = "!_______________!________________________________!_____________________!"
-                    linha2 = f" !   BBC    ! {idAssent} - {nome:<20}!"
+                    linha2 = f" !   TPP    ! {idAssent} - {nome:<20}!"
                     linha3 = f"!_______________!________________________________!_____________________!"
                     caminho_qrcode = url_for('static', filename=f'img/QR{idAssent}.jpg')
                     assentados_formatados.extend([linha1, linha2, linha3])

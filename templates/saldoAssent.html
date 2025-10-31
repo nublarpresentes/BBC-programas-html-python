@@ -15,7 +15,7 @@
 <header class="bg-success text-white shadow-sm">
   <div class="container d-flex align-items-center py-2">
     <img src="/static/img/logo_bbc.png" style="height:60px" class="me-3" alt="IFPA">
-    <h1 class="h4 mb-0">SBBC — Saldo do Assentado</h1>
+    <h1 class="h4 mb-0">TPP — Saldo do Assentado</h1>
   </div>
 </header>
 
@@ -69,7 +69,7 @@
     {% if filtros.idAssent %}
     <!-- Contribuições -->
     <div class="form-section mb-4">
-      <h5 class="text-success mb-3">Contribuições do Período</h5>
+      <h5 class="text-success mb-3">Retribuições do Período</h5>
       <div class="table-responsive">
         <table class="table table-striped table-sm align-middle">
           <thead class="table-light">
@@ -89,12 +89,12 @@
                 <td class="text-end">{{ '%.2f'|format(c.valor_efetivo or 0) }}</td>
               </tr>
             {% else %}
-              <tr><td colspan="4" class="text-center text-muted">Sem contribuições no período.</td></tr>
+              <tr><td colspan="4" class="text-center text-muted">Sem retribuições no período.</td></tr>
             {% endfor %}
           </tbody>
           <tfoot>
             <tr class="table-light">
-              <th colspan="3" class="text-end">Total de Contribuições</th>
+              <th colspan="3" class="text-end">Total de Retribuições</th>
               <th class="text-end">{{ '%.2f'|format(total_contrib or 0) }}</th>
             </tr>
           </tfoot>

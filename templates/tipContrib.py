@@ -3,9 +3,9 @@ from flask import request, render_template, redirect, url_for
 from conexao_bd import conectar_bd
 from datetime import datetime
 
-# ------------------------------------
-# Função: Cadastrar Tipo Contribuição
-# -------------------------------------
+# -------------------------------------------------------------------------------------------------------
+# Função: Cadastrar Tipo Retribuição  - nomenclatura mudou de CONTRIBUIÇÃO PARA RETRIBUIÇÃO E VICE-VERSA
+# -------------------------------------------------------------------------------------------------------
 
 def cadastrar_tipcontrib():
     if request.method == 'POST':
@@ -46,12 +46,12 @@ def cadastrar_tipcontrib():
         except Exception as e:
             conn.rollback()
             conn.close()
-            print("Erro ao cadastrar tipo contrib:", e)
+            print("Erro ao cadastrar tipo retribuição:", e)
             return redirect(url_for('tipContribCad'))
 
 
 # ------------------------------
-# Função: Alterar Tipo contrib
+# Função: Alterar Tipo retrib
 # ------------------------------
 def alterar_tipcontrib():
     if request.method == 'POST':

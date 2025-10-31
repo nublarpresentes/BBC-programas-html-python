@@ -43,8 +43,8 @@ def view_recpsaCad():
 # --------- SALDO (regra do usuário) ----------
 def _saldo_assentado(idAssent):
     """
-    SALDO = (SOMA de todas as contribuições) − (não pagas)
-    Não pagas = retribuições (PP) faltantes até o mês atual + mensalidades faltantes até o mês atual.
+    SALDO = (SOMA de todas as retibuições) − (não pagas)*
+    *Não pagas = contribuições (PP) faltantes até o mês atual + mensalidades faltantes até o mês atual.
     PP: somar por política -> (mesAtual - qtdPagasNoAno) * perct(tbpolitpub)
     Mensalidade: (mesAtual - qtdPagasNoAno) * valEqv(tipo id=3)
     """
@@ -56,7 +56,7 @@ def _saldo_assentado(idAssent):
         ano = datetime.now().year
         mes_atual = datetime.now().month
 
-        # 1) Soma contribuições (tipFinancCP = 1)
+        # 1) Soma retribuições (tipFinancCP = 1)
         cur.execute("""
             SELECT COALESCE(SUM(f."valFinanc" * COALESCE(NULLIF(f."qtdContr",0),1)),0)
               FROM "tbfinanc" f

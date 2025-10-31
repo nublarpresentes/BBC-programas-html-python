@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8"/>
-  <title>SBBC — Banco do Bem Comum</title>
+  <title>TPP — Tecnologia dos Painéis da Partilha</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -24,13 +24,13 @@
   <div class="container">
     <div class="d-flex align-items-center py-2">
       <img src="/static/img/logo_bbc.png" alt="SBBC Logo" class="me-3" style="height:60px;">
-      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+      <h1 class="h4 mb-0">TPP — Tecnologia dos Painéis da Partilha</h1>
     </div>
 
     <nav class="nav justify-content-center border-top border-light pt-2">
       <a class="nav-link text-white" href="/menu" title="Home" data-bs-toggle="tooltip"><i class="bi bi-house-door-fill"></i> Home</a>
       <a class="nav-link text-white" href="/menuAssent" title="Assentado" data-bs-toggle="tooltip"><i class="bi bi-people-fill"></i> Assentado</a>
-      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Banco do Bem Comum</a>
+      <a class="nav-link text-white" href="/menuBBC" title="Banco do Bem Comum" data-bs-toggle="tooltip"><i class="bi bi-bank"></i> Painel da Partilha</a>
       <a class="nav-link text-white" href="/menuEventos" title="Eventos" data-bs-toggle="tooltip"><i class="bi bi-journal-bookmark-fill"></i> Eventos</a>
       <a class="nav-link text-white" href="/faleConosco" title="Fale Conosco" data-bs-toggle="tooltip"><i class="bi bi-chat-dots-fill"></i> Fale Conosco</a>
     </nav>
@@ -45,33 +45,34 @@
       Bem-vindo, <strong>{{ usuario }}</strong>! Escolha uma opção.
     </div>
 
+
     <div class="row g-4">
       <!-- MENU LATERAL -->
       <aside class="col-lg-3">
         <div class="card card-rounded shadow-soft">
           <div class="card-body">
-            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Banco</h5>
+            <h5 class="card-title mb-3"><i class="bi bi-menu-button-wide-fill me-2"></i>Menu Painel</h5>
 
             <div class="menu-section-title">Módulos</div>
             <div class="list-group">
-              <a href="/contribCad" class="list-group-item list-group-item-action" title="Cadastrar contribuição">
-                <i class="bi bi-cash-coin me-2"></i>Contribuição — Cadastro
+              <a href="/contribCad" class="list-group-item list-group-item-action" title="Cadastrar retribuição">
+                <i class="bi bi-cash-coin me-2"></i>Retribuição — Cadastro
               </a>
-              <a href="/contribAlt" class="list-group-item list-group-item-action" title="Alterar contribuição">
-                <i class="bi bi-pencil me-2"></i>Contribuição — Alterar
+              <a href="/contribAlt" class="list-group-item list-group-item-action" title="Alterar retribuição">
+                <i class="bi bi-pencil me-2"></i>Retribuição — Alterar
               </a>
-              <a href="/conGeralContrib" class="list-group-item list-group-item-action" title="Consultar contribuições">
-                <i class="bi bi-search me-2"></i>Contribuição — Consultas
+              <a href="/conGeralContrib" class="list-group-item list-group-item-action" title="Consultar retribuições">
+                <i class="bi bi-search me-2"></i>Retribuição — Consultas
               </a>
 
-              <a href="/retribCad" class="list-group-item list-group-item-action mt-2" title="Cadastrar retribuição">
-                <i class="bi bi-gift-fill me-2"></i>Retribuição — Cadastro
+              <a href="/retribCad" class="list-group-item list-group-item-action mt-2" title="Cadastrar contribuição">
+                <i class="bi bi-gift-fill me-2"></i>Contribuição — Cadastro
               </a>
-              <a href="/retribAlt" class="list-group-item list-group-item-action" title="Alterar retribuição">
-                <i class="bi bi-pencil-square me-2"></i>Retribuição — Alterar
+              <a href="/retribAlt" class="list-group-item list-group-item-action" title="Alterar contribuição">
+                <i class="bi bi-pencil-square me-2"></i>Contribuição — Alterar
               </a>
-              <a href="/conGeralRetrib" class="list-group-item list-group-item-action" title="Consultar retribuições">
-                <i class="bi bi-search me-2"></i>Retribuição — Consultas
+              <a href="/conGeralRetrib" class="list-group-item list-group-item-action" title="Consultar contribuições">
+                <i class="bi bi-search me-2"></i>Contribuição — Consultas
               </a>
 
               <a href="/recpsaCad" class="list-group-item list-group-item-action mt-2" title="Cadastrar recompensa">
@@ -88,14 +89,14 @@
 
             <div class="menu-section-title mt-3">Tabelas</div>
             <div class="list-group">
-              <a href="/tipContribCad" class="list-group-item list-group-item-action" title="Tipo de Contribuição">
-                <i class="bi bi-sliders2-vertical me-2"></i>Tipo de Contribuição
+              <a href="/tipContribCad" class="list-group-item list-group-item-action" title="Tipo de Retribuição">
+                <i class="bi bi-sliders2-vertical me-2"></i>Tipo de Retribuição
               </a>
-              <a href="/tipContribAlt" class="list-group-item list-group-item-action" title="Alterar Tipo de Contribuição">
-                <i class="bi bi-pencil me-2"></i>Tipo de Contribuição — Alterar
+              <a href="/tipContribAlt" class="list-group-item list-group-item-action" title="Alterar Tipo de Retribuição">
+                <i class="bi bi-pencil me-2"></i>Tipo de Retribuição — Alterar
               </a>
-              <a href="/conGeralTipContrib" class="list-group-item list-group-item-action" title="Consultar Tipo de Contribuição">
-                <i class="bi bi-search me-2"></i>Tipo de Contribuição — Consultas
+              <a href="/conGeralTipContrib" class="list-group-item list-group-item-action" title="Consultar Tipo de Retribuição">
+                <i class="bi bi-search me-2"></i>Tipo de Retribuição — Consultas
               </a>
 
               <a href="/tipRecpsaCad" class="list-group-item list-group-item-action mt-2" title="Tipo de Recompensa">
@@ -145,8 +146,8 @@
           <div class="card-body">
             <div class="d-flex flex-wrap gap-2 align-items-center">
               <h5 class="mb-0 me-2"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i>Acesso rápido:</h5>
-              <a class="btn btn-outline-primary btn-sm" href="/contribCad"><i class="bi bi-cash-coin me-1"></i>Contribuição — Cadastrar</a>
-              <a class="btn btn-outline-primary btn-sm" href="/retribCad"><i class="bi bi-gift-fill me-1"></i>Retribuição — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/contribCad"><i class="bi bi-cash-coin me-1"></i>Retribuição — Cadastrar</a>
+              <a class="btn btn-outline-primary btn-sm" href="/retribCad"><i class="bi bi-gift-fill me-1"></i>Contribuição — Cadastrar</a>
               <a class="btn btn-outline-primary btn-sm" href="/recpsaCad"><i class="bi bi-trophy-fill me-1"></i>Recompensa — Cadastrar</a>
               <a class="btn btn-outline-primary btn-sm" href="/conGeralSaldo"><i class="bi bi-bar-chart-line me-1"></i>Saldos</a>
             </div>
@@ -170,14 +171,14 @@
         {% endif %}
 
         <!-- Atalhos em cards -->
-        <h4 class="mb-3 text-success">Operações do Banco</h4>
+        <h4 class="mb-3 text-success">Operações do Painel</h4>
         <div class="row g-3">
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
               <div class="card-body">
                 <i class="bi bi-cash-coin fs-4 text-success"></i>
-                <h6 class="mt-2">Contribuições</h6>
-                <p class="text-muted mb-3">Cadastrar, alterar e consultar contribuições.</p>
+                <h6 class="mt-2">Retribuições</h6>
+                <p class="text-muted mb-3">Cadastrar, alterar e consultar retribuições.</p>
                 <div class="d-flex gap-2">
                   <a class="btn btn-sm btn-outline-success" href="/contribCad">Cadastrar</a>
                   <a class="btn btn-sm btn-outline-secondary" href="/contribAlt">Alterar</a>
@@ -191,8 +192,8 @@
             <div class="card h-100 shadow-sm">
               <div class="card-body">
                 <i class="bi bi-gift-fill fs-4 text-success"></i>
-                <h6 class="mt-2">Retribuições</h6>
-                <p class="text-muted mb-3">Gerencie as retribuições.</p>
+                <h6 class="mt-2">Contribuições</h6>
+                <p class="text-muted mb-3">Gerencie as contribuições.</p>
                 <div class="d-flex gap-2">
                   <a class="btn btn-sm btn-outline-success" href="/retribCad">Cadastrar</a>
                   <a class="btn btn-sm btn-outline-secondary" href="/retribAlt">Alterar</a>

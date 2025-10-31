@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8"/>
-  <title>Consulta Geral — Retribuições</title>
+  <title>Consulta Geral — Contribuições</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -21,7 +21,7 @@
     <!-- Linha com logo e título -->
     <div class="d-flex align-items-center py-2">
       <img src="/static/img/logo_bbc.png" alt="IFPA Logo" class="me-3" style="height:60px;">
-      <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+      <h1 class="h4 mb-0">TPP - Tecnologia dos Painéis da Partilha</h1>
     </div>
 
     <!-- Linha com o menu principal -->
@@ -51,7 +51,7 @@
 
     <!-- Filtros -->
     <div class="form-section mb-4">
-      <h5 class="text-primary mb-3">Filtro — Retribuições</h5>
+      <h5 class="text-primary mb-3">Filtro — Contribuições</h5>
       {% if message %}<div class="alert alert-info py-2 mb-3">{{ message }}</div>{% endif %}
 
       <form action="/conFiltroRetrib" method="GET" class="row g-3">
@@ -139,7 +139,7 @@
           <thead class="table-light">
           <tr>
             <th>Assentado</th>
-            <th>Retribuição</th>
+            <th>Contribuição</th>
             <th>Categoria</th>
             <th>Mês/Ano</th>
             <th class="text-end">Valor</th>

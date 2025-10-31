@@ -4,7 +4,10 @@ from flask import request, render_template, redirect, url_for, flash
 from conexao_bd import conectar_bd
 
 # ---------- CADASTRO ----------
-
+#   ATENÇÃO  =>    A NOMENCLATURA DE CONTRIBUIÇÃO MUDOU PARA RETRIBUIÇÃO
+#                  MAS OS NOMES DOS PROGRAMAS E DAS ROTINAS NÃO MUDARAM - ficou CONTRIB O PREFIXO;
+#                  PORÉM AS AS INTERFACES / MENSAGENS MUDARAM DE CONTRIBUICAO PARA RETRIBUIÇÃO
+#                  ou seja; no BANCO DE DADOS , O TIPO FINANC CONTINUA = 1 ( RETRIBUIÇÃO )
 def cadastrar_contrib():
     if request.method != 'POST':
         return redirect(url_for('contribCad'))
@@ -63,12 +66,12 @@ def cadastrar_contrib():
         row = cur.fetchone()
         if not row:
             conn.close()
-            flash('❌ Tipo de contribuição inexistente.')
+            flash('❌ Tipo de retribuição inexistente.')
             return redirect(url_for('contribCad'))
 
         tipo_catg, tipo_polpub, valEqv = row
 
-        # regra: Contribuição NÃO aceita categoria 1 nem idPolPub definido
+        # regra: retribuição NÃO aceita categoria 1 nem idPolPub definido
         if tipo_catg == 1 or tipo_polpub is not None:
             conn.close()
             flash('❌ Este tipo pertence à Política Pública. Use a tela de Retribuição.', 'danger')
@@ -85,7 +88,7 @@ def cadastrar_contrib():
             valFinanc = 0.0
         if valFinanc <= 0:
             conn.close()
-            flash('❌ Valor da contribuição não informado.', 'danger')
+            flash('❌ Valor da retribuição não informado.', 'danger')
             return redirect(url_for('contribCad'))
 
         inseridos = 0
@@ -153,7 +156,7 @@ def cadastrar_contrib():
             inseridos = 1
 
         conn.commit()
-        flash(f"✅ Contribuição registrada ({inseridos} registro(s)).", 'success')
+        flash(f"✅ Retribuição registrada ({inseridos} registro(s)).", 'success')
         return redirect(url_for('contribCad'))
 
     except Exception as e:
@@ -162,7 +165,7 @@ def cadastrar_contrib():
                 conn.rollback()
         except:
             pass
-        print("Erro ao cadastrar contribuição:", e)
+        print("Erro ao cadastrar retribuição:", e)
         flash("❌ Erro ao cadastrar.", 'danger')
         return redirect(url_for('contribCad'))
     finally:
@@ -173,7 +176,7 @@ def cadastrar_contrib():
 
 def _selecoes_cadastro():
     """
-    Assentados e Tipos PARA CONTRIBUIÇÃO:
+    Assentados e Tipos PARA RETRIBUIÇÃO:
       - EXCLUI Política Pública (idCatgFinanc = 1).
     """
     conn = conectar_bd()
@@ -185,7 +188,7 @@ def _selecoes_cadastro():
         cur.execute('SELECT "idAssent","nome" FROM "tbassentado" ORDER BY "nome" ASC')
         assentados = cur.fetchall()
 
-        # Tipos de contribuição (tudo MENOS Política Pública)
+        # Tipos de retribuição (tudo MENOS Política Pública)
         cur.execute("""
           SELECT
             t."idTipFinanc",   -- [0]
@@ -240,7 +243,7 @@ def view_contribAlt():
         cur.execute('SELECT "idTipFinanc","nomFinanc" FROM "tbtipfinanc" ORDER BY "nomFinanc" ASC')
         tipos = cur.fetchall()
 
-        params = [1]  # f."tipFinancCP" = 1 (contribuição)
+        params = [1]  # f."tipFinancCP" = 1 (retribuição)
         where = ['f."tipFinancCP" = %s']
         if filtros.idAssent:
             where.append('f."idAssent" = %s')
@@ -409,7 +412,7 @@ def alterar_contrib():
                 """, (idAssent_db, idCatg_db, ano_db, novo_num, idSeqFinanc))
                 ja_existe = (cur.fetchone() or [0])[0]
                 if ja_existe:
-                    flash('⚠️ Já existe contribuição com este nº de parcela para este assentado/categoria/ano.', 'warning')
+                    flash('⚠️ Já existe retribuição com este nº de parcela para este assentado/categoria/ano.', 'warning')
                     conn.close()
                     return redirect(url_for('contribAlt', id=idSeqFinanc))
 
@@ -430,7 +433,7 @@ def alterar_contrib():
             """, (obs, qtdContr, idSeqFinanc))
 
         conn.commit()
-        flash('✅ Contribuição alterada com sucesso!', 'success')
+        flash('✅ Retribuição alterada com sucesso!', 'success')
         return redirect(url_for('contribAlt'))
 
     except Exception as e:
@@ -439,7 +442,7 @@ def alterar_contrib():
                 conn.rollback()
         except:
             pass
-        print('Erro ao alterar contribuição:', e)
+        print('Erro ao alterar retribuição:', e)
         flash('❌ Erro ao alterar.', 'danger')
         return redirect(url_for('contribAlt'))
     finally:

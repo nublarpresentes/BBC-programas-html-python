@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Alterar Contribuições</title>
+  <title>Alterar Retribuições</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
@@ -15,7 +15,7 @@
 <header class="bg-success text-white py-3 shadow-sm">
   <div class="container d-flex align-items-center">
     <img src="/static/img/logo_bbc.png" class="me-3" style="height:60px;" alt="IFPA">
-    <h1 class="h4 mb-0">SBBC - Sistema Banco do Bem Comum</h1>
+    <h1 class="h4 mb-0">TPP - Tecnologia dos Painéis da Partilha</h1>
   </div>
 </header>
 
@@ -39,7 +39,7 @@
           </select>
         </div>
         <div class="col-md-6">
-          <label class="form-label fw-bold">Tipo de Contribuição</label>
+          <label class="form-label fw-bold">Tipo de Retribuição</label>
           <select name="idTipFinanc" class="form-select">
             <option value="">-- Todos --</option>
             {% for t in tipos %}
@@ -59,7 +59,7 @@
 
     <!-- Lista -->
     <div class="form-section mb-4">
-      <h4 class="text-primary mb-3">Contribuições</h4>
+      <h4 class="text-primary mb-3">Retribuições</h4>
       <div class="table-responsive">
         <table class="table table-sm table-striped align-middle">
           <thead class="table-light">
@@ -100,7 +100,7 @@
 
     {% if registro %}
     <div class="form-section">
-      <h4 class="text-success mb-3">Alterar Contribuição — ID {{ registro.idseq }}</h4>
+      <h4 class="text-success mb-3">Alterar Retribuição — ID {{ registro.idseq }}</h4>
       <form action="/altContrib" method="POST" class="row g-3">
         <input type="hidden" name="idSeqFinanc" value="{{ registro.idseq }}"/>
 

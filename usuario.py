@@ -55,7 +55,7 @@ def acessoUsuario():
             except psycopg2.Error as e:
                 return f"Erro ao realizar login: {e}"
         else:
-            return "Erro ao conectar ao banco de dados."
+            return "Erro ao conectar ao banco de dados..."
 
 # Rota para realizar o login
 
