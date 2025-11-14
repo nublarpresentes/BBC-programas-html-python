@@ -1,4 +1,5 @@
 import psycopg2
+import bcrypt
 from datetime import datetime
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 
@@ -1017,6 +1018,70 @@ def _pegar_noticia_capa():
     finally:
         try: conn.close()
         except: pass
+
+# -------------------- API PARA O MOBILE --------------------
+from flask import jsonify
+from flask_cors import CORS
+
+# habilita CORS no Flask (permite Flet / celular acessarem o servidor)
+CORS(app)
+
+
+@app.post("/api/auth/login")
+def api_login():
+    """API de login usada pelo aplicativo mobile BBCM.py."""
+
+    data = request.get_json() or {}
+    usuario = (data.get("usuario") or "").strip()
+    senha   = (data.get("senha") or "").strip()
+
+    if not usuario or not senha:
+        return jsonify({"ok": False, "message": "Usuário ou senha vazios."}), 400
+
+    conn = conectar_bd()
+    if not conn:
+        return jsonify({"ok": False, "message": "Erro ao conectar no BD."}), 500
+
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT usuario, nome, senha
+            FROM tbusuario
+            WHERE usuario = %s
+        """, (usuario,))
+        row = cur.fetchone()
+
+        if not row:
+            return jsonify({"ok": False, "message": "Usuário não encontrado."}), 404
+
+        usuario_db, nome_db, senha_hash_db = row
+
+        # garante que o hash está em bytes
+        if isinstance(senha_hash_db, str):
+            senha_hash_db = senha_hash_db.encode("utf-8")
+
+        # compara a senha digitada com o hash do banco (MESMO esquema do usuario.py)
+        if not bcrypt.checkpw(senha.encode("utf-8"), senha_hash_db):
+            return jsonify({"ok": False, "message": "Senha incorreta."}), 401
+
+        # sucesso
+        return jsonify({
+            "ok": True,
+            "usuario": usuario_db,
+            "nome": nome_db
+        }), 200
+
+    except Exception as e:
+        print("Erro API login:", e)
+        return jsonify({"ok": False, "message": "Erro interno."}), 500
+
+    finally:
+        try:
+            conn.close()
+        except:
+            pass
+
+
 
 # -------------------- RUN --------------------
 if __name__ == '__main__':
