@@ -10,7 +10,7 @@
       <div class="col-md-4">
         <label class="form-label fw-bold">Tipo</label>
         <select name="idTipEvt" class="form-select">
-          <option value="">— Todos —</option>
+          <option value=""> — Todos —</option>
           {% for t in tipos %}
             <option value="{{t[0]}}" {{ 'selected' if (filtros and filtros.idTipEvt==t[0]|string) else '' }}>{{t[1]}}</option>
           {% endfor %}
